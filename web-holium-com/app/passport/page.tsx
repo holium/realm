@@ -1,145 +1,53 @@
 'use client';
 
+import { CopyIcon } from '@/app/assets/icons';
+import { shipUrl } from '@/app/lib/shared';
+import { LinkedNFT, PassportProfile } from '@/app/lib/types';
+import { renderAddress } from './edit/workflow';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-import { AddressIcon, RightArrowIcon } from '@/app/assets/icons';
-import { SocialButton } from '@/app/assets/styled';
-import ContactCard from '@/app/components/ContactCard';
-import { PassportProfile } from '@/app/lib/types';
+interface NFTProps {
+  nft: LinkedNFT;
+}
 
-const ChatRow = (data: any) => {
+const NFT = ({ nft }: NFTProps) => {
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        padding: '4px 8px',
+        justifyContent: 'center',
+        gap: '8px',
+        paddingTop: '8px',
       }}
     >
-      <img
-        src={data.image}
-        alt={data.name}
-        style={{ width: '36px', height: '36px', marginRight: '14px' }}
-      />
-      <div
-        style={{
-          flex: 1,
-          fontSize: '16px',
-          lineHeight: '20px',
-          fontWeight: '450',
-        }}
-      ></div>
-      <SocialButton>Join</SocialButton>
+      {nft['image-url'] && (
+        <img
+          alt={'nft'}
+          src={nft['image-url']}
+          style={{
+            height: '115px',
+            width: '115px',
+            borderRadius: '8px',
+          }}
+        ></img>
+      )}
     </div>
   );
 };
 
-type PageMode = 'incognito' | 'view' | 'edit' | 'error';
+interface PassportViewProps {
+  canEdit?: boolean;
+  passport: PassportProfile;
+}
 
-export default function Home() {
-  const [canEdit, setCanEdit] = useState<boolean>(true);
-  const [pageMode, setPageMode] = useState<PageMode>('view');
-  const [passport, setPassport] = useState<PassportProfile | null>(null);
-  const router = useRouter();
-
-  const onEditClick = (e) => {
-    e.preventDefault();
-    router.push(`passport/edit`);
-  };
-  useEffect(() => {
-    setPassport({
-      nfts: [],
-      cover: null,
-      discoverable: false,
-      'user-status': 'online',
-      recommendations: [],
-      crypto: null,
-      addresses: [],
-      'default-address': '0xf36f...34a6',
-      chain: [],
-      contact: {
-        avatar: undefined,
-        bio: null,
-        ship: '~lomder-librun',
-        'display-name': null,
-        color: '',
-      },
-    });
-    // if (
-    //   window.__INITIAL_STATE__.discoverable &&
-    //   window.__INITIAL_STATE__.passport_api_key
-    // ) {
-    //   // get our passport from the publicly facing ship API. this is
-    //   //   different than the %passport API which gives much more detailed information.
-    //   //  the public version only gives the bare minimum data necessary to
-    //   //   render the UI
-    //   fetch(
-    //     `${shipUrl}/~/scry/profile/${window.__INITIAL_STATE__.passport_api_key}.json`,
-    //     {
-    //       method: 'GET',
-    //       credentials: 'include',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //     }
-    //   )
-    //     .then((response) => response.json())
-    //     .then((data: PassportProfile) => {
-    //       console.log(data);
-    //       // parse the cookie and extract the ship name. if the ship
-    //       //  name in the cookie matches the ship name returned by the our-passport.json
-    //       //  call, enable edit functionality
-    //       if (document.cookie) {
-    //         const pairs = document.cookie.split(';');
-    //         for (let i = 0; i < pairs.length; i++) {
-    //           const pair = pairs[i].split('=');
-    //           const key = pair[0].trim();
-    //           if (key === `urbauth-${data.contact?.ship}`) {
-    //             setCanEdit(true);
-    //             break;
-    //           }
-    //         }
-    //       }
-    //       setPassport(data);
-    //     })
-    //     .catch((e) => {
-    //       console.error(e);
-    //       setPageMode('error');
-    //     });
-    // } else {
-    //   setPageMode('incognito');
-    // }
-  }, []);
-
-  if (!passport) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          height: '100vh',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {pageMode === 'error'
-          ? 'Error loading page'
-          : 'Please wait. Loading...'}
-      </div>
-    );
-  }
-
-  return pageMode === 'incognito' ? (
-    <div style={{ display: 'flex', height: '100vh', width: '800px' }}>
-      {passport.contact.ship} does not want to be found
-    </div>
-  ) : (
+function PassportView({ canEdit, passport }: PassportViewProps) {
+  return (
     <div
       style={{
         display: 'flex',
         width: '100%',
-        height: '100vh',
         justifyContent: 'center',
         alignItems: 'center',
       }}
@@ -148,56 +56,87 @@ export default function Home() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          height: '100vh',
-          width: '400px',
+          minWidth: '490px',
+          width: '490px',
           justifyContent: 'center',
           alignItems: 'center',
+          gap: '8px',
         }}
       >
-        {canEdit && <SocialButton onClick={onEditClick}>Edit</SocialButton>}
-        <>
-          <ContactCard contact={passport.contact} />
-          {/* <Section /> */}
-          <div style={{ width: '100%' }}>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                marginTop: '8px',
-              }}
-            >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+            <h1 style={{ fontWeight: '500' }}>Passport</h1>
+          </div>
+          {canEdit && (
+            <button>
               <div
                 style={{
-                  fontSize: '12px',
-                  color: '#333333',
-                  opacity: '0.4',
+                  flex: 1,
+                  color: '#4e9efd',
                 }}
               >
-                NFTs
+                Edit
               </div>
-              <hr
-                style={{
-                  // color: '#333333',
-                  marginLeft: '8px',
-                  backgroundColor: '#333333',
-                  width: '100%',
-                  height: '1px',
-                  border: 0,
-                  opacity: '10%',
-                }}
-              />
-            </div>
+            </button>
+          )}
+        </div>
+        <hr
+          style={{
+            // color: '#333333',
+            marginLeft: '8px',
+            backgroundColor: '#333333',
+            width: '100%',
+            height: '1px',
+            border: 0,
+            opacity: '10%',
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            alignItems: 'center',
+          }}
+        >
+          {passport.contact.avatar ? (
+            <img
+              alt={passport.contact['display-name'] || passport.contact.ship}
+              src={passport.contact.avatar.img}
+              style={{ width: '120px', height: '120px', borderRadius: '10px' }}
+            ></img>
+          ) : (
             <div
               style={{
-                color: '#333333',
-                marginTop: '4px',
-                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '120px',
+                height: '120px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(78, 158, 253, 0.08)',
+                fontSize: '0.8em',
               }}
-            ></div>
+            >
+              No image
+            </div>
+          )}
+          <div style={{ color: '#333333', fontWeight: 'bold' }}>
+            {passport.contact['display-name']}
           </div>
+          <div style={{ fontSize: '0.9em', color: 'rgba(51, 51, 51, 0.5)' }}>
+            {passport.contact.ship}
+          </div>
+        </div>
+
+        <>
           <div style={{ width: '100%' }}>
             <div
               style={{
@@ -212,13 +151,13 @@ export default function Home() {
               <div
                 style={{
                   fontSize: '12px',
+                  fontWeight: '450',
                   color: '#333333',
                   opacity: '0.4',
                   whiteSpace: 'nowrap',
-                  lineHeight: '22px',
                 }}
               >
-                Public address
+                Bio
               </div>
               <hr
                 style={{
@@ -232,29 +171,8 @@ export default function Home() {
                 }}
               />
             </div>
-            <div
-              style={{
-                color: '#333333',
-                paddingTop: '4px',
-                paddingBottom: '4px',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderRadius: '8px',
-                  backgroundColor: '#EFF2F4',
-                  padding: '8px',
-                  gap: '8px',
-                  lineHeight: '20px',
-                }}
-              >
-                <AddressIcon />
-                <div style={{ flex: 1 }}>{passport['default-address']}</div>
-                <RightArrowIcon />
-              </div>
+            <div style={{ paddingTop: '4px', paddingBottom: '4px' }}>
+              {passport.contact.bio || 'No bio'}
             </div>
           </div>
           <div style={{ width: '100%' }}>
@@ -275,9 +193,10 @@ export default function Home() {
                   opacity: '0.4',
                   whiteSpace: 'nowrap',
                   lineHeight: '22px',
+                  fontWeight: '450',
                 }}
               >
-                Chats
+                NFTs
               </div>
               <hr
                 style={{
@@ -296,15 +215,277 @@ export default function Home() {
                 color: '#333333',
                 paddingTop: '4px',
                 paddingBottom: '4px',
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: '8px',
               }}
             >
-              {passport.chats?.map((item, idx) => (
-                <ChatRow key={`chat-row-${idx}`} data={item} />
-              ))}
+              {passport.nfts.length === 0 ? (
+                <>No nfts</>
+              ) : (
+                <>
+                  {passport.nfts.map((nft: LinkedNFT, idx: number) => (
+                    <NFT key={`owned-nft-${idx}`} nft={nft} />
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+          <div style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                paddingTop: '8px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#333333',
+                  opacity: '0.4',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '22px',
+                  fontWeight: '450',
+                }}
+              >
+                Linked addresses
+              </div>
+              <hr
+                style={{
+                  marginLeft: '8px',
+                  backgroundColor: '#333333',
+                  width: '100%',
+                  height: '1px',
+                  border: 0,
+                  opacity: '10%',
+                  flex: 1,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                color: '#333333',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+              }}
+            >
+              {passport.addresses?.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <>
+                    {passport.addresses
+                      ?.filter((value, index) => index !== 1)
+                      .map((entry, idx) => (
+                        <div
+                          key={`address-${idx}`}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            backgroundColor: '#F2F4F5',
+                            borderRadius: '8px',
+                            gap: '8px',
+                            padding: '8px',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <div
+                            style={{
+                              borderRadius: '4px',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: '#5482EC',
+                            }}
+                          ></div>
+                          <div style={{ flex: 1, verticalAlign: 'middle' }}>
+                            {renderAddress(entry.address as `0x${string}`)}
+                          </div>
+                          {passport['default-address'] === entry.address && (
+                            <div style={{ color: '#878889' }}>Public</div>
+                          )}
+                          <CopyIcon fill={'#9FA1A1'} />
+                        </div>
+                      ))}
+                  </>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                paddingTop: '8px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#333333',
+                  opacity: '0.4',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '22px',
+                  fontWeight: '450',
+                }}
+              >
+                Device addresses
+              </div>
+              <hr
+                style={{
+                  marginLeft: '8px',
+                  backgroundColor: '#333333',
+                  width: '100%',
+                  height: '1px',
+                  border: 0,
+                  opacity: '10%',
+                  flex: 1,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                color: '#333333',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+              }}
+            >
+              {passport.addresses?.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <>
+                    {passport.addresses
+                      ?.filter((entry, idx) => idx === 1)
+                      .map((entry, idx) => (
+                        <div
+                          key={`address-${idx}`}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            backgroundColor: '#F2F4F5',
+                            borderRadius: '8px',
+                            gap: '8px',
+                            padding: '8px',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <div
+                            style={{
+                              borderRadius: '4px',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: '#5482EC',
+                            }}
+                          ></div>
+                          <div style={{ flex: 1, verticalAlign: 'middle' }}>
+                            {renderAddress(entry.address as `0x${string}`)}
+                          </div>
+                          {passport['default-address'] === entry.address && (
+                            <div style={{ color: '#878889' }}>Public</div>
+                          )}
+                          <CopyIcon fill={'#9FA1A1'} />
+                        </div>
+                      ))}
+                  </>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                </div>
+              )}
             </div>
           </div>
         </>
       </div>
     </div>
+  );
+}
+
+// @ts-ignore
+export default function Home() {
+  const [passport, setPassport] = useState<PassportProfile | null>(null);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+
+  useEffect(() => {
+    // get our passport from the publicly facing ship API. this is
+    //   different than the %passport API which gives much more detailed information.
+    //  the public version only gives the bare minimum data necessary to
+    //   render the UI
+    fetch(`${shipUrl}/~/scry/profile/our.json`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => response.json())
+      .then((passport: PassportProfile) => {
+        console.log(passport);
+        // parse the cookie and extract the ship name. if the ship
+        //  name in the cookie matches the ship name returned by the our-passport.json
+        //  call, enable edit functionality
+        if (document.cookie) {
+          const pairs = document.cookie.split(';');
+          for (let i = 0; i < pairs.length; i++) {
+            const pair = pairs[i].split('=');
+            const key = pair[0].trim();
+            if (key === `urbauth-${passport.contact?.ship}`) {
+              setCanEdit(true);
+              break;
+            }
+          }
+        }
+        console.log('setting passport => %o', passport);
+        setPassport(passport);
+      })
+      .catch((e) => {
+        console.error(e);
+        // setPageMode('error');
+      });
+  }, []);
+
+  return (
+    <>
+      {passport ? (
+        <div style={{ padding: '48px' }}>
+          <PassportView canEdit={canEdit} passport={passport} />
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            height: '100vh',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          Loading. Please wait...
+        </div>
+      )}
+    </>
   );
 }

@@ -227,6 +227,10 @@ export function generateWalletAddress() {
   return { walletAddress, privateKey };
 }
 
+export function walletFromKey(key: string) {
+  return new ethers.Wallet(key).address;
+}
+
 export async function addDeviceSigningKey(
   entity: string,
   shipUrl: string,
@@ -300,14 +304,10 @@ export async function addDeviceSigningKey(
 export async function addWalletAddress(
   entity: string,
   shipUrl: string,
-  wallet: WalletClient,
   deviceSigningKey: `0x${string}`,
   walletAddress: `0x${string}`
 ) {
-  if (!wallet.account) {
-    console.error('wallet account is undefined');
-    return;
-  }
+  const wallet = new ethers.Wallet(deviceSigningKey);
 
   let response = await fetch(
     `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
@@ -325,13 +325,13 @@ export async function addWalletAddress(
     'link-metadata': {
       ...metadata,
       timestamp: Number(new Date().getTime()),
-      'signing-address': deviceSigningKey,
+      'signing-address': wallet.address,
       'link-id': 'KEY_ADD',
       'from-entity': entity,
     },
     'link-data': {
       address: walletAddress,
-      'address-type': wallet.name,
+      'address-type': 'wallet',
       'entity-name': entity,
     },
   };
@@ -341,9 +341,7 @@ export async function addWalletAddress(
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
   );
-  const signed_hash = await wallet.signMessage({
-    message: calculated_hash,
-  });
+  const signed_hash = await wallet.signMessage(calculated_hash);
 
   const root_node_link = {
     data: data_string,

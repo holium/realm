@@ -59,6 +59,7 @@ import {
   addWalletAddress,
   createEpochPassportNode,
   generateWalletAddress,
+  walletFromKey,
 } from '@/app/lib/wallet';
 import { saveContact } from '@/app/lib/profile';
 
@@ -161,7 +162,6 @@ const NFT = ({ nft, selectable, isSelected, onSelectionChange }: NFTProps) => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        paddingTop: '8px',
       }}
     >
       {selectable && nft['image-url'] && (
@@ -238,11 +238,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 'wallet connected. passport-ready. adding address...'
               );
               // is this a new wallet being added?
-              const idx = passport.addresses.findIndex(
+              const idx = currentPassport.addresses.findIndex(
                 (item) => item.address === address
               );
               if (idx === -1) {
                 setWalletAddress(address);
+                setDeviceWalletAddress(address);
                 setWorkflowStep('confirm-add-address');
                 passportWorkflow.current?.showModal();
               } else {
@@ -299,6 +300,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
     () => passport
   );
   const [passportState, setPassportState] = useState<PassportState>('initial');
+  const [editState, setEditState] = useState<string>('none');
 
   if (!passport) return <></>;
 
@@ -310,11 +312,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
         console.error('image upload error');
         return;
       }
-      passport.contact.avatar = {
+      currentPassport.contact.avatar = {
         type: 'image',
         img: e.target.result as string,
       };
-      setAvatar(passport.contact.avatar.img);
+      setAvatar(currentPassport.contact.avatar.img);
       console.log('passport => %o', passport);
     };
     reader.readAsDataURL(e.target.files[0]);
@@ -349,7 +351,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
     // console.log('dataUrl => %o', dataUrl);
 
     const contact = {
-      ...passport.contact,
+      ...currentPassport.contact,
       'display-name': displayName,
       bio: bio,
     };
@@ -443,13 +445,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
           break;
 
         case 'confirm-device-signing-key':
-          if (address && deviceSigningKey) {
+          if (address && deviceWalletAddress) {
             addDeviceSigningKey(
               shipName,
               shipUrl,
               walletClient as WalletClient,
               address,
-              deviceSigningKey
+              deviceWalletAddress
             )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
@@ -461,7 +463,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 setCurrentPassport(response);
                 localStorage.setItem(
                   '/holium/realm/passport/device-signing-key',
-                  deviceSigningKey
+                  deviceSigningKey as `0x${string}`
                 );
                 setPassportState('passport-ready');
                 passportWorkflow.current?.close();
@@ -478,14 +480,20 @@ function PassportEditor({ passport }: PassportEditorProps) {
           break;
 
         case 'confirm-add-address':
-          if (walletAddress && currentPassport.addresses[1].address) {
+          const devicePrivateKey = localStorage.getItem(
+            '/holium/realm/passport/device-signing-key'
+          );
+          if (!devicePrivateKey) {
+            console.error('no device private key found');
+            return;
+          }
+          if (walletAddress) {
             console.log('adding new address...');
             addWalletAddress(
               shipName,
               shipUrl,
-              walletClient as WalletClient,
-              walletAddress,
-              currentPassport.addresses[1].address as `0x${string}`
+              devicePrivateKey as `0x${string}`,
+              walletAddress
             )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
@@ -523,7 +531,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
       case 'device-signing-key-not-found':
         setWalletAddress(currentPassport['default-address'] as `0x${string}`);
-        setDeviceSigningKey(generateWalletAddress());
+        const { walletAddress, privateKey } = generateWalletAddress();
+        setDeviceWalletAddress(walletAddress as `0x${string}`);
+        setDeviceSigningKey(privateKey);
         setWorkflowStep('confirm-device-signing-key');
         passportWorkflow.current?.showModal();
         break;
@@ -638,6 +648,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
               }}
             >
               <button
+                disabled={true}
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
@@ -646,7 +657,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
               >
                 <div
                   style={{
-                    color: '#4e9efd',
+                    color: 'rgba(51, 51, 51, 0.4)',
                     fontSize: '0.8em',
                   }}
                 >
@@ -659,7 +670,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   display: 'flex',
                   flexDirection: 'row',
                 }}
-                onClick={() => nftPicker.current?.showModal()}
+                onClick={() => {
+                  setEditState('choose-nft');
+                  nftPicker.current?.showModal();
+                }}
               >
                 <div
                   style={{
@@ -694,10 +708,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
             opacity: '10%',
           }}
         />
-        {passport.contact.avatar ? (
+        {currentPassport.contact.avatar ? (
           <img
-            alt={passport.contact['display-name'] || passport.contact.ship}
-            src={passport.contact.avatar.img}
+            alt={
+              currentPassport.contact['display-name'] ||
+              currentPassport.contact.ship
+            }
+            src={currentPassport.contact.avatar.img}
             style={{ width: '120px', height: '120px', borderRadius: '10px' }}
           ></img>
         ) : (
@@ -706,8 +723,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '80px',
-              height: '80px',
+              width: '120px',
+              height: '120px',
               borderRadius: '10px',
               backgroundColor: '#F2F7FE',
             }}
@@ -887,30 +904,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 gap: '8px',
               }}
             >
-              {passport.nfts.length === 0 ? (
-                <button
-                  style={{
-                    width: '115px',
-                    height: '115px',
-                    borderRadius: '8px',
-                    background: 'rgba(78, 158, 253, 0.08)',
-                  }}
-                  onClick={() => nftPicker.current?.showModal()}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <PlusIcon />
-                  </div>
-                </button>
-              ) : (
-                // <div style={{ fontSize: '0.8em' }}>No NFTs found</div>
+              {currentPassport.nfts.length > 0 && (
                 <>
-                  {passport.nfts.map((nft: LinkedNFT, idx: number) => (
+                  {currentPassport.nfts.map((nft: LinkedNFT, idx: number) => (
                     <NFT
                       key={`owned-nft-${idx}`}
                       selectable={false}
@@ -919,6 +915,28 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   ))}
                 </>
               )}
+              <button
+                style={{
+                  width: '115px',
+                  height: '115px',
+                  borderRadius: '8px',
+                  background: 'rgba(78, 158, 253, 0.08)',
+                }}
+                onClick={() => {
+                  setEditState('add-nft');
+                  nftPicker.current?.showModal();
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <PlusIcon />
+                </div>
+              </button>
             </div>
           </div>
           <div style={{ width: '100%' }}>
@@ -977,37 +995,39 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   }}
                 >
                   <>
-                    {currentPassport.addresses?.map((entry, idx) => (
-                      <div
-                        key={`address-${idx}`}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          backgroundColor: '#F2F4F5',
-                          borderRadius: '8px',
-                          gap: '8px',
-                          padding: '8px',
-                          alignItems: 'center',
-                        }}
-                      >
+                    {currentPassport.addresses
+                      ?.filter((entry, index) => index !== 1)
+                      .map((entry, idx) => (
                         <div
+                          key={`address-${idx}`}
                           style={{
-                            borderRadius: '4px',
-                            width: '20px',
-                            height: '20px',
-                            backgroundColor: '#5482EC',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            backgroundColor: '#F2F4F5',
+                            borderRadius: '8px',
+                            gap: '8px',
+                            padding: '8px',
+                            alignItems: 'center',
                           }}
-                        ></div>
-                        <div style={{ flex: 1 }}>
-                          {renderAddress(entry.address as `0x${string}`)}
+                        >
+                          <div
+                            style={{
+                              borderRadius: '4px',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: '#5482EC',
+                            }}
+                          ></div>
+                          <div style={{ flex: 1 }}>
+                            {renderAddress(entry.address as `0x${string}`)}
+                          </div>
+                          {currentPassport['default-address'] ===
+                            entry.address && (
+                            <div style={{ color: '#878889' }}>Public</div>
+                          )}
+                          <CopyIcon fill={'#9FA1A1'} />
                         </div>
-                        {currentPassport['default-address'] ===
-                          entry.address && (
-                          <div style={{ color: '#878889' }}>Public</div>
-                        )}
-                        <CopyIcon fill={'#9FA1A1'} />
-                      </div>
-                    ))}
+                      ))}
                     <button
                       style={{
                         display: 'flex',
@@ -1058,6 +1078,98 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     </div>
                   </button>
                 </div>
+              )}
+            </div>
+          </div>
+          <div style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                paddingTop: '8px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#333333',
+                  opacity: '0.4',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '22px',
+                  fontWeight: '450',
+                }}
+              >
+                Device addresses
+              </div>
+              <hr
+                style={{
+                  // color: '#333333',
+                  marginLeft: '8px',
+                  backgroundColor: '#333333',
+                  width: '100%',
+                  height: '1px',
+                  border: 0,
+                  opacity: '10%',
+                  flex: 1,
+                  // marginRight: '8px',
+                }}
+              />
+              {/* <SocialButton onClick={onAddAddressClick}>
+                Add Address
+              </SocialButton> */}
+            </div>
+            <div
+              style={{
+                color: '#333333',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+              }}
+            >
+              {currentPassport.addresses?.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <>
+                    {currentPassport.addresses
+                      ?.filter((entry, idx) => idx === 1)
+                      .map((entry, idx) => (
+                        <div
+                          key={`address-${idx}`}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            backgroundColor: '#F2F4F5',
+                            borderRadius: '8px',
+                            gap: '8px',
+                            padding: '8px',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <div
+                            style={{
+                              borderRadius: '4px',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: '#5482EC',
+                            }}
+                          ></div>
+                          <div style={{ flex: 1 }}>
+                            {renderAddress(entry.address as `0x${string}`)}
+                          </div>
+                          <CopyIcon fill={'#9FA1A1'} />
+                        </div>
+                      ))}
+                  </>
+                </div>
+              ) : (
+                <>No device address</>
               )}
             </div>
           </div>
@@ -1198,41 +1310,64 @@ function PassportEditor({ passport }: PassportEditorProps) {
             onClick={(e: any) => {
               e.preventDefault();
               if (!(selectedNft && selectedMedia)) return;
-              console.log(passport);
-              const devicePrivateKey = localStorage.getItem(
-                '/holium/realm/passport/device-signing-key'
-              );
-              if (!(devicePrivateKey && deviceWalletAddress)) {
-                console.error('no device private key found');
-                return;
+              console.log(editState);
+              if (editState === 'add-nft') {
+                console.log(passport);
+                const devicePrivateKey = localStorage.getItem(
+                  '/holium/realm/passport/device-signing-key'
+                );
+                if (!devicePrivateKey) {
+                  console.error('no device private key found');
+                  return;
+                }
+                addNFT(shipName, shipUrl, devicePrivateKey, [
+                  ...currentPassport.nfts,
+                  {
+                    'token-standard': selectedNft.tokenType,
+                    name:
+                      selectedNft.title ||
+                      selectedNft?.rawMetadata?.name ||
+                      'error',
+                    'contract-address': selectedNft.contract.address,
+                    'token-id': selectedNft.tokenId,
+                    'image-url': selectedMedia.thumbnail || '?',
+                    'chain-id': 'eth-mainnet',
+                    'owned-by': walletFromKey(
+                      devicePrivateKey
+                    ) as `0x${string}`,
+                  },
+                ])
+                  .then((result: any) => {
+                    console.log('addNFT response => %o', result);
+                    if (result.term === 'poke-fail') {
+                      console.error('error => %o', result.tang[0]);
+                      return;
+                    }
+                    setCurrentPassport(result);
+                    nftPicker.current?.close();
+                  })
+                  .catch((e) => {
+                    console.error(e);
+                  });
+              } else if (editState === 'choose-nft') {
+                console.log(selectedMedia.thumbnail);
+                if (selectedMedia.thumbnail) {
+                  saveContact({
+                    ...currentPassport.contact,
+                    avatar: {
+                      type: 'nft',
+                      img: selectedMedia.thumbnail,
+                    },
+                  }).then((response) => {
+                    if (response.term === 'poke-fail') {
+                      console.error('error => %o', response.tang[0]);
+                      return;
+                    }
+                    setCurrentPassport(response);
+                    nftPicker.current?.close();
+                  });
+                }
               }
-              addNFT(shipName, shipUrl, devicePrivateKey, [
-                ...passport.nfts,
-                {
-                  'token-standard': selectedNft.tokenType,
-                  name:
-                    selectedNft.title ||
-                    selectedNft?.rawMetadata?.name ||
-                    'error',
-                  'contract-address': selectedNft.contract.address,
-                  'token-id': selectedNft.tokenId,
-                  'image-url': selectedMedia.thumbnail || '?',
-                  'chain-id': 'eth-mainnet',
-                  'owned-by': deviceWalletAddress,
-                },
-              ])
-                .then((result: any) => {
-                  console.log('addNFT response => %o', result);
-                  if (result.term === 'poke-fail') {
-                    console.error('error => %o', result.tang[0]);
-                    return;
-                  }
-                  setCurrentPassport(result);
-                  nftPicker.current?.close();
-                })
-                .catch((e) => {
-                  console.error(e);
-                });
             }}
           >
             Confirm
