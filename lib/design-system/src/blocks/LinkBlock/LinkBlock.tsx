@@ -206,6 +206,12 @@ export const LinkBlock = ({
   } catch {
     sitename = ogOrLink;
   }
+  let origin: string;
+  try {
+    origin = new URL(ogOrLink).origin;
+  } catch {
+    origin = ogOrLink;
+  }
   return (
     <Block id={id} {...rest}>
       {ogHasImage && (
@@ -269,7 +275,6 @@ export const LinkBlock = ({
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              const origin = new URL(ogOrLink).origin;
               window.open(origin, '_blank');
             }}
             style={{
