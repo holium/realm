@@ -51,6 +51,17 @@ export type LinkType = 'opengraph' | 'url';
 type MediaType = 'twitter' | 'media' | 'image';
 export type LinkBlockType = LinkType | MediaType;
 
+const parseUrl = (url: string, defaultUrl: string) => {
+  let result: string;
+  try {
+    const urlObject = new URL(url);
+    result = urlObject.toString();
+  } catch (e) {
+    result = defaultUrl;
+  }
+  return result;
+};
+
 export const LinkBlock = ({
   id,
   link,
@@ -187,7 +198,14 @@ export const LinkBlock = ({
       </Box>
     );
   }
-  const ogOrLink = ogHasURL ? openGraph?.ogUrl : link;
+  // @patrick - only use ogUrl if it can be parsed using URL
+  const ogOrLink = ogHasURL ? parseUrl(openGraph?.ogUrl, link) : link;
+  let sitename: string;
+  try {
+    sitename = openGraph?.ogSiteName || new URL(ogOrLink).hostname;
+  } catch {
+    sitename = ogOrLink;
+  }
   return (
     <Block id={id} {...rest}>
       {ogHasImage && (
@@ -261,7 +279,7 @@ export const LinkBlock = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {openGraph?.ogSiteName || new URL(ogOrLink).hostname}
+            {sitename}
           </Text.Anchor>
         </Flex>
         <Flex flex={1} justifyContent="flex-end" alignItems="center">

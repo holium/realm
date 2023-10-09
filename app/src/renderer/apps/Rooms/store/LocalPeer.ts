@@ -44,13 +44,11 @@ export class LocalPeer extends EventEmitter {
   @observable videoStream: MediaStream | undefined = undefined;
   @observable screenStream: MediaStream | undefined = undefined;
   @observable analysers: IAudioAnalyser[] = [];
-  @observable devices:
-    | {
-        audioInput: string;
-        audioOutput: string;
-        videoInput: string;
-      }
-    | undefined;
+  @observable devices?: {
+    audioInput: string | undefined;
+    audioOutput: string | undefined;
+    videoInput: string | undefined;
+  };
 
   constructor(ourId: string) {
     super();
@@ -98,13 +96,12 @@ export class LocalPeer extends EventEmitter {
       this.isMuted = false;
       return this.audioStream;
     } else {
-      const storedDeviceId = localStorage.getItem('rooms-audio-input');
       const audio = await navigator.mediaDevices
         .getUserMedia({
-          audio: storedDeviceId
+          audio: this.devices?.audioInput
             ? {
                 ...DEFAULT_AUDIO_OPTIONS,
-                deviceId: { exact: storedDeviceId },
+                deviceId: { exact: this.devices.audioInput },
               }
             : DEFAULT_AUDIO_OPTIONS,
           video: false,
@@ -154,14 +151,13 @@ export class LocalPeer extends EventEmitter {
       });
       return this.videoStream;
     } else {
-      const storedDeviceId = localStorage.getItem('rooms-video-input');
       return await navigator.mediaDevices
         .getUserMedia({
           audio: false,
-          video: storedDeviceId
+          video: this.devices?.videoInput
             ? {
                 ...DEFAULT_VIDEO_OPTIONS,
-                deviceId: storedDeviceId,
+                deviceId: { exact: this.devices.videoInput },
               }
             : DEFAULT_VIDEO_OPTIONS,
         })
@@ -327,41 +323,38 @@ export class LocalPeer extends EventEmitter {
   }
 
   @action
-  setAudioInputDevice(deviceId: string) {
-    localStorage.setItem('rooms-audio-input', deviceId);
-    // if (this.stream?.active) {
-    //   this.disableMedia();
-    //   this.constraints.audio = {
-    //     ...(this.constraints.audio as MediaTrackConstraints),
-    //     deviceId: {
-    //       exact: deviceId,
-    //     },
-    //   };
-    //   this.enableMedia({
-    //     audio: this.constraints.audio,
-    //     video: this.constraints.video,
-    //   });
-    // }
-  }
-
-  @action
-  setVideoInputDevice(deviceId: string) {
-    localStorage.setItem('rooms-video-input', deviceId);
-  }
-
-  // TODO
-  @action
-  setAudioOutputDevice(deviceId: string) {
-    localStorage.setItem('rooms-audio-output', deviceId);
-    // setup new audio output device
-  }
-
-  @action
   clearTracks() {
     this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
     this.audioStream = undefined;
+  }
+
+  @action
+  setAudioInputDevice(deviceId: string) {
+    this.devices = {
+      audioInput: deviceId,
+      audioOutput: this.devices?.audioOutput,
+      videoInput: this.devices?.videoInput,
+    };
+  }
+
+  @action
+  setVideoInputDevice(deviceId: string) {
+    this.devices = {
+      videoInput: deviceId,
+      audioInput: this.devices?.audioInput,
+      audioOutput: this.devices?.audioOutput,
+    };
+  }
+
+  @action
+  setAudioOutputDevice(deviceId: string) {
+    this.devices = {
+      audioOutput: deviceId,
+      audioInput: this.devices?.audioInput,
+      videoInput: this.devices?.videoInput,
+    };
   }
 
   @action
@@ -376,9 +369,11 @@ export class LocalPeer extends EventEmitter {
     this.isVideoOn = false;
     this.videoStream = undefined;
     this.screenStream = undefined;
-    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
-      track.stop();
-    });
-    this.audioStream = undefined;
+    if (this.audioStream) {
+      this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+        track.stop();
+      });
+      this.audioStream = undefined;
+    }
   }
 }

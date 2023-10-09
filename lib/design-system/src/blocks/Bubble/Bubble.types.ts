@@ -139,15 +139,6 @@ export type ChatMessageType = {
   reactions?: FragmentReactionType[];
 };
 
-export const BLOCK_TYPES = [
-  'image',
-  'video',
-  'audio',
-  'link',
-  'blockquote',
-  'code',
-  'markdown',
-];
 export const TEXT_TYPES = [
   'plain',
   'bold',
@@ -160,25 +151,3 @@ export const TEXT_TYPES = [
   'inline-code',
   'ship',
 ];
-
-export type FragmentKeyTypes =
-  | 'markdown'
-  | 'plain'
-  | 'bold'
-  | 'italics'
-  | 'strike'
-  | 'bold-italics'
-  | 'bold-strike'
-  | 'italics-strike'
-  | 'bold-italics-strike'
-  | 'inline-code'
-  | 'ship'
-  | 'image'
-  | 'video'
-  | 'audio'
-  | 'link'
-  | 'blockquote'
-  | 'code'
-  | 'tab'
-  | 'reply'
-  | 'break';

@@ -32,7 +32,7 @@ export const AccountGetRealmDialogStory: ComponentStory<
     <AccountGetRealmDialog
       onClickJoinWaitlist={() => Promise.resolve(false)}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

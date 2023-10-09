@@ -90,6 +90,10 @@ const ChatFragment = types.union(
   types.model('FragmentStatus', {
     status: types.string,
     metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FramgentUrLink', {
+    'ur-link': types.string,
+    metadata: types.optional(types.frozen(), {}),
   })
 );
 export type ChatFragmentMobxType = Instance<typeof ChatFragment>;

@@ -176,7 +176,7 @@ export class Conduit extends EventEmitter {
         }
       };
 
-      this.sse.onmessage = (event: MessageEvent) => {
+      this.sse.onmessage = async (event: MessageEvent) => {
         if (this.status !== ConduitState.Connected) {
           this.updateStatus(ConduitState.Connected);
         }
@@ -258,7 +258,11 @@ export class Conduit extends EventEmitter {
               if (reconnectSub?.onQuit) {
                 reconnectSub?.onQuit?.(parsedEvent);
               } else {
-                this.resubscribe(eventId);
+                try {
+                  await this.resubscribe(eventId);
+                } catch (e) {
+                  console.error(e);
+                }
               }
             }
             break;
@@ -271,13 +275,21 @@ export class Conduit extends EventEmitter {
       this.sse.onerror = async (error) => {
         log.info(this.watches.keys());
         if (!error) {
-          this.handleError({ status: 500, message: 'Unknown error' });
+          try {
+            await this.handleError({ status: 500, message: 'Unknown error' });
+          } catch (e) {
+            console.error(e);
+          }
         }
         log.error('sse error', error);
         if (error.status === 403) {
           // @ts-ignore
           error.originator = 'sse';
-          this.handleError(error);
+          try {
+            await this.handleError(error);
+          } catch (e) {
+            console.error(e);
+          }
         }
         // @ts-ignore
         if (error.status === '404') {
@@ -508,7 +520,7 @@ export class Conduit extends EventEmitter {
    * @param params
    * @returns
    */
-  async thread(params: Thread<Action>): Promise<any> {
+  async thread(params: Thread): Promise<any> {
     const { inputMark, outputMark, threadName, body, desk } = params;
 
     try {
@@ -540,7 +552,11 @@ export class Conduit extends EventEmitter {
       action: Action.Ack,
       'event-id': eventId,
     };
-    await this.postToChannel(message);
+    try {
+      await this.postToChannel(message);
+    } catch (e) {
+      console.error(e);
+    }
     return eventId;
   }
 
@@ -554,18 +570,21 @@ export class Conduit extends EventEmitter {
         action: 'delete',
       },
     ]);
-
-    const response = await fetch(this.channelUrl(this.uid), {
-      headers: {
-        ...this.headers,
-        Cookie: this.headers.Cookie,
-      },
-      method: 'POST',
-      body: body,
-      signal: this.abort.signal,
-    });
-    if (!response.ok) {
-      throw new Error('Failed to DELETE channel in node context');
+    try {
+      const response = await fetch(this.channelUrl(this.uid), {
+        headers: {
+          ...this.headers,
+          Cookie: this.headers.Cookie,
+        },
+        method: 'POST',
+        body: body,
+        signal: this.abort.signal,
+      });
+      if (!response.ok) {
+        console.error('Failed to DELETE channel in node context');
+      }
+    } catch (e) {
+      console.error(e);
     }
     return;
   }
@@ -707,7 +726,7 @@ export class Conduit extends EventEmitter {
   }
 
   static async reconnect(conduit: Conduit) {
-    conduit.closeChannel();
+    await conduit.closeChannel();
     if (!conduit.url || !conduit.code || !conduit.cookie)
       throw new Error('url, code, or cookie not set');
     await conduit.init(conduit.url, conduit.code, conduit.cookie);

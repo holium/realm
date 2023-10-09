@@ -70,7 +70,32 @@ export const bootRealm = () => {
   mouseOverlayWindow = null;
 
   setRealmCursor(true);
-  realmWindow = createRealmWindow();
+
+  let lastWindowMetadata = undefined;
+  if (realmService) {
+    lastWindowMetadata = realmService.getLastWindowMetadata();
+  }
+  realmWindow = createRealmWindow(
+    lastWindowMetadata?.isFullscreen,
+    lastWindowMetadata?.lastWindowBounds
+  );
+
+  realmWindow.on('ready-to-show', () => {
+    if (realmService !== null && realmWindow !== null) {
+      const lastWindowMetadata = realmService.getLastWindowMetadata();
+      const isFullScreen = lastWindowMetadata.isFullscreen ?? true;
+      if (lastWindowMetadata.lastWindowBounds) {
+        setTimeout(() => {
+          realmWindow?.setFullScreen(isFullScreen);
+          if (lastWindowMetadata?.lastWindowBounds) {
+            realmWindow?.setBounds(lastWindowMetadata?.lastWindowBounds);
+          }
+          realmWindow?.webContents.send('set-fullscreen', isFullScreen);
+        }, 0);
+      }
+    }
+  });
+
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
   menuBuilder = null;
@@ -165,6 +190,16 @@ app
     });
 
     app.on('before-quit', () => {
+      if (realmWindow?.isSimpleFullScreen() || realmWindow?.isFullScreen()) {
+        realmService?.setLastFullscreenStatus(true);
+      } else {
+        realmService?.setLastFullscreenStatus(false);
+      }
+      const bounds = realmWindow?.getBounds();
+      if (bounds) {
+        realmService?.setLastWindowBounds(bounds);
+      }
+
       // For Macs with camera notch we're using simple fullscreen,
       // then this is required to exit the app.
       if (isMacWithCameraNotch()) {

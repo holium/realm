@@ -4,7 +4,7 @@ import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { serialize, unserialize } from './helpers';
 import { DataPacket } from './room.types';
-import { OnDataChannel, OnLeftRoom } from './RoomsStore';
+import { OnDataChannel, OnLeftRoom, RoomModel } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
 const DataPacketMuteStatus = 3;
@@ -35,6 +35,7 @@ export class PeerClass extends EventsEmitter {
   @observable stream: MediaStream | null = null;
   @observable ourStreams: MediaStream[];
   @observable reconnectAttempts = 0;
+  @observable rooms: Map<string, RoomModel> = new Map();
 
   @observable onDataChannel: OnDataChannel = async () => {};
   @observable onLeftRoom: OnLeftRoom = async () => {};
@@ -120,19 +121,6 @@ export class PeerClass extends EventsEmitter {
     this.peer.addStream(stream);
     this.ourStreams.push(stream);
     // this.ourStreams = stream;
-  }
-
-  @action
-  setAudioOutputDevice(deviceId: string) {
-    // const video = document.getElementById(
-    //     `peer-video-${this.peerId}`
-    // ) as HTMLVideoElement;
-    // video.setSinkId(deviceId);
-    const audio = document.getElementById(
-      `peer-audio-${this.peerId}`
-    ) as HTMLAudioElement;
-    // @ts-expect-error
-    audio.setSinkId(deviceId);
   }
 
   @action
@@ -271,6 +259,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onClose() {
+    console.log('close: %o', this.peerId);
     if (!this.peer) {
       console.error('Peer does not exist in onClose');
       return;
@@ -315,6 +304,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onSignal(signal: any) {
+    // console.log('signal: %o, %o', this.peerId, signal);
     try {
       const msg = {
         type: 'signal',
@@ -365,7 +355,10 @@ export class PeerClass extends EventsEmitter {
         this.disableVideo();
       }
     }
-    this.onDataChannel(this.rid, this.peerId, dataPacket);
+    // only allow this thru if we are in the room where this originated
+    if (this.rooms.has(this.rid)) {
+      this.onDataChannel(this.rid, this.peerId, dataPacket);
+    }
   }
 
   @action
@@ -389,6 +382,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onConnect() {
+    console.log('connected: %o', this.peerId);
     this.status = 'connected';
     console.log('Peer connected', this.peerId);
   }

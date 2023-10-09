@@ -74,6 +74,7 @@ export enum PeerConnectionState {
 
 export interface DataPacket {
   from: string;
+  path?: string;
   kind: DataPacketKind;
   value: {
     multiplayer?: MultiplayerPayload;

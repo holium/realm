@@ -88,9 +88,10 @@ const NewRoomPresenter = () => {
     const spacePath =
       spacesStore.selected?.type !== 'our'
         ? spacesStore.selected?.path ?? ''
-        : null;
+        : '/our';
 
     await roomsStore?.createRoom(
+      `${name}/${Date.now()}`,
       name,
       isPrivate ? 'private' : 'public',
       spacePath

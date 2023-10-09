@@ -153,7 +153,7 @@ describe('hosting.holium.com', () => {
     cy.get('button').contains('Submit').click();
 
     /* --- BOOTING STEP --- */
-    // Intercept first GET /get-user-ships, then click button with text 'Next'
+    // Intercept first 4 GET /get-user-ships, then click button with text 'Next'
     cy.intercept('GET', `${API_BASE_URL}/get-user-ships`, {
       statusCode: 200,
       body: getUserShipsFixture,
@@ -161,6 +161,10 @@ describe('hosting.holium.com', () => {
 
     // Wait until GET /get-user-ships is called
     cy.wait('@getUserShips', { timeout: 10000 });
+    cy.wait('@getUserShips', { timeout: 10000 });
+    cy.wait('@getUserShips', { timeout: 10000 });
+    cy.wait('@getUserShips', { timeout: 10000 });
+
     // Wait until Next button is enabled and click it
     cy.get('button').contains('Next').should('not.be.disabled').click();
 

@@ -20,7 +20,7 @@ export const GetRealmDialogStory: ComponentStory<
     <GetRealmDialog
       onBack={() => {}}
       onPurchaseId={() => {}}
-      onUploadId={() => {}}
+      onUploadPier={() => {}}
     />
   </OnboardingDialogWrapper>
 );
@@ -43,7 +43,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <GetOnRealmDialog
       onPurchaseId={() => {}}
-      onUploadId={() => {}}
+      onUploadPier={() => {}}
       onAlreadyHaveAccount={() => {}}
     />
   </OnboardingDialogWrapper>

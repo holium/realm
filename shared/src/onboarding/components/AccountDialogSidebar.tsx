@@ -33,7 +33,7 @@ type Props = {
   selectedShipId?: number;
   currentSection?: SidebarSection;
   isLoading?: boolean;
-  onClickUploadId: () => void;
+  onClickUploadPier: () => void;
   onClickPurchaseId: () => void;
   setSelectedShipId: (shipId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
@@ -45,7 +45,7 @@ export const AccountDialogSidebar = ({
   selectedShipId,
   currentSection,
   isLoading,
-  onClickUploadId,
+  onClickUploadPier,
   onClickPurchaseId,
   setSelectedShipId,
   onClickSidebarSection,
@@ -141,7 +141,7 @@ export const AccountDialogSidebar = ({
                   gap="8px"
                   borderTop="1px solid rgba(var(--rlm-border-rgba))"
                 >
-                  <Button.Transparent width="100%" onClick={onClickUploadId}>
+                  <Button.Transparent width="100%" onClick={onClickUploadPier}>
                     <Flex alignItems="center" gap="8px">
                       <Icon name="ArrowRightLine" size={16} />
                       <Text.Body>Upload Pier</Text.Body>

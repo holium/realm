@@ -23,17 +23,17 @@ const DownloadRealmPresenter = () => {
     }
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account/download-realm',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account/download-realm',
       });
     }
@@ -64,7 +64,7 @@ const DownloadRealmPresenter = () => {
       onDownloadWindows={onDownloadWindows}
       onDownloadLinux={onDownloadLinux}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

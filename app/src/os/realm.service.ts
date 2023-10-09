@@ -12,7 +12,7 @@ import { getCookie, setSessionCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
-import { AuthService } from './services/auth/auth.service';
+import { AuthService, LastWindowMetadata } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
 import { MigrationService } from './services/migration/migration.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
@@ -37,15 +37,16 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
     this.onWillRedirect = this.onWillRedirect.bind(this);
 
-    // app.on(
-    //   'web-contents-created',
-    //   async (_: Event, webContents: WebContents) => {
-    //     webContents.on('will-redirect', (e: Event, url: string) => {
-    //       e.preventDefault();
-    //       this.onWillRedirect(url, webContents);
-    //     });
-    //   }
-    // );
+    // this will catch a redirect when the window is first being launched
+    app.on(
+      'web-contents-created',
+      async (_: Event, webContents: WebContents) => {
+        webContents.on('will-redirect', (e: Event, url: string) => {
+          e.preventDefault();
+          this.onWillRedirect(url, webContents);
+        });
+      }
+    );
 
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
@@ -53,7 +54,28 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         log.info("realm.service.ts: 'did-attach-webview' event fired");
         this.onWebViewAttached(event, webviewWebContents);
       });
+      // this will catch redirects that occur in the spawned window content
+      webContents.on('will-redirect', (e: Event, url: string) => {
+        e.preventDefault();
+        this.onWillRedirect(url, webContents);
+      });
     });
+  }
+
+  public setLastWindowBounds(bounds: Electron.Rectangle) {
+    this.services?.auth.setLastWindowBounds(bounds);
+  }
+
+  public setLastDisplay(display: Electron.Display) {
+    this.services?.auth.setLastDisplay(display);
+  }
+
+  public setLastFullscreenStatus(isFullscreen: boolean) {
+    this.services?.auth.setLastFullscreenStatus(isFullscreen);
+  }
+
+  public getLastWindowMetadata(): LastWindowMetadata {
+    return this.services?.auth.getLastWindowMetadata();
   }
 
   /**
@@ -314,6 +336,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
   async onWillRedirect(url: string, webContents: WebContents) {
     try {
+      // log.info('realm.service.ts:', 'onWillRedirect %o', url);
       const delim = '/~/login?redirect=';
       const parts = url.split(delim);
       // http://localhost/~/login?redirect=
@@ -329,6 +352,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
+        // log.info('realm.service.ts:', 'onWillRedirect calling getCookie...');
         const cookie = await getCookie({
           serverUrl: credentials.url,
           serverCode: credentials.code,
