@@ -12,6 +12,11 @@ import {
   w3mProvider,
 } from '@web3modal/ethereum';
 import { useWeb3Modal, Web3Modal } from '@web3modal/react';
+// import {
+//   createWeb3Modal,
+//   // useWeb3Modal,
+//   // Web3Modal,
+// } from '@web3modal/wagmi/react';
 import {
   Alchemy,
   Media,
@@ -79,6 +84,47 @@ const settings = {
   apiKey: 'YVJ7LV7w8esHG18rdnKSERfN_OcyJWY_', // Replace with your Alchemy API Key.
   network: Network.ETH_MAINNET, // Replace with your network.
 };
+
+type SupportedWallets = {
+  [key: string]: {
+    explorer_id: string;
+    image_id: string;
+    image_url: string;
+  };
+};
+const supportedWallets: SupportedWallets = {
+  // metamask
+  metamask: {
+    explorer_id:
+      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+    image_id: '5195e9db-94d8-4579-6f11-ef553be95100',
+    image_url:
+      'https://explorer-api.walletconnect.com/v3/logo/lg/5195e9db-94d8-4579-6f11-ef553be95100?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
+  },
+  // rainbow
+  rainbow: {
+    explorer_id:
+      '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
+    image_id: '7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500',
+    image_url:
+      'https://explorer-api.walletconnect.com/v3/logo/md/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
+  },
+  // trust
+  trust: {
+    explorer_id:
+      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+    image_id: '0528ee7e-16d1-4089-21e3-bbfb41933100',
+    image_url:
+      'https://explorer-api.walletconnect.com/v3/logo/md/0528ee7e-16d1-4089-21e3-bbfb41933100?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
+  },
+};
+
+// createWeb3Modal({
+//   wagmiConfig,
+//   projectId,
+//   chains,
+//   includeWalletIds: Object.keys(supportedWallets),
+// });
 
 const alchemy = new Alchemy(settings);
 
@@ -389,7 +435,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
           if (isConnected) {
             disconnect();
           }
-          open({ view: 'Connect' })
+          open({
+            view: 'Connect',
+            featuredWalletIds: [Object.keys(supportedWallets)],
+          })
             .then(() => {
               console.log([
                 isLoading,
@@ -409,38 +458,41 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
         case 'confirm-passport-root':
           if (isConnected && connector && address) {
-            console.log('creating passport root for %o...', address);
-            createEpochPassportNode(
-              shipName,
-              shipUrl,
-              connector.name,
+            console.log(
+              'creating passport root for %o...',
+              address,
               walletClient,
-              address
-            )
-              .then((result) => {
-                console.log('createEpochPassportNode response => %o', result);
-                if (result.term === 'poke-fail') {
-                  reject('error creating passport root');
-                  return;
-                }
-                console.log(
-                  `wallet addresses: [${address}, ${walletClient?.account.address}]`
-                );
-                setCurrentPassport(result);
-                // we already have a passport root; therefore generate a new device key
-                //  and set the workflow step to 2
-                const { walletAddress, privateKey } = generateWalletAddress();
-                setDeviceWalletAddress(walletAddress as `0x${string}`);
-                setDeviceSigningKey(privateKey);
-                setWorkflowStep('confirm-device-signing-key');
-                resolve();
-              })
-              .catch((e) => {
-                console.error(e);
-                reject(e);
-              });
-          } else {
-            console.error('unexpected wallet state');
+              connector
+            ),
+              createEpochPassportNode(
+                shipName,
+                shipUrl,
+                connector.name.split(' ')[0].toLowerCase(),
+                walletClient,
+                address
+              )
+                .then((result) => {
+                  console.log('createEpochPassportNode response => %o', result);
+                  if (result.term === 'poke-fail') {
+                    reject('error creating passport root');
+                    return;
+                  }
+                  console.log(
+                    `wallet addresses: [${address}, ${walletClient?.account.address}]`
+                  );
+                  setCurrentPassport(result);
+                  // we already have a passport root; therefore generate a new device key
+                  //  and set the workflow step to 2
+                  const { walletAddress, privateKey } = generateWalletAddress();
+                  setDeviceWalletAddress(walletAddress as `0x${string}`);
+                  setDeviceSigningKey(privateKey);
+                  setWorkflowStep('confirm-device-signing-key');
+                  resolve();
+                })
+                .catch((e) => {
+                  console.error(e);
+                  reject(e);
+                });
           }
           break;
 
@@ -488,28 +540,45 @@ function PassportEditor({ passport }: PassportEditorProps) {
             return;
           }
           if (walletAddress) {
-            console.log('adding new address...');
-            addWalletAddress(
-              shipName,
-              shipUrl,
-              devicePrivateKey as `0x${string}`,
-              walletAddress
-            )
-              // the wallet address of secret/hidden wallet that now lives on this device
-              .then((response: any) => {
-                console.log('response => %o', response);
-                if (response.term === 'poke-fail') {
-                  reject('error adding device key');
-                  return;
-                }
-                setCurrentPassport(response);
-                passportWorkflow.current?.close();
-                resolve();
+            console.log('account => %o', walletClient?.account);
+
+            console.log('getting provider...');
+            connector
+              ?.getProvider()
+              .then((provider) => {
+                console.log('provider => %o', provider);
+                const walletProviderName =
+                  provider.signer.session.peer.metadata.name
+                    .split(' ')[0]
+                    .toLowerCase();
+                console.log(
+                  'adding new address (walletClient, walletProvider) => %o...',
+                  [walletClient, provider.signer.session.peer.metadata.name]
+                );
+                addWalletAddress(
+                  shipName,
+                  shipUrl,
+                  devicePrivateKey as `0x${string}`,
+                  walletAddress,
+                  walletProviderName
+                )
+                  // the wallet address of secret/hidden wallet that now lives on this device
+                  .then((response: any) => {
+                    console.log('response => %o', response);
+                    if (response.term === 'poke-fail') {
+                      reject('error adding device key');
+                      return;
+                    }
+                    setCurrentPassport(response);
+                    passportWorkflow.current?.close();
+                    resolve();
+                  })
+                  .catch((e) => {
+                    console.error(e);
+                    reject(e);
+                  });
               })
-              .catch((e) => {
-                console.error(e);
-                reject(e);
-              });
+              .catch((e) => console.error(e));
           } else {
             console.error(
               'unexpected wallet address and/or device signing key'
@@ -544,7 +613,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
           console.log('disconnecting first...');
           disconnect();
         }
-        open({ view: 'Connect' });
+        open({
+          view: 'Connect',
+          featuredWalletIds: [Object.keys(supportedWallets)],
+        });
         break;
     }
   };
@@ -566,6 +638,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   }, [currentPassport['default-address']]);
 
   useEffect(() => {
+    // keep an eye on this call, looks like the 3 wallets we are interested in. metamask
     // setup the initial wallet state of the page before rendering anything
     if (currentPassport.chain.length === 0) {
       // if we have no links in the chain, the user will have to start by connecting
@@ -996,7 +1069,14 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 >
                   <>
                     {currentPassport.addresses
-                      ?.filter((entry, index) => index !== 1)
+                      ?.filter((entry, index) => {
+                        console.log(entry);
+                        console.log(
+                          'wallet => %o',
+                          supportedWallets[entry.wallet]
+                        );
+                        return index !== 1;
+                      })
                       .map((entry, idx) => (
                         <div
                           key={`address-${idx}`}
@@ -1010,14 +1090,26 @@ function PassportEditor({ passport }: PassportEditorProps) {
                             alignItems: 'center',
                           }}
                         >
-                          <div
+                          {/* <div
                             style={{
                               borderRadius: '4px',
                               width: '20px',
                               height: '20px',
-                              backgroundColor: '#5482EC',
                             }}
-                          ></div>
+                          > */}
+                          <img
+                            style={{
+                              borderRadius: '4px',
+                              width: '20px',
+                              height: '20px',
+                            }}
+                            src={
+                              supportedWallets[entry.wallet]?.image_url ||
+                              undefined
+                            }
+                            alt={entry.wallet}
+                          ></img>
+                          {/* </div> */}
                           <div style={{ flex: 1 }}>
                             {renderAddress(entry.address as `0x${string}`)}
                           </div>

@@ -6,10 +6,12 @@ import { Network, Alchemy } from 'alchemy-sdk';
 
 import { EPOCH_NODE_POC, LinkedNFT, PassportProfile } from './types';
 import { WalletClient } from 'wagmi';
+import { StringDecoder } from 'string_decoder';
 
 declare global {
   interface Window {
     ethereum: any;
+    web3: any;
   }
 }
 
@@ -305,7 +307,8 @@ export async function addWalletAddress(
   entity: string,
   shipUrl: string,
   deviceSigningKey: `0x${string}`,
-  walletAddress: `0x${string}`
+  walletAddress: `0x${string}`,
+  walletName: string
 ) {
   const wallet = new ethers.Wallet(deviceSigningKey);
 
@@ -331,7 +334,7 @@ export async function addWalletAddress(
     },
     'link-data': {
       address: walletAddress,
-      'address-type': 'wallet',
+      'address-type': walletName,
       'entity-name': entity,
     },
   };
