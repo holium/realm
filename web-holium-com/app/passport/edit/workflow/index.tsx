@@ -114,7 +114,7 @@ export function RenderWorkflowInitializeStep({
       </div>
       <hr
         style={{
-          backgroundColor: '#7199F0',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           width: '100%',
           height: '1px',
           border: 0,
@@ -126,8 +126,8 @@ export function RenderWorkflowInitializeStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -142,7 +142,7 @@ export function RenderWorkflowInitializeStep({
             height: '30px',
             border: 0,
             borderRadius: '50%',
-            backgroundColor: '#8CAEF0',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
             fontWeight: 450,
             fontSize: '18px',
             alignItems: 'center',
@@ -160,8 +160,8 @@ export function RenderWorkflowInitializeStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -176,7 +176,7 @@ export function RenderWorkflowInitializeStep({
             height: '30px',
             border: 0,
             borderRadius: '50%',
-            backgroundColor: '#8CAEF0',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
             fontWeight: 450,
             fontSize: '18px',
             alignItems: 'center',
@@ -192,7 +192,7 @@ export function RenderWorkflowInitializeStep({
       </div>
       <hr
         style={{
-          backgroundColor: '#7199F0',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           width: '100%',
           height: '1px',
           border: 0,
@@ -296,7 +296,7 @@ export function RenderWorkflowLinkRootStep({
             height: '30px',
             border: 0,
             borderRadius: '50%',
-            backgroundColor: '#8CAEF0',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
             fontWeight: 450,
             fontSize: '18px',
             alignItems: 'center',
@@ -330,8 +330,8 @@ export function RenderWorkflowLinkRootStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -357,7 +357,7 @@ export function RenderWorkflowLinkRootStep({
       </div>
       <hr
         style={{
-          backgroundColor: '#7199F0',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           width: '100%',
           height: '1px',
           border: 0,
@@ -460,7 +460,7 @@ export function RenderWorkflowLinkDeviceKeyStep({
             height: '30px',
             border: 0,
             borderRadius: '50%',
-            backgroundColor: '#8CAEF0',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
             fontWeight: 450,
             fontSize: '18px',
             alignItems: 'center',
@@ -494,8 +494,8 @@ export function RenderWorkflowLinkDeviceKeyStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -521,8 +521,8 @@ export function RenderWorkflowLinkDeviceKeyStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -542,7 +542,10 @@ export function RenderWorkflowLinkDeviceKeyStep({
               type="password"
               readOnly={true}
               value={state.deviceSigningKey || 'none'}
-              style={{ backgroundColor: '#739BEC', color: '#ffffff' }}
+              style={{
+                backgroundColor: 'rgba(255,255,255, 0.2)',
+                color: '#ffffff',
+              }}
             ></input>
           </div>
         </div>
@@ -554,7 +557,7 @@ export function RenderWorkflowLinkDeviceKeyStep({
       </div>
       <hr
         style={{
-          backgroundColor: '#7199F0',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           width: '100%',
           height: '1px',
           border: 0,
@@ -674,8 +677,8 @@ export function RenderWorkflowLinkAddressStep({
           display: 'flex',
           flexDirection: 'row',
           borderRadius: '38px',
-          border: 'solid 2px #91B0E9',
-          backgroundColor: '#739BEC',
+          border: 'solid 2px rgba(255,255,255, 0.2)',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
           // lineHeight: '34px',
@@ -705,7 +708,7 @@ export function RenderWorkflowLinkAddressStep({
       </div>
       <hr
         style={{
-          backgroundColor: '#7199F0',
+          backgroundColor: 'rgba(255,255,255, 0.2)',
           width: '100%',
           height: '1px',
           border: 0,
@@ -719,7 +722,7 @@ export function RenderWorkflowLinkAddressStep({
           </div>
           <hr
             style={{
-              backgroundColor: '#7199F0',
+              backgroundColor: 'rgba(255,255,255, 0.2)',
               width: '100%',
               height: '1px',
               border: 0,

@@ -315,7 +315,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
     });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nftPicker = useRef<HTMLDialogElement>(null);
-  const editAvatarMenu = useRef<HTMLDialogElement>(null);
+  // const editAvatarMenu = useRef<HTMLDialogElement>(null);
   const passportWorkflow = useRef<HTMLDialogElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
@@ -801,7 +801,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
               borderRadius: '10px',
               backgroundColor: '#F2F7FE',
             }}
-            onClick={() => editAvatarMenu.current?.show()}
+            onClick={() => {
+              setEditState('choose-nft');
+              nftPicker.current?.showModal();
+            }}
+            // onClick={() => editAvatarMenu.current?.show()}
           >
             <PlusIcon />
           </button>
@@ -1267,9 +1271,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
           </div>
         </>
       </div>
-      <dialog id="editAvatarMenu" ref={editAvatarMenu}>
+      {/* <dialog id="editAvatarMenu" ref={editAvatarMenu}>
         some content
-      </dialog>
+      </dialog> */}
       {workflowStep === 'none' ? (
         RenderWorkflowNoneState()
       ) : (
