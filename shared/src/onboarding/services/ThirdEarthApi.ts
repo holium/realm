@@ -265,7 +265,12 @@ export class ThirdEarthApi {
     );
   }
 
-  stripeMakePayment(token: string, productId: string, patp?: string) {
+  stripeMakePayment(
+    token: string,
+    productId: string,
+    priceId: string,
+    patp?: string
+  ) {
     return http<StripeMakePaymentResponse>(
       `${this.apiBaseUrl}/stripe-make-payment`,
       {
@@ -273,6 +278,7 @@ export class ThirdEarthApi {
         headers: this.getHeaders(token),
         body: JSON.stringify({
           productId,
+          priceId,
           patp,
         }),
       }

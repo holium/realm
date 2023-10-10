@@ -1,7 +1,11 @@
 import { ReactNode } from 'react';
 
 import { Flex } from '@holium/design-system/general';
-import { ThirdEarthProduct, ThirdEarthShip } from '@holium/shared';
+import {
+  ThirdEarthPeriodicity,
+  ThirdEarthProduct,
+  ThirdEarthShip,
+} from '@holium/shared';
 
 export const OnboardingDialogWrapper = ({
   children,
@@ -43,6 +47,24 @@ export const thirdEarthMockProduct: ThirdEarthProduct = {
   long_description: 'Monthly subscription',
   price_id: '11',
   subscription_price: 15,
+  price_options: [
+    {
+      unit: 'usd',
+      description: 'monthly subscription',
+      periodicity: 'month' as ThirdEarthPeriodicity,
+      one_time_price: 0,
+      recurring_price: 15,
+      stripe_price_id: 'price_1MDqoIHhoM3uGGuYAZZN23Yr',
+    },
+    {
+      unit: 'usd',
+      description: 'yearly subscription',
+      periodicity: 'year' as ThirdEarthPeriodicity,
+      one_time_price: 0,
+      recurring_price: 150,
+      stripe_price_id: 'price_1MDqoIHhoM3uGGuY00mWc29l',
+    },
+  ],
 };
 
 export const thirdEarthMockProducts = [

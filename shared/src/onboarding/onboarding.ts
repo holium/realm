@@ -60,7 +60,9 @@ export type {
   RealmOnboardingStep,
   ThirdEarthAlert,
   ThirdEarthPortalSession,
+  ThirdEarthPriceOption,
   ThirdEarthProduct,
   ThirdEarthProductType,
   ThirdEarthShip,
 } from './types';
+export { ThirdEarthPeriodicity, ThirdEarthProductId } from './types/index';

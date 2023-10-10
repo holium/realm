@@ -4,6 +4,25 @@ export type ThirdEarthProductType =
   | 'byop-nk'
   | 'subscription';
 
+export enum ThirdEarthPeriodicity {
+  MONTH = 'month',
+  YEAR = 'year',
+}
+
+export type ThirdEarthPriceOption = {
+  unit: string;
+  description: string;
+  periodicity: ThirdEarthPeriodicity;
+  one_time_price: number;
+  recurring_price: number;
+  stripe_price_id: string;
+};
+
+export enum ThirdEarthProductId {
+  PLANET = 30,
+  BYOP_P = 101,
+}
+
 export type ThirdEarthProduct = {
   client_id: number;
   comet_count: string;
@@ -16,6 +35,7 @@ export type ThirdEarthProduct = {
   long_description: string;
   price_id: string;
   priority: number;
+  price_options: ThirdEarthPriceOption[];
   product_status: string;
   product_type: ThirdEarthProductType;
   subscription_price: number;
