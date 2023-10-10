@@ -6,7 +6,9 @@ import {
   OnboardingPage,
   OnboardingStorage,
   PaymentDialog,
+  ThirdEarthPeriodicity,
   ThirdEarthProduct,
+  ThirdEarthProductId,
   ThirdEarthProductType,
 } from '@holium/shared';
 
@@ -16,8 +18,7 @@ import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
-  products: ThirdEarthProduct[];
-  // We use underscore to highlight that this is a query param.
+  product: ThirdEarthProduct | undefined;
   product_type: ThirdEarthProductType;
   back_url?: string;
 };
@@ -28,9 +29,14 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const product_type = (query.product_type ??
     'planet') as ThirdEarthProductType;
 
+  const product = products.find((p) => {
+    if (product_type === 'planet') return p.id === ThirdEarthProductId.PLANET;
+    else return p.id === ThirdEarthProductId.BYOP_P;
+  });
+
   return {
     props: {
-      products,
+      product,
       product_type,
       back_url,
     } as ServerSideProps,
@@ -38,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 };
 
 export default function Payment({
-  products: unfilteredProducts,
+  product,
   product_type,
   back_url,
 }: ServerSideProps) {
@@ -51,11 +57,7 @@ export default function Payment({
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
 
-  const products = unfilteredProducts.filter(
-    (product) => product.product_type === product_type
-  );
-
-  const [productId, setProductId] = useState(products[0].id);
+  const [periodicity, setPeriodicity] = useState(ThirdEarthPeriodicity.MONTH);
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
@@ -72,9 +74,17 @@ export default function Payment({
     setToken(token);
 
     const getSecretAndSetupStripe = async () => {
+      if (!product) return;
+
+      const priceOption = product.price_options.find(
+        (po) => po.periodicity === periodicity
+      );
+      if (!priceOption) return;
+
       const response = await thirdEarthApi.stripeMakePayment(
         token,
-        productId.toString(),
+        product.id.toString(),
+        priceOption.stripe_price_id,
         // Don't pass serverId for byop-p.
         product_type !== 'byop-p' && serverId ? serverId : undefined
       );
@@ -90,7 +100,7 @@ export default function Payment({
     } catch (e) {
       console.error(e);
     }
-  }, [productId]);
+  }, [periodicity]);
 
   const stripeOptions: StripeElementsOptions = {
     clientSecret: clientSecret,
@@ -112,7 +122,7 @@ export default function Payment({
   };
 
   const onNext = async () => {
-    if (!token || !invoiceId || !productId) return false;
+    if (!token || !invoiceId || !product) return false;
 
     if (product_type === 'byop-p') {
       await thirdEarthApi.log(token, {
@@ -120,7 +130,7 @@ export default function Payment({
         type: 'info',
         subject: 'FRONTEND: payment step (email notify)',
         message: `Succesful stripe purchase of byop-p by ${email}.`,
-        productId: productId.toString(),
+        productId: product.id.toString(),
         auditTrailCode: 1000,
       });
 
@@ -136,7 +146,7 @@ export default function Payment({
         // This server call should be non-blocking since the user has already paid.
         await thirdEarthApi.provisionalShipEntry({
           token,
-          product: productId.toString(),
+          product: product.id.toString(),
           invoiceId,
           shipType: 'provisional',
         });
@@ -156,7 +166,7 @@ export default function Payment({
         type: 'info',
         subject: 'FRONTEND: payment step (email notify)',
         message: `Succesful stripe purchase of planet by ${email}.`,
-        productId: productId.toString(),
+        productId: product.id.toString(),
         auditTrailCode: 1000,
       });
 
@@ -174,7 +184,7 @@ export default function Payment({
         await thirdEarthApi.provisionalShipEntry({
           token,
           patp: serverId,
-          product: productId.toString(),
+          product: product.id.toString(),
           invoiceId,
           shipType: 'planet',
         });
@@ -191,14 +201,13 @@ export default function Payment({
   return (
     <Page title="Payment" isProtected>
       <PaymentDialog
-        productType={product_type}
-        products={products}
-        productId={productId}
-        patp={serverId}
+        priceOptions={product?.price_options ?? []}
+        periodicity={periodicity}
+        setPeriodicity={setPeriodicity}
+        patp={product_type === 'planet' ? serverId : undefined}
         email={email}
         stripe={stripe as any}
         stripeOptions={stripeOptions as any}
-        setProductId={setProductId}
         onBack={onBack}
         onNext={onNext}
       />
