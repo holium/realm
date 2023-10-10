@@ -51,11 +51,13 @@ import {
   CloseIcon,
   CopyIcon,
   PlusIcon,
+  ProfileViewIcon,
   SmallPlusIcon,
+  WalletIcon,
 } from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
-import { shipName, shipUrl } from '@/app/lib/shared';
+import { isProd, shipName, shipUrl } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDeviceSigningKey,
@@ -67,6 +69,7 @@ import {
   walletFromKey,
 } from '@/app/lib/wallet';
 import { saveContact } from '@/app/lib/profile';
+import { useRouter } from 'next/navigation';
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -252,6 +255,7 @@ interface PassportEditorProps {
 // all good - we have a passport, passport root, and device key
 
 function PassportEditor({ passport }: PassportEditorProps) {
+  const router = useRouter();
   const { open } = useWeb3Modal();
   // const { connect } = useConnect();
   const { disconnect, disconnectAsync } = useDisconnect();
@@ -712,7 +716,31 @@ function PassportEditor({ passport }: PassportEditorProps) {
           }}
         >
           <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
-            <h1 style={{ fontWeight: '500' }}>Passport Editor</h1>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'baseline',
+              }}
+            >
+              <h1 style={{ fontWeight: '500' }}>Passport Editor</h1>
+              {/* <div style={{ marginLeft: '4px' }}>
+                <ProfileViewIcon />
+              </div> */}
+              <button>
+                <div
+                  style={{
+                    flex: 1,
+                    color: '#4e9efd',
+                    fontSize: '0.8em',
+                    marginLeft: '4px',
+                  }}
+                  onClick={() => router.push('/passport')}
+                >
+                  View Profile
+                </div>
+              </button>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -927,6 +955,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   backgroundColor: 'transparent',
                   width: '100%',
                   resize: 'none',
+                  cursor: 'auto',
                 }}
                 rows={2}
                 maxLength={128}
@@ -1121,7 +1150,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
                             entry.address && (
                             <div style={{ color: '#878889' }}>Public</div>
                           )}
-                          <CopyIcon fill={'#9FA1A1'} />
+                          <button
+                            onClick={() =>
+                              navigator.clipboard.writeText(entry.address)
+                            }
+                          >
+                            <CopyIcon fill={'#9FA1A1'} />
+                          </button>
                         </div>
                       ))}
                     <button
@@ -1150,7 +1185,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                  {/* <div style={{ fontSize: '0.8em' }}>No addresses found</div> */}
                   <button
                     style={{
                       borderRadius: '10px',
@@ -1248,18 +1283,24 @@ function PassportEditor({ passport }: PassportEditorProps) {
                             alignItems: 'center',
                           }}
                         >
+                          <WalletIcon />
                           <div
                             style={{
-                              borderRadius: '4px',
-                              width: '20px',
-                              height: '20px',
-                              backgroundColor: '#5482EC',
+                              flex: 1,
+                              alignItems: 'center',
+                              verticalAlign: 'bottom',
+                              lineHeight: '24px',
                             }}
-                          ></div>
-                          <div style={{ flex: 1 }}>
+                          >
                             {renderAddress(entry.address as `0x${string}`)}
                           </div>
-                          <CopyIcon fill={'#9FA1A1'} />
+                          <button
+                            onClick={() =>
+                              navigator.clipboard.writeText(entry.address)
+                            }
+                          >
+                            <CopyIcon fill={'#9FA1A1'} />
+                          </button>
                         </div>
                       ))}
                   </>
@@ -1523,8 +1564,8 @@ export default function Home() {
         <WagmiConfig config={wagmiConfig}>
           <div
             style={{
-              paddingTop: '24px',
-              paddingBottom: '24px',
+              paddingTop: '48px',
+              paddingBottom: '48px',
             }}
           >
             <PassportEditor passport={passport} />

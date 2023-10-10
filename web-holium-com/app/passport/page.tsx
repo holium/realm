@@ -1,10 +1,11 @@
 'use client';
 
 import { CopyIcon } from '@/app/assets/icons';
-import { shipUrl } from '@/app/lib/shared';
+import { isProd, shipUrl } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import { renderAddress } from './edit/workflow';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface NFTProps {
   nft: LinkedNFT;
@@ -43,6 +44,7 @@ interface PassportViewProps {
 }
 
 function PassportView({ canEdit, passport }: PassportViewProps) {
+  const router = useRouter();
   return (
     <div
       style={{
@@ -81,6 +83,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                   flex: 1,
                   color: '#4e9efd',
                 }}
+                onClick={() => router.push('/passport/edit')}
               >
                 Edit
               </div>
@@ -313,7 +316,13 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                           {passport['default-address'] === entry.address && (
                             <div style={{ color: '#878889' }}>Public</div>
                           )}
-                          <CopyIcon fill={'#9FA1A1'} />
+                          <button
+                            onClick={() =>
+                              navigator.clipboard.writeText(entry.address)
+                            }
+                          >
+                            <CopyIcon fill={'#9FA1A1'} />
+                          </button>
                         </div>
                       ))}
                   </>
@@ -406,7 +415,13 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                           {passport['default-address'] === entry.address && (
                             <div style={{ color: '#878889' }}>Public</div>
                           )}
-                          <CopyIcon fill={'#9FA1A1'} />
+                          <button
+                            onClick={() =>
+                              navigator.clipboard.writeText(entry.address)
+                            }
+                          >
+                            <CopyIcon fill={'#9FA1A1'} />
+                          </button>
                         </div>
                       ))}
                   </>

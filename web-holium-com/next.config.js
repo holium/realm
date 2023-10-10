@@ -3,7 +3,7 @@
 const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig = {
-  basePath: isProd ? '/passport' : '',
+  // basePath: isProd ? '/passport' : '',
   output: 'export',
 
   // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`

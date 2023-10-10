@@ -539,17 +539,23 @@ export function RenderWorkflowLinkDeviceKeyStep({
           <div style={{ fontSize: '0.8em' }}>Device signing key</div>
           <div style={{ fontSize: '1em', flex: 1 }}>
             <input
+              tabIndex={-1}
               type="password"
               readOnly={true}
+              disabled={true}
               value={state.deviceSigningKey || 'none'}
               style={{
-                backgroundColor: 'rgba(255,255,255, 0.2)',
+                backgroundColor: 'rgba(255,255,255, 0)',
                 color: '#ffffff',
+                border: 0,
+                width: '100%',
               }}
             ></input>
           </div>
         </div>
-        <CopyIcon />
+        <button>
+          <CopyIcon />
+        </button>
       </div>
       <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
         We’ve generated a device signing key for you. Please sign the new device
