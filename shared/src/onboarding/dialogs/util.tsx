@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { Flex } from '@holium/design-system/general';
 import {
   ThirdEarthPeriodicity,
-  ThirdEarthProduct,
+  ThirdEarthPriceOption,
   ThirdEarthShip,
 } from '@holium/shared';
 
@@ -30,53 +30,22 @@ export const thirdEarthMockShip: ThirdEarthShip = {
   product_type: 'planet',
 } as any;
 
-export const thirdEarthMockProduct: ThirdEarthProduct = {
-  id: 1,
-  client_id: 1,
-  droplet_class_id: 1,
-  is_migration: false,
-  is_planet: true,
-  lang_code: 'en',
-  priority: 1,
-  product_status: 'active',
-  product_type: 'subscription',
-  threshold: 0,
-  comet_count: '0',
-  title: 'Monthly',
-  description: 'Monthly subscription',
-  long_description: 'Monthly subscription',
-  price_id: '11',
-  subscription_price: 15,
-  price_options: [
-    {
-      unit: 'usd',
-      description: 'monthly subscription',
-      periodicity: 'month' as ThirdEarthPeriodicity,
-      one_time_price: 0,
-      recurring_price: 15,
-      stripe_price_id: 'price_1MDqoIHhoM3uGGuYAZZN23Yr',
-    },
-    {
-      unit: 'usd',
-      description: 'yearly subscription',
-      periodicity: 'year' as ThirdEarthPeriodicity,
-      one_time_price: 0,
-      recurring_price: 150,
-      stripe_price_id: 'price_1MDqoIHhoM3uGGuY00mWc29l',
-    },
-  ],
-};
-
-export const thirdEarthMockProducts = [
-  thirdEarthMockProduct,
+export const thirdEarthMockPriceOptions: ThirdEarthPriceOption[] = [
   {
-    ...thirdEarthMockProduct,
-    id: 2,
-    title: 'Yearly',
-    description: 'Yearly subscription',
-    long_description: 'Yearly subscription',
-    price_id: '12',
-    subscription_price: 150,
+    unit: 'usd',
+    description: 'monthly subscription',
+    periodicity: 'month' as ThirdEarthPeriodicity,
+    one_time_price: 0,
+    recurring_price: 15,
+    stripe_price_id: 'price_1MDqoIHhoM3uGGuYAZZN23Yr',
+  },
+  {
+    unit: 'usd',
+    description: 'yearly subscription',
+    periodicity: 'year' as ThirdEarthPeriodicity,
+    one_time_price: 0,
+    recurring_price: 150,
+    stripe_price_id: 'price_1MDqoIHhoM3uGGuY00mWc29l',
   },
 ];
 

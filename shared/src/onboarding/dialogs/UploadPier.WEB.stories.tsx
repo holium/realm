@@ -5,11 +5,12 @@ import {
   CreateAccountDialog,
   GetOnRealmDialog,
   PaymentDialog,
+  ThirdEarthPeriodicity,
   VerifyEmailDialog,
 } from '../onboarding';
 import { UploadPierDialog } from './UploadPier/UploadPierDialog';
 import { UploadPierDisclaimerDialog } from './UploadPierDisclaimer/UploadPierDisclaimerDialog';
-import { OnboardingDialogWrapper, thirdEarthMockProduct } from './util';
+import { OnboardingDialogWrapper, thirdEarthMockPriceOptions } from './util';
 
 export default {
   component: CreateAccountDialog,
@@ -75,15 +76,9 @@ export const UploadPierPaymentDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
-      productType="byop-p"
-      products={[
-        {
-          ...thirdEarthMockProduct,
-          product_type: 'byop-p',
-        },
-      ]}
-      productId={1}
-      setProductId={() => {}}
+      priceOptions={thirdEarthMockPriceOptions}
+      periodicity={ThirdEarthPeriodicity.MONTH}
+      setPeriodicity={() => {}}
       patp="~zod"
       email="admin@admin.com"
       stripe={undefined}
