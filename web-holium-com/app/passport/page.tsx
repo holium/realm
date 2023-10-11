@@ -1,7 +1,7 @@
 'use client';
 
 import { CopyIcon } from '@/app/assets/icons';
-import { isProd, shipUrl } from '@/app/lib/shared';
+// import { isProd, shipUrl } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import { renderAddress } from './edit/workflow';
 import { useEffect, useState } from 'react';
@@ -83,7 +83,9 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                   flex: 1,
                   color: '#4e9efd',
                 }}
-                onClick={() => router.push('/passport/edit')}
+                onClick={() =>
+                  router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/edit`)
+                }
               >
                 Edit
               </div>
@@ -449,7 +451,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${shipUrl}/~/scry/profile/our.json`, {
+    fetch(`${process.env.NEXT_PUBLIC_SHIP_URL}/~/scry/profile/our.json`, {
       method: 'GET',
       credentials: 'include',
       headers: {

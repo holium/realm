@@ -735,7 +735,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     fontSize: '0.8em',
                     marginLeft: '4px',
                   }}
-                  onClick={() => router.push('/passport')}
+                  onClick={() =>
+                    router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/`)
+                  }
                 >
                   View Profile
                 </div>

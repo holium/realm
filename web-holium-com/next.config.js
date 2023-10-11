@@ -1,10 +1,19 @@
 /** @type {import('next').NextConfig} */
 
-const isProd = process.env.NODE_ENV === 'production';
-
 const nextConfig = {
-  // basePath: isProd ? '/passport' : '',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
   output: 'export',
+
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/',
+  //       destination: process.env.NEXT_PUBLIC_BASE_PATH,
+  //       basePath: false,
+  //       permanent: false,
+  //     },
+  //   ];
+  // },
 
   // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   // trailingSlash: true,
