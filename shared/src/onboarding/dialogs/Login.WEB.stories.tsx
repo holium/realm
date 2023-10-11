@@ -82,6 +82,8 @@ export const AccountStorageDialogStory: ComponentStory<
         networkUsage: 20,
         minioUsage: 30,
       }}
+      isLoading={false}
+      error={undefined}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

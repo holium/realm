@@ -16,7 +16,7 @@ export const StorageTroubleshoot = ({ onClick }: Props) => {
   const getDebugElement = () => {
     switch (debugState) {
       case 'uninitialized':
-        return <Text.Body>Restart Storage</Text.Body>;
+        return <Text.Body>Set Credentials to Default</Text.Body>;
       case 'restarting':
         return <Spinner size={16} />;
       case 'restarted':
@@ -37,7 +37,7 @@ export const StorageTroubleshoot = ({ onClick }: Props) => {
       <Flex flex={1} justifyContent="flex-end">
         <Button.Secondary
           type="button"
-          width="124px"
+          width="191px"
           height="28px"
           alignItems="center"
           justifyContent="center"
