@@ -65,6 +65,7 @@ export const AccountDialogSidebar = ({
       if (isFinishedUploading) {
         sidebarItems = [
           SidebarSection.Hosting,
+          SidebarSection.Storage,
           SidebarSection.CustomDomain,
           SidebarSection.DownloadRealm,
           SidebarSection.Support,

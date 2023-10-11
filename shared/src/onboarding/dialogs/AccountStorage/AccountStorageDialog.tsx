@@ -17,6 +17,8 @@ type Props = {
     networkUsage: number; // MB
     minioUsage: number; // MB
   };
+  isLoading: boolean;
+  error: string | undefined;
   onClickRestartStorage: () => Promise<string> | undefined;
   setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
@@ -33,6 +35,8 @@ export const AccountStorageDialog = ({
   storagePassword,
   dataStorage,
   dataSent,
+  isLoading,
+  error,
   onClickRestartStorage,
   setSelectedShipId,
   onClickPurchaseId,
@@ -44,7 +48,7 @@ export const AccountStorageDialog = ({
     ships={ships}
     selectedShipId={selectedShipId}
     currentSection={SidebarSection.Storage}
-    isLoading={!storageUrl || !storageBucket || !storagePassword}
+    isLoading={isLoading}
     setSelectedShipId={setSelectedShipId}
     onClickPurchaseId={onClickPurchaseId}
     onClickUploadPier={onClickUploadPier}
@@ -52,11 +56,13 @@ export const AccountStorageDialog = ({
     onExit={onExit}
   >
     <AccountStorageDialogBody
+      key={selectedShipId}
       storageUrl={storageUrl as string}
       storageBucket={storageBucket as string}
       storagePassword={storagePassword as string}
       dataStorage={dataStorage}
       dataSent={dataSent}
+      error={error}
       onClickRestartStorage={onClickRestartStorage}
     />
   </AccountDialog>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useToggle } from '@holium/design-system/util';
 import {
   AccountStorageDialog,
   UserContextProvider,
@@ -18,6 +19,9 @@ const S3StoragePresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { token, ships, selectedShipId, setSelectedShipId } = useUser();
 
+  const loading = useToggle(true);
+
+  const [error, setError] = useState<string>();
   const [s3Info, setS3Info] = useState<GetUserS3InfoResponse>();
   const [networkUsage, setNetworkUsage] = useState<number>(0);
   const [minioUsage, setMinioUsage] = useState<number>(0);
@@ -48,22 +52,36 @@ const S3StoragePresenter = () => {
     });
   };
 
+  const getAndSetS3Info = async (token: string, shipId: string) => {
+    try {
+      loading.toggleOn();
+      setError(undefined);
+      const newS3Info = await thirdEarthApi.getUserStorageInfo(token, shipId);
+
+      if (newS3Info) {
+        setS3Info(newS3Info);
+        thirdEarthApi.getUserResourceHistory(token, shipId).then((response) => {
+          setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
+          setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
+        });
+      } else {
+        throw new Error();
+      }
+    } catch {
+      setError('No storage set up for this ship.');
+      return;
+    } finally {
+      loading.toggleOff();
+    }
+  };
+
   useEffect(() => {
     const selectedShip = ships.find((ship) => ship.id === selectedShipId);
 
     if (!token) return;
     if (!selectedShip) return;
 
-    thirdEarthApi
-      .getUserStorageInfo(token, selectedShip.id.toString())
-      .then(setS3Info);
-
-    thirdEarthApi
-      .getUserResourceHistory(token, selectedShip.id.toString())
-      .then((response) => {
-        setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
-        setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
-      });
+    getAndSetS3Info(token, selectedShip.id.toString());
   }, [token, ships, selectedShipId]);
 
   const onClickRestartStorage = () => {
@@ -88,6 +106,8 @@ const S3StoragePresenter = () => {
         total: Number(s3Info?.storageCapacity),
       }}
       dataSent={{ networkUsage, minioUsage }}
+      isLoading={loading.isOn}
+      error={error}
       onClickRestartStorage={onClickRestartStorage}
       onClickPurchaseId={onClickPurchaseId}
       onClickUploadPier={onClickUploadPier}

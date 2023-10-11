@@ -61,6 +61,7 @@ export const AccountStorageSection = ({ account }: Props) => {
             used: Number(storageInfo?.storageUsed),
             total: Number(storageInfo?.storageCapacity),
           }}
+          error={undefined}
           dataSent={{ networkUsage, minioUsage }}
           onClickRestartStorage={onClickRestartStorage}
         />
