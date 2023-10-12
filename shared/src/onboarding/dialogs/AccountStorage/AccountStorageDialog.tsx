@@ -19,7 +19,7 @@ type Props = {
   };
   isLoading: boolean;
   error: string | undefined;
-  onClickRestartStorage: () => Promise<string> | undefined;
+  onClickRestartStorage: () => Promise<void>;
   setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
   onClickUploadPier: () => void;
