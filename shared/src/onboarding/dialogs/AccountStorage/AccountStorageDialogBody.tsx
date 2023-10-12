@@ -1,4 +1,4 @@
-import { ErrorBox } from '@holium/design-system/general';
+import { ErrorBox, Flex } from '@holium/design-system/general';
 
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
@@ -21,7 +21,7 @@ type Props = {
     minioUsage: number;
   };
   error: string | undefined;
-  onClickRestartStorage: () => Promise<string> | undefined;
+  onClickRestartStorage: () => Promise<void>;
 };
 
 export const AccountStorageDialogBody = ({
@@ -35,9 +35,12 @@ export const AccountStorageDialogBody = ({
 }: Props) => {
   if (error) {
     return (
-      <AccountDialogTable>
+      <>
         <ErrorBox>{error}</ErrorBox>
-      </AccountDialogTable>
+        <Flex flexDirection="column" alignItems="center">
+          <StorageTroubleshoot onClick={onClickRestartStorage} />
+        </Flex>
+      </>
     );
   }
 
@@ -56,7 +59,9 @@ export const AccountStorageDialogBody = ({
         </AccountDialogDescription>
       </AccountDialogTableRow>
       <StoragePassword storagePassword={storagePassword} />
-      <StorageTroubleshoot onClick={onClickRestartStorage} />
+      <AccountDialogTableRow title="Troubleshoot">
+        <StorageTroubleshoot onClick={onClickRestartStorage} />
+      </AccountDialogTableRow>
     </AccountDialogTable>
   );
 };

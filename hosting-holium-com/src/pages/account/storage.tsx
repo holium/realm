@@ -84,13 +84,19 @@ const S3StoragePresenter = () => {
     getAndSetS3Info(token, selectedShip.id.toString());
   }, [token, ships, selectedShipId]);
 
-  const onClickRestartStorage = () => {
+  const onClickRestartStorage = async () => {
     const selectedShip = ships.find((ship) => ship.id === selectedShipId);
 
     if (!token) return;
     if (!selectedShip) return;
 
-    return thirdEarthApi.setStorage(token, selectedShip.id.toString());
+    try {
+      await thirdEarthApi.setStorage(token, selectedShip.id.toString());
+    } catch (e) {
+      setError('Failed to restart storage.');
+    }
+
+    return;
   };
 
   return (
