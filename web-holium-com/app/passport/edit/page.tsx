@@ -154,7 +154,7 @@ const OwnedNFT = ({
     <>
       <button
         style={
-          selectable && isSelected && media.thumbnail
+          selectable && isSelected && (media.gateway || media.thumbnail)
             ? { border: 'solid 3px #5482EC', borderRadius: '8px' }
             : { border: 'solid 3px transparent' }
         }
@@ -180,10 +180,10 @@ const OwnedNFT = ({
               }
             ></input>
           )} */}
-          {media.thumbnail && (
+          {(media.gateway || media.thumbnail) && (
             <img
               alt={'nft'}
-              src={media.thumbnail}
+              src={media.gateway || media.thumbnail}
               style={{
                 height: '115px',
                 width: '115px',
@@ -1212,7 +1212,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
                       'error',
                     'contract-address': selectedNft.contract.address,
                     'token-id': selectedNft.tokenId,
-                    'image-url': selectedMedia.thumbnail || '?',
+                    'image-url':
+                      selectedMedia.gateway || selectedMedia.thumbnail || '?',
                     'chain-id': 'eth-mainnet',
                     'owned-by': walletFromKey(
                       devicePrivateKey
@@ -1233,12 +1234,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   });
               } else if (editState === 'choose-nft') {
                 console.log(selectedMedia.thumbnail);
-                if (selectedMedia.thumbnail) {
+                if (selectedMedia.gateway || selectedMedia.thumbnail) {
                   saveContact({
                     ...currentPassport.contact,
                     avatar: {
                       type: 'nft',
-                      img: selectedMedia.thumbnail,
+                      img:
+                        selectedMedia.gateway || selectedMedia.thumbnail || '',
                     },
                   }).then((response) => {
                     if (response.term === 'poke-fail') {
