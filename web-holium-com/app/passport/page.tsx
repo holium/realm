@@ -6,6 +6,7 @@ import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import { renderAddress } from './edit/workflow';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { shipUrl } from '../lib/shared';
 
 interface NFTProps {
   nft: LinkedNFT;
@@ -83,9 +84,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                   flex: 1,
                   color: '#4e9efd',
                 }}
-                onClick={() =>
-                  router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/edit`)
-                }
+                onClick={() => router.push(`/passport/edit`)}
               >
                 Edit
               </div>
@@ -451,7 +450,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`/passport/our`, {
+    fetch(`${shipUrl}/passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {

@@ -4,6 +4,7 @@ import {
   CheckIcon,
   CloseIcon,
   CopyIcon,
+  ErrorIcon,
   PassportIcon,
 } from '@/app/assets/icons';
 import { StyledSpinner } from '@/app/components';
@@ -20,6 +21,7 @@ export const renderAddress = (address: `0x${string}` | undefined) => {
 
 export type WorkflowStep =
   | 'none'
+  | 'new-device'
   | 'welcome'
   | 'confirm-passport-root'
   | 'confirm-device-signing-key'
@@ -773,6 +775,157 @@ export function RenderWorkflowLinkAddressStep({
           )}
         </div>
       </button>
+    </div>
+  );
+}
+
+interface PassportRenderProps {
+  signingAddress: string;
+  mnemonic: string;
+  readyState: PageReadyState;
+  onConfirm: () => void;
+}
+
+export type PageReadyState = 'ready' | 'loading' | 'error';
+
+export interface PageRenderState {
+  readyState?: PageReadyState;
+  lastError?: any;
+}
+
+export function RenderGetStartedStep({
+  signingAddress,
+  mnemonic,
+  readyState,
+  onConfirm,
+}: PassportRenderProps) {
+  const words = mnemonic.split(' ');
+  console.log('RenderGetStartedStep: readyState => %o', readyState);
+  return (
+    <div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          padding: '12px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <PassportIcon />
+          <div
+            style={{
+              marginLeft: '12px',
+              fontWeight: 450,
+              fontSize: '1.2em',
+              flex: 1,
+            }}
+          >
+            Passport - Welcome
+          </div>
+        </div>
+        <hr
+          style={{
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            width: '100%',
+            height: '1px',
+            border: 0,
+          }}
+        />
+        <div style={{ fontWeight: 'normal' }}>
+          Before you get started, we've generated a device signing key for you.
+          This new device key allows us to cryptographically verify any changes
+          you make to your passport. Here are the details:
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            borderRadius: '8px',
+            border: 'solid 2px rgba(255,255,255, 0.2)',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            alignItems: 'center',
+            padding: '8px 12px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '0 12px',
+              flex: 1,
+              flexWrap: 'wrap',
+              width: '100%',
+            }}
+          >
+            <div style={{ fontSize: '0.8em' }}>Device signer address</div>
+            <div style={{ fontSize: '1em', flex: 1 }}>
+              {renderAddress(signingAddress as `0x${string}`)}
+            </div>
+            {words.length === 12 && (
+              <div
+                style={{
+                  marginTop: '8px',
+                  display: 'grid',
+                  width: '100%',
+                  flexWrap: 'wrap',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 8,
+                }}
+              >
+                {words.map((word: string, idx: number) => (
+                  <div key={`word-${idx}`}>{word}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div style={{ fontWeight: 'normal' }}>
+          Click the 'Confirm' button to accept this device key and get started.
+        </div>
+        <hr
+          style={{
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            width: '100%',
+            height: '1px',
+            border: 0,
+          }}
+        />
+        <button
+          style={{
+            borderRadius: '10px',
+            backgroundColor: '#FFFFFF',
+            color: '#4292F1',
+            lineHeight: '22px',
+            padding: '13px 0',
+          }}
+          onClick={() => {
+            onConfirm && onConfirm();
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            <div>Confirm New Device Key</div>
+            {readyState === 'loading' && (
+              <StyledSpinner color="#4292F1" size={12} width={1.5} />
+            )}
+            {readyState === 'error' && <ErrorIcon />}
+          </div>
+        </button>
+      </div>
     </div>
   );
 }

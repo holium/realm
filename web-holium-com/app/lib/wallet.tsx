@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import { createWalletClient, custom, recoverPublicKey } from 'viem';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { generateMnemonic, english } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
 import { Network, Alchemy } from 'alchemy-sdk';
 
@@ -436,5 +436,87 @@ export async function addNFT(
     },
   });
 
+  return response.json();
+}
+
+export function generateDeviceWallet() {
+  const mnemonic = generateMnemonic(english);
+  const wallet = Wallet.fromMnemonic(mnemonic);
+  return { mnemonic, address: wallet.address };
+}
+
+export async function createDeviceKey(
+  shipUrl: string,
+  entity: string,
+  mnemonic: string
+) {
+  const wallet = Wallet.fromMnemonic(mnemonic);
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata: any = await response.json();
+  console.log('raw metadata => %o', metadata);
+
+  let val = metadata['pki-state']['address-to-entity'].FILL_IN;
+  metadata['pki-state']['address-to-entity'] = {
+    [wallet.address]: val,
+  };
+
+  let nonce = metadata['pki-state']['address-to-nonce'].FILL_IN;
+  metadata['pki-state']['address-to-nonce'] = {
+    [wallet.address]: nonce,
+  };
+
+  metadata['pki-state']['entity-to-addresses'][val] = [wallet.address];
+
+  metadata['sig-chain-settings']['signing-key'] = wallet.address;
+  metadata['timestamp'] = Number(new Date().getTime());
+
+  // const root = generateEpochPassportNode(entity, signingPublicKey);
+  const data_string = JSON.stringify(metadata);
+  const calculated_hash = await ethers.utils.sha256(
+    ethers.utils.toUtf8Bytes(data_string)
+  );
+  const signed_hash = await wallet.signMessage(calculated_hash);
+  const root_node_link = {
+    data: data_string,
+    hash: calculated_hash,
+    'signature-of-hash': signed_hash,
+    'link-type': 'PASSPORT_ROOT',
+    'wallet-source': 'device',
+  };
+
+  console.log('entity: %o', entity);
+  console.log('wallet address: %o', wallet.address);
+  console.log(data_string);
+  console.log('calculated hash: %o', calculated_hash);
+  console.log('signed hash: %o', signed_hash);
+  console.log('root_node_link: %o', root_node_link);
+  console.log(
+    'final payload: %o',
+    JSON.stringify({
+      'add-link': root_node_link,
+    })
+  );
+
+  // attempt to post payload to ship
+  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  response = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({
+      'add-link': root_node_link,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   return response.json();
 }

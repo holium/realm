@@ -45,11 +45,14 @@ import {
   RenderWorkflowLinkDeviceKeyStep,
   RenderWorkflowLinkRootStep,
   RenderWorkflowNoneState,
+  RenderGetStartedStep,
+  PageReadyState,
 } from './workflow';
 
 import {
   CloseIcon,
   CopyIcon,
+  ErrorIcon,
   PlusIcon,
   ProfileViewIcon,
   SmallPlusIcon,
@@ -64,7 +67,9 @@ import {
   addKey,
   addNFT,
   addWalletAddress,
+  createDeviceKey,
   createEpochPassportNode,
+  generateDeviceWallet,
   generateWalletAddress,
   walletFromKey,
 } from '@/app/lib/wallet';
@@ -642,48 +647,15 @@ function PassportEditor({ passport }: PassportEditorProps) {
   }, [currentPassport['default-address']]);
 
   useEffect(() => {
-    // keep an eye on this call, looks like the 3 wallets we are interested in. metamask
-    // setup the initial wallet state of the page before rendering anything
-    if (currentPassport.chain.length === 0) {
-      // if we have no links in the chain, the user will have to start by connecting
-      //   a wallet and creating the root/device keys
-
-      // the only way this would exist is during testing, when you delete your entire
-      //  chain for testing purposes. unless we build out a feature that allows you
-      //  to restart the process from scratch
-      localStorage.removeItem('/holium/realm/passport/device-signing-key');
-
-      setPassportState('passport-not-found');
-    } else if (currentPassport.chain.length === 1) {
-      localStorage.removeItem('/holium/realm/passport/device-signing-key');
-
-      setPassportState('device-signing-key-not-found');
-    } else if (currentPassport.chain.length >= 2) {
-      const deviceKey = localStorage.getItem(
-        '/holium/realm/passport/device-signing-key'
-      );
-      if (!deviceKey) {
-        console.error(
-          'invalid passport state. passport chain has more than two links with no device signing key found'
-        );
-      }
-      setPassportState('passport-ready');
+    const deviceKey = localStorage.getItem(
+      '/holium/realm/passport/device-signing-key'
+    );
+    if (currentPassport.chain.length === 0 && !deviceKey) {
+      // show the Get Started popup
+      setWorkflowStep('new-device');
+      passportWorkflow.current.showModal();
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (currentPassport.addresses) {
-  //     currentPassport.addresses.map((wallet, idx) => {
-  //       alchemy.nft
-  //         .getNftsForOwner(wallet.address)
-  //         .then((response: OwnedNftsResponse) => {
-  //           setNFTs([...response.ownedNfts]);
-  //         });
-  //     });
-  //   } else {
-  //     setNFTs([]);
-  //   }
-  // }, [passport['default-address'], currentPassport.addresses]);
 
   console.log('rendering workflow step: %o', workflowStep);
 
@@ -1331,7 +1303,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
             backgroundColor: '#4292F1',
             color: '#ffffff',
           }}
-          open={workflowStep !== 'none'}
         >
           <div
             style={{
@@ -1340,6 +1311,15 @@ function PassportEditor({ passport }: PassportEditorProps) {
               // gap: 8,
             }}
           >
+            {workflowStep === 'new-device' &&
+              RenderWorkflowNewDeviceStep({
+                state: {
+                  currentStep: workflowStep,
+                  passport: passport,
+                },
+                onNextWorkflowStep,
+                onCloseWorkflow,
+              })}
             {workflowStep === 'welcome' &&
               RenderWorkflowInitializeStep({
                 state: {
@@ -1521,13 +1501,22 @@ function PassportEditor({ passport }: PassportEditorProps) {
 // @ts-ignore
 export default function Home() {
   const [passport, setPassport] = useState<PassportProfile | null>(null);
+  const [pageState, setPageState] = useState<
+    'none' | 'get-started' | 'edit-passport'
+  >('get-started');
+  const [readyState, setReadyState] = useState<PageReadyState>('ready');
+  const [lastError, setLastError] = useState<string>('');
+  const [deviceWallet, setDeviceWallet] = useState<{
+    mnemonic: string;
+    address: string;
+  } | null>(null);
 
   useEffect(() => {
     // get our passport from the publicly facing ship API. this is
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${shipUrl}/~/scry/profile/our.json`, {
+    fetch(`${shipUrl}/passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -1550,8 +1539,18 @@ export default function Home() {
             }
           }
         }
-        console.log('setting passport => %o', passport);
+        const deviceKey = localStorage.getItem(
+          '/holium/realm/passport/device-signing-key'
+        );
         setPassport(passport);
+        if (passport.chain.length === 0 && !deviceKey) {
+          const { mnemonic, address } = generateDeviceWallet();
+          setDeviceWallet({ mnemonic, address });
+          setPageState('get-started');
+        } else {
+          console.log('setting passport => %o', passport);
+          setPageState('edit-passport');
+        }
       })
       .catch((e) => {
         console.error(e);
@@ -1559,23 +1558,115 @@ export default function Home() {
       });
   }, []);
 
-  console.log('rendering passport => %o', passport);
   return (
     <>
-      {passport ? (
-        <WagmiConfig config={wagmiConfig}>
-          <div
-            style={{
-              paddingTop: '48px',
-              paddingBottom: '48px',
-            }}
-          >
-            <PassportEditor passport={passport} />
-          </div>
-        </WagmiConfig>
+      {passport && pageState === 'edit-passport' ? (
+        <>
+          <WagmiConfig config={wagmiConfig}>
+            <div
+              style={{
+                paddingTop: '48px',
+                paddingBottom: '48px',
+              }}
+            >
+              <PassportEditor passport={passport} />
+            </div>
+          </WagmiConfig>
+          <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+        </>
       ) : null}
-
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+      {deviceWallet && pageState === 'get-started' && (
+        <div
+          style={{
+            display: 'flex',
+            width: '100%',
+            height: '100vh',
+            minHeight: '600px',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <dialog
+            style={{
+              borderRadius: '24px',
+              padding: '12px',
+              width: '420px',
+              minWidth: '420px',
+              backgroundColor: '#4292F1',
+              color: '#ffffff',
+            }}
+            open={true}
+          >
+            <>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <>
+                  {RenderGetStartedStep({
+                    signingAddress: deviceWallet.address,
+                    mnemonic: deviceWallet.mnemonic,
+                    readyState,
+                    onConfirm: () => {
+                      setReadyState('loading');
+                      console.log('onConfirm called');
+                      createDeviceKey(shipUrl, shipName, deviceWallet.mnemonic)
+                        .then((response: PassportProfile) => {
+                          console.log(response);
+                          if (response.addresses.length > 0) {
+                            localStorage.setItem(
+                              '/holium/realm/passport/device-signing-key',
+                              response.addresses[0].address
+                            );
+                            setReadyState('ready');
+                            setPageState('edit-passport');
+                          } else {
+                            console.warn(
+                              'warning: createDevice call succeeded. but no address found in response'
+                            );
+                          }
+                        })
+                        .catch((e) => {
+                          console.error(e);
+                          setLastError(
+                            'An error occurred adding the device to your passport.'
+                          );
+                          setReadyState('error');
+                        });
+                    },
+                  })}
+                  {/* {readyState === 'error' && (
+                    <div
+                      style={{
+                        borderRadius: '8px',
+                        backgroundColor: '#ffffff',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          width: '100%',
+                          gap: 8,
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(255,110,110, 0.25)',
+                          color: '#FF6E6E',
+                          padding: '8px 0',
+                        }}
+                      >
+                        <ErrorIcon />
+                        {lastError}
+                      </div>
+                    </div>
+                  )} */}
+                </>
+              </div>
+            </>
+          </dialog>
+        </div>
+      )}
     </>
   );
 }
