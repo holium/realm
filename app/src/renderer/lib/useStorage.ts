@@ -69,7 +69,7 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
       const fileName = fileParts.slice(0, -1);
       const fileExtension = fileParts.pop();
 
-      const key = encodeURIComponent(
+      const key = encodeURI(
         `${window.ship}/${moment().unix()}-${fileName}.${fileExtension}`
       );
       const params = {
