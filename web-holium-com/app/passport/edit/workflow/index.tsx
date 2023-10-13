@@ -34,8 +34,8 @@ export interface PassportWorkflowState {
   readyState?: WorkflowStepReadyState;
   lastError?: any;
   passport: PassportProfile;
-  walletAddress?: `0x${string}`;
-  deviceSigningKey?: `0x${string}`;
+  walletAddress?: string;
+  deviceSigningKey?: string;
 }
 
 interface PassportWorkflowProps {
@@ -641,92 +641,98 @@ export function RenderWorkflowLinkAddressStep({
     renderState.readyState
   );
   return (
-    <div
+    <dialog
+      id="passportWorkflowDialog"
+      open={true}
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        color: '#FFFFFF',
-        borderRadius: '16px',
-        backgroundColor: '#4292F1',
+        borderRadius: '24px',
         padding: '12px',
-        gap: 12,
+        width: '400px',
+        minWidth: '400px',
+        backgroundColor: '#4292F1',
+        color: '#ffffff',
       }}
     >
       <div
         style={{
           display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        <PassportIcon />
-        <div
-          style={{
-            marginLeft: '12px',
-            fontWeight: 450,
-            fontSize: '1.2em',
-            flex: 1,
-          }}
-        >
-          Add address
-        </div>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setRenderState({ readyState: 'ready', lastError: undefined });
-            onCloseWorkflow && onCloseWorkflow();
-          }}
-        >
-          <CloseIcon />
-        </button>
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          borderRadius: '38px',
-          border: 'solid 2px rgba(255,255,255, 0.2)',
-          backgroundColor: 'rgba(255,255,255, 0.2)',
-          alignItems: 'center',
-          padding: '8px 12px',
-          // lineHeight: '34px',
+          flexDirection: 'column',
+          // gap: 8,
         }}
       >
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '0 12px',
-            flex: 1,
+            color: '#FFFFFF',
+            borderRadius: '16px',
+            backgroundColor: '#4292F1',
+            padding: '12px',
+            gap: 12,
           }}
         >
-          <div style={{ fontSize: '0.8em' }}>Wallet address</div>
-          <div style={{ fontSize: '1em', flex: 1 }}>
-            {renderAddress(state.walletAddress)}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <PassportIcon />
+            <div
+              style={{
+                marginLeft: '12px',
+                fontWeight: 450,
+                fontSize: '1.2em',
+                flex: 1,
+              }}
+            >
+              Add address
+            </div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setRenderState({ readyState: 'ready', lastError: undefined });
+                onCloseWorkflow && onCloseWorkflow();
+              }}
+            >
+              <CloseIcon />
+            </button>
           </div>
-        </div>
-        <CheckIcon />
-      </div>
-      <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
-        You’ve connected the wallet address listed above. If this is the correct
-        address, confirm below and it will add this address to your Passport.
-      </div>
-      <div style={{ fontWeight: 450, fontSize: '0.9em' }}>
-        Note: This new address will be signed using your device signing key.
-      </div>
-      <hr
-        style={{
-          backgroundColor: 'rgba(255,255,255, 0.2)',
-          width: '100%',
-          height: '1px',
-          border: 0,
-          // opacity: '10%',
-        }}
-      />
-      {renderState.lastError && (
-        <>
-          <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
-            {renderState.lastError.toString()}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              borderRadius: '38px',
+              border: 'solid 2px rgba(255,255,255, 0.2)',
+              backgroundColor: 'rgba(255,255,255, 0.2)',
+              alignItems: 'center',
+              padding: '8px 12px',
+              // lineHeight: '34px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '0 12px',
+                flex: 1,
+              }}
+            >
+              <div style={{ fontSize: '0.8em' }}>Wallet address</div>
+              <div style={{ fontSize: '1em', flex: 1 }}>
+                {renderAddress(state.walletAddress as `0x${string}`)}
+              </div>
+            </div>
+            <CheckIcon />
+          </div>
+          <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
+            You’ve connected the wallet address listed above. If this is the
+            correct address, confirm below and it will add this address to your
+            Passport.
+          </div>
+          <div style={{ fontWeight: 450, fontSize: '0.9em' }}>
+            Note: This new address will be signed using your device signing key.
           </div>
           <hr
             style={{
@@ -737,45 +743,61 @@ export function RenderWorkflowLinkAddressStep({
               // opacity: '10%',
             }}
           />
-        </>
-      )}
-      <button
-        style={{
-          borderRadius: '10px',
-          backgroundColor: '#FFFFFF',
-          color: '#4292F1',
-          lineHeight: '22px',
-          padding: '13px 0',
-        }}
-        onClick={() => {
-          setRenderState({ readyState: 'loading' });
-          onNextWorkflowStep(state)
-            .then(() => setRenderState({ readyState: 'ready' }))
-            .catch((e) => {
-              console.error('error: %o', e);
-              setRenderState({
-                readyState: 'error',
-                lastError: e,
-              });
-            });
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-        >
-          <div>Sign and add key</div>
-          {renderState.readyState === 'loading' && (
-            <StyledSpinner color="#4292F1" size={12} width={1.5} />
+          {renderState.lastError && (
+            <>
+              <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+                {renderState.lastError.toString()}
+              </div>
+              <hr
+                style={{
+                  backgroundColor: 'rgba(255,255,255, 0.2)',
+                  width: '100%',
+                  height: '1px',
+                  border: 0,
+                  // opacity: '10%',
+                }}
+              />
+            </>
           )}
+          <button
+            style={{
+              borderRadius: '10px',
+              backgroundColor: '#FFFFFF',
+              color: '#4292F1',
+              lineHeight: '22px',
+              padding: '13px 0',
+            }}
+            onClick={() => {
+              setRenderState({ readyState: 'loading' });
+              onNextWorkflowStep(state)
+                .then(() => setRenderState({ readyState: 'ready' }))
+                .catch((e) => {
+                  console.error('error: %o', e);
+                  setRenderState({
+                    readyState: 'error',
+                    lastError: e,
+                  });
+                });
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <div>Sign and add key</div>
+              {renderState.readyState === 'loading' && (
+                <StyledSpinner color="#4292F1" size={12} width={1.5} />
+              )}
+            </div>
+          </button>
         </div>
-      </button>
-    </div>
+      </div>
+    </dialog>
   );
 }
 

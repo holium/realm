@@ -442,10 +442,18 @@ export async function addNFT(
 export function generateDeviceWallet() {
   const mnemonic = generateMnemonic(english);
   const wallet = Wallet.fromMnemonic(mnemonic);
-  return { mnemonic, address: wallet.address };
+  return { mnemonic, address: wallet.address, privateKey: wallet.privateKey };
 }
 
-export async function createDeviceKey(
+/**
+ * Add a new device (wallet / address) to the ship as a PASSPORT_ROOT.
+ *
+ * @param shipUrl
+ * @param entity
+ * @param mnemonic
+ * @returns
+ */
+export async function addDevice(
   shipUrl: string,
   entity: string,
   mnemonic: string
@@ -463,6 +471,15 @@ export async function createDeviceKey(
   );
   const metadata: any = await response.json();
   console.log('raw metadata => %o', metadata);
+
+  // if the link-id returned from the API is not PASSPORT_ROOT, something
+  //   is severely wrong
+  if (!(metadata['link-id'] === 'PASSPORT_ROOT')) {
+    console.error(
+      'error: adding new device, but template block is not type PASSPORT_ROOT'
+    );
+    return;
+  }
 
   let val = metadata['pki-state']['address-to-entity'].FILL_IN;
   metadata['pki-state']['address-to-entity'] = {
@@ -490,7 +507,7 @@ export async function createDeviceKey(
     hash: calculated_hash,
     'signature-of-hash': signed_hash,
     'link-type': 'PASSPORT_ROOT',
-    'wallet-source': 'device',
+    'wallet-source': 'account',
   };
 
   console.log('entity: %o', entity);
@@ -518,5 +535,97 @@ export async function createDeviceKey(
       'Content-Type': 'application/json',
     },
   });
+  return response.json();
+}
+
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
+
+/**
+ * Add a new signed wallet / address to the ship as a SIGNED_KEY_ADD.
+ *
+ * @param shipUrl
+ * @param entity
+ * @param mnemonic
+ * @returns
+ */
+export async function addWallet(
+  shipUrl: string,
+  entity: string,
+  deviceSigningKey: string,
+  wallet: any,
+  walletName: string,
+  walletAddress: string
+) {
+  const deviceWallet = new Wallet(deviceSigningKey);
+
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata = await response.json();
+
+  const nonce = getRandomInt(1, 1000);
+  const timestamp = Number(new Date().getTime());
+  const message = `${entity} owns ${walletAddress}, ${nonce}, ${timestamp}`;
+  const keysig = await wallet.signMessage({
+    account: walletAddress,
+    message: message,
+  });
+
+  const payload = {
+    'link-metadata': {
+      ...metadata,
+      // timestamp: Number(new Date().getTime()),
+      'signing-address': deviceWallet.address,
+      'link-id': 'SIGNED_KEY_ADD',
+      'from-entity': entity,
+    },
+    'link-data': {
+      address: walletAddress,
+      'address-type': walletName,
+      'entity-name': entity,
+      'key-signature': keysig,
+      timestamp: timestamp,
+      nonce: nonce,
+    },
+  };
+
+  // const root = generateAddressAddKey(entity, deviceSigningKey, walletAddress);
+  const data_string = JSON.stringify(payload);
+  const calculated_hash = await ethers.utils.sha256(
+    ethers.utils.toUtf8Bytes(data_string)
+  );
+  const signed_hash = await deviceWallet.signMessage(calculated_hash);
+
+  const root_node_link = {
+    data: data_string,
+    hash: calculated_hash,
+    'signature-of-hash': signed_hash,
+    'link-type': 'SIGNED_KEY_ADD',
+  };
+  // console.log('add-link payload => %o', root_node_link);
+  // attempt to post payload to ship
+  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  response = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({
+      'add-link': root_node_link,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
   return response.json();
 }

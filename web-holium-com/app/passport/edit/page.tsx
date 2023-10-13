@@ -63,11 +63,11 @@ import { SocialButton } from '@/app/assets/styled';
 import { isProd, shipName, shipUrl } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
+  addDevice,
   addDeviceSigningKey,
-  addKey,
   addNFT,
+  addWallet,
   addWalletAddress,
-  createDeviceKey,
   createEpochPassportNode,
   generateDeviceWallet,
   generateWalletAddress,
@@ -271,55 +271,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
       onConnect({ address, connector, isReconnected }) {
         console.log('Connected', { address, connector, isReconnected });
         if (!isReconnected) {
-          switch (passportState) {
-            case 'passport-not-found':
-              setWalletAddress(address);
-              setWorkflowStep('confirm-passport-root');
-              passportWorkflow.current?.showModal();
-              break;
-
-            case 'device-signing-key-not-found':
-              setWalletAddress(
-                currentPassport['default-address'] as `0x${string}`
-              );
-              const { walletAddress, privateKey } = generateWalletAddress();
-              setDeviceWalletAddress(walletAddress as `0x${string}`);
-              setDeviceSigningKey(privateKey);
-              setWorkflowStep('confirm-device-signing-key');
-              break;
-
-            case 'passport-ready':
-              console.log(
-                'wallet connected. passport-ready. adding address...'
-              );
-              // is this a new wallet being added?
-              const idx = currentPassport.addresses.findIndex(
-                (item) => item.address === address
-              );
-              if (idx === -1) {
-                setWalletAddress(address);
-                setDeviceWalletAddress(address);
-                setWorkflowStep('confirm-add-address');
-                passportWorkflow.current?.showModal();
-              } else {
-                console.warn('%o found in passport. skipping...');
-              }
-              break;
-          }
+          setWalletAddress(address);
+          setWorkflowStep('confirm-add-address');
         }
       },
       onDisconnect() {
         console.log('onDisconnect called');
-        // switch (passportState) {
-        //   case 'passport-not-found':
-        //     passportWorkflow.current?.showModal();
-        //     break;
-        // }
-        switch (workflowStep) {
-          case 'confirm-device-signing-key':
-            passportWorkflow.current?.showModal();
-            break;
-        }
       },
     });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -438,95 +395,50 @@ function PassportEditor({ passport }: PassportEditorProps) {
       isDisconnected,
     ]);
     return new Promise<void>((resolve, reject) => {
-      switch (state.currentStep) {
-        case 'welcome':
-          console.log('open connect');
-          if (isConnected) {
-            disconnect();
-          }
-          open({
-            view: 'Connect',
-            featuredWalletIds: [Object.keys(supportedWallets)],
-          })
-            .then(() => {
-              console.log([
-                isLoading,
-                address,
-                connector,
-                isConnected,
-                isDisconnected,
-              ]);
-              passportWorkflow.current?.close();
-            })
-            .then(() => resolve())
-            .catch((err) => {
-              console.log('caught error. rejecting... %o', err);
-              reject(err);
-            });
-          break;
-
-        case 'confirm-passport-root':
-          if (isConnected && connector && address) {
+      const deviceSigningKey = localStorage.getItem(
+        '/holium/realm/passport/device-signing-key'
+      );
+      if (!deviceSigningKey) {
+        console.error('no device private key found');
+        return;
+      }
+      if (walletAddress && walletClient) {
+        console.log('account => %o', walletClient.account);
+        console.log('getting provider...');
+        connector
+          ?.getProvider()
+          .then((provider) => {
+            console.log('provider => %o', provider);
+            let walletProviderName: string = '';
+            // if signer information available, use this to get wallet name
+            if (provider.isMetaMask) {
+              walletProviderName = 'metamask';
+            } else {
+              walletProviderName = provider.signer.session.peer.metadata.name
+                .split(' ')[0]
+                .toLowerCase();
+            }
             console.log(
-              'creating passport root for %o...',
-              address,
-              walletClient,
-              connector
-            ),
-              createEpochPassportNode(
-                shipName,
-                shipUrl,
-                connector.name.split(' ')[0].toLowerCase(),
-                walletClient,
-                address
-              )
-                .then((result) => {
-                  console.log('createEpochPassportNode response => %o', result);
-                  if (result.term === 'poke-fail') {
-                    reject('error creating passport root');
-                    return;
-                  }
-                  console.log(
-                    `wallet addresses: [${address}, ${walletClient?.account.address}]`
-                  );
-                  setCurrentPassport(result);
-                  // we already have a passport root; therefore generate a new device key
-                  //  and set the workflow step to 2
-                  const { walletAddress, privateKey } = generateWalletAddress();
-                  setDeviceWalletAddress(walletAddress as `0x${string}`);
-                  setDeviceSigningKey(privateKey);
-                  setWorkflowStep('confirm-device-signing-key');
-                  resolve();
-                })
-                .catch((e) => {
-                  console.error(e);
-                  reject(e);
-                });
-          }
-          break;
-
-        case 'confirm-device-signing-key':
-          if (address && deviceWalletAddress) {
-            addDeviceSigningKey(
-              shipName,
+              'adding new address (walletClient, walletProvider) => %o...',
+              [walletClient, walletProviderName]
+            );
+            addWallet(
               shipUrl,
-              walletClient as WalletClient,
-              address,
-              deviceWalletAddress
+              shipName,
+              deviceSigningKey,
+              walletClient,
+              walletProviderName,
+              walletAddress
             )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
-                console.log('addDeviceSigningKey response => %o', response);
+                console.log('response => %o', response);
                 if (response.term === 'poke-fail') {
                   reject('error adding device key');
                   return;
                 }
+                setWorkflowStep('none');
                 setCurrentPassport(response);
-                localStorage.setItem(
-                  '/holium/realm/passport/device-signing-key',
-                  deviceSigningKey as `0x${string}`
-                );
-                setPassportState('passport-ready');
                 passportWorkflow.current?.close();
                 resolve();
               })
@@ -534,66 +446,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 console.error(e);
                 reject(e);
               });
-          } else {
-            console.error('unexpected address and/or device signing key state');
-            reject('unexpected address and/or device signing key state');
-          }
-          break;
-
-        case 'confirm-add-address':
-          const devicePrivateKey = localStorage.getItem(
-            '/holium/realm/passport/device-signing-key'
-          );
-          if (!devicePrivateKey) {
-            console.error('no device private key found');
-            return;
-          }
-          if (walletAddress) {
-            console.log('account => %o', walletClient?.account);
-
-            console.log('getting provider...');
-            connector
-              ?.getProvider()
-              .then((provider) => {
-                console.log('provider => %o', provider);
-                const walletProviderName =
-                  provider.signer.session.peer.metadata.name
-                    .split(' ')[0]
-                    .toLowerCase();
-                console.log(
-                  'adding new address (walletClient, walletProvider) => %o...',
-                  [walletClient, provider.signer.session.peer.metadata.name]
-                );
-                addWalletAddress(
-                  shipName,
-                  shipUrl,
-                  devicePrivateKey as `0x${string}`,
-                  walletAddress,
-                  walletProviderName
-                )
-                  // the wallet address of secret/hidden wallet that now lives on this device
-                  .then((response: any) => {
-                    console.log('response => %o', response);
-                    if (response.term === 'poke-fail') {
-                      reject('error adding device key');
-                      return;
-                    }
-                    setCurrentPassport(response);
-                    passportWorkflow.current?.close();
-                    resolve();
-                  })
-                  .catch((e) => {
-                    console.error(e);
-                    reject(e);
-                  });
-              })
-              .catch((e) => console.error(e));
-          } else {
-            console.error(
-              'unexpected wallet address and/or device signing key'
-            );
-          }
-          break;
+          })
+          .catch((e) => console.error(e));
+      } else {
+        console.error('unexpected wallet address and/or device signing key');
       }
     });
   };
@@ -601,33 +457,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const onAddAddressClick = (_e: any) => {
     console.log('onAddressClick => %o', currentPassport.chain);
 
-    switch (passportState) {
-      case 'passport-not-found':
-        setWorkflowStep('welcome');
-        passportWorkflow.current?.showModal();
-        break;
-
-      case 'device-signing-key-not-found':
-        setWalletAddress(currentPassport['default-address'] as `0x${string}`);
-        const { walletAddress, privateKey } = generateWalletAddress();
-        setDeviceWalletAddress(walletAddress as `0x${string}`);
-        setDeviceSigningKey(privateKey);
-        setWorkflowStep('confirm-device-signing-key');
-        passportWorkflow.current?.showModal();
-        break;
-
-      case 'passport-ready':
-        console.log('passport-ready. launching wallet picker...');
-        if (isConnected) {
-          console.log('disconnecting first...');
-          disconnect();
-        }
-        open({
-          view: 'Connect',
-          featuredWalletIds: [Object.keys(supportedWallets)],
-        });
-        break;
-    }
+    open({
+      view: 'Connect',
+      featuredWalletIds: [Object.keys(supportedWallets)],
+    });
   };
 
   useEffect(() => {
@@ -645,17 +478,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
         });
     }
   }, [currentPassport['default-address']]);
-
-  useEffect(() => {
-    const deviceKey = localStorage.getItem(
-      '/holium/realm/passport/device-signing-key'
-    );
-    if (currentPassport.chain.length === 0 && !deviceKey) {
-      // show the Get Started popup
-      setWorkflowStep('new-device');
-      passportWorkflow.current.showModal();
-    }
-  }, []);
 
   console.log('rendering workflow step: %o', workflowStep);
 
@@ -1066,7 +888,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {currentPassport.addresses?.length > 0 ? (
+              {currentPassport.addresses?.filter(
+                (entry) => !(entry.wallet === 'account')
+              ).length > 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -1077,12 +901,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   <>
                     {currentPassport.addresses
                       ?.filter((entry, index) => {
-                        console.log(entry);
+                        console.log('address => %o', entry);
                         console.log(
                           'wallet => %o',
                           supportedWallets[entry.wallet]
                         );
-                        return index !== 1;
+                        return !(entry.wallet === 'account');
                       })
                       .map((entry, idx) => (
                         <div
@@ -1243,7 +1067,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 >
                   <>
                     {currentPassport.addresses
-                      ?.filter((entry, idx) => idx === 1)
+                      ?.filter((entry, idx) => entry.wallet === 'account')
                       .map((entry, idx) => (
                         <div
                           key={`address-${idx}`}
@@ -1289,82 +1113,21 @@ function PassportEditor({ passport }: PassportEditorProps) {
       {/* <dialog id="editAvatarMenu" ref={editAvatarMenu}>
         some content
       </dialog> */}
-      {workflowStep === 'none' ? (
-        RenderWorkflowNoneState()
-      ) : (
-        <dialog
-          id="passportWorkflowDialog"
-          ref={passportWorkflow}
-          style={{
-            borderRadius: '24px',
-            padding: '12px',
-            width: '400px',
-            minWidth: '400px',
-            backgroundColor: '#4292F1',
-            color: '#ffffff',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              // gap: 8,
-            }}
-          >
-            {workflowStep === 'new-device' &&
-              RenderWorkflowNewDeviceStep({
-                state: {
-                  currentStep: workflowStep,
-                  passport: passport,
-                },
-                onNextWorkflowStep,
-                onCloseWorkflow,
-              })}
-            {workflowStep === 'welcome' &&
-              RenderWorkflowInitializeStep({
-                state: {
-                  currentStep: workflowStep,
-                  passport: passport,
-                },
-                onNextWorkflowStep,
-                onCloseWorkflow,
-              })}
-            {workflowStep === 'confirm-passport-root' &&
-              RenderWorkflowLinkRootStep({
-                state: {
-                  currentStep: workflowStep,
-                  walletAddress: walletAddress as `0x${string}`,
-                  passport: passport,
-                },
-                onNextWorkflowStep,
-                onCloseWorkflow,
-              })}
-            {workflowStep === 'confirm-device-signing-key' &&
-              RenderWorkflowLinkDeviceKeyStep({
-                state: {
-                  currentStep: workflowStep,
-                  walletAddress: walletAddress as `0x${string}`,
-                  deviceSigningKey: deviceSigningKey as `0x${string}`,
-                  passport: passport,
-                },
-                onNextWorkflowStep,
-                onCloseWorkflow,
-              })}
-            {workflowStep === 'confirm-add-address' &&
-              RenderWorkflowLinkAddressStep({
-                state: {
-                  currentStep: workflowStep,
-                  walletAddress: walletAddress as `0x${string}`,
-                  deviceSigningKey: deviceSigningKey as `0x${string}`,
-                  passport: passport,
-                },
-                onNextWorkflowStep,
-                onCloseWorkflow,
-              })}
-            {/* {workflowStep === 2 && renderStep3()} */}
-          </div>
-        </dialog>
-      )}
+      {!(workflowStep === 'confirm-add-address') && RenderWorkflowNoneState()}
+      {workflowStep === 'confirm-add-address' &&
+        RenderWorkflowLinkAddressStep({
+          state: {
+            currentStep: 'confirm-add-address',
+            walletAddress: walletAddress as `0x${string}`,
+            deviceSigningKey:
+              localStorage.getItem(
+                '/holium/realm/passport/device-signing-key'
+              ) || '',
+            passport: passport,
+          },
+          onNextWorkflowStep,
+          onCloseWorkflow,
+        })}
       <dialog
         id="nftPicker"
         ref={nftPicker}
@@ -1509,6 +1272,7 @@ export default function Home() {
   const [deviceWallet, setDeviceWallet] = useState<{
     mnemonic: string;
     address: string;
+    privateKey: string;
   } | null>(null);
 
   useEffect(() => {
@@ -1544,8 +1308,8 @@ export default function Home() {
         );
         setPassport(passport);
         if (passport.chain.length === 0 && !deviceKey) {
-          const { mnemonic, address } = generateDeviceWallet();
-          setDeviceWallet({ mnemonic, address });
+          const { mnemonic, address, privateKey } = generateDeviceWallet();
+          setDeviceWallet({ mnemonic, address, privateKey });
           setPageState('get-started');
         } else {
           console.log('setting passport => %o', passport);
@@ -1612,13 +1376,13 @@ export default function Home() {
                     onConfirm: () => {
                       setReadyState('loading');
                       console.log('onConfirm called');
-                      createDeviceKey(shipUrl, shipName, deviceWallet.mnemonic)
+                      addDevice(shipUrl, shipName, deviceWallet.mnemonic)
                         .then((response: PassportProfile) => {
                           console.log(response);
                           if (response.addresses.length > 0) {
                             localStorage.setItem(
                               '/holium/realm/passport/device-signing-key',
-                              response.addresses[0].address
+                              deviceWallet.privateKey
                             );
                             setReadyState('ready');
                             setPageState('edit-passport');
