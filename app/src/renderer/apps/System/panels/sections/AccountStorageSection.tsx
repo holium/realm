@@ -40,13 +40,14 @@ export const AccountStorageSection = ({ account }: Props) => {
       });
   }, [token, ships, account.serverId]);
 
-  const onClickRestartStorage = () => {
+  const onClickRestartStorage = async () => {
     const selectedShip = ships.find((ship) => ship.patp === account.serverId);
 
     if (!token) return;
     if (!selectedShip) return;
 
-    return thirdEarthApi.setStorage(token, selectedShip.id.toString());
+    await thirdEarthApi.setStorage(token, selectedShip.id.toString());
+    return;
   };
 
   return (
@@ -61,6 +62,7 @@ export const AccountStorageSection = ({ account }: Props) => {
             used: Number(storageInfo?.storageUsed),
             total: Number(storageInfo?.storageCapacity),
           }}
+          error={undefined}
           dataSent={{ networkUsage, minioUsage }}
           onClickRestartStorage={onClickRestartStorage}
         />
