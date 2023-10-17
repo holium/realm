@@ -1556,10 +1556,11 @@ export default function Home() {
                 flexDirection: 'column',
                 width: '400px',
                 gap: 12,
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255,110,110, 0.25)',
+                borderRadius: '8px',
+                border: 'solid 2px rgba(255,110,110, 0.25)',
+                // backgroundColor: 'rgba(255,110,110, 0.25)',
                 color: '#FF6E6E',
-                padding: '8px 8px',
+                padding: '16px 8px',
               }}
             >
               <div

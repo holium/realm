@@ -984,24 +984,39 @@ export function RenderDeviceKeyRecovery({
           }}
         >
           {words.map((word: string, idx: number) => (
-            <input
-              key={`txt-${idx}`}
-              maxLength={10}
-              style={{ height: '24px', width: '72px', textAlign: 'center' }}
-              onPaste={(event) => {
-                event.stopPropagation();
-                event.preventDefault();
-                let data = event.clipboardData || window.clipboardData;
-                let txt: string = data.getData('Text') as string;
-                console.log('txt => %o', txt.split(' '));
-                setWords(txt.split(' '));
+            <div
+              style={{
+                borderRadius: '4px',
+                border: 'solid 2px rgba(255,110,110, 0.25)',
+                textAlign: 'center',
               }}
-              value={word}
-              onChange={(e) => {
-                words[idx] = e.target.value;
-                setWords(words);
-              }}
-            ></input>
+            >
+              <input
+                key={`txt-${idx}`}
+                maxLength={10}
+                style={{
+                  fontSize: '0.8em',
+                  outline: 'none',
+                  height: '24px',
+                  width: '72px',
+                  textAlign: 'center',
+                  border: 0,
+                }}
+                onPaste={(event) => {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  let data = event.clipboardData || window.clipboardData;
+                  let txt: string = data.getData('Text') as string;
+                  console.log('txt => %o', txt.split(' '));
+                  setWords(txt.split(' '));
+                }}
+                // value={word}
+                onChange={(e) => {
+                  words[idx] = e.target.value;
+                  setWords(words);
+                }}
+              ></input>
+            </div>
           ))}
         </div>
         <div style={{ fontWeight: 'normal' }}>
@@ -1022,7 +1037,7 @@ export function RenderDeviceKeyRecovery({
             backgroundColor: '#FFFFFF',
             color: '#4292F1',
             lineHeight: '22px',
-            padding: '13px 0',
+            padding: '0px 0',
           }}
           onClick={() => {
             onConfirm && onConfirm();
