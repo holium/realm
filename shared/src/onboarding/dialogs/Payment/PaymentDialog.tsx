@@ -13,32 +13,30 @@ import { Flex, Spinner } from '@holium/design-system/general';
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { OnboardDialogTitle } from '../../components/OnboardDialog.styles';
 import { PaymentIcon } from '../../icons/PaymentIcon';
-import { ThirdEarthProduct, ThirdEarthProductType } from '../../types';
+import { ThirdEarthPeriodicity, ThirdEarthPriceOption } from '../../types';
 import { AccountInformation } from './AccountInformation';
 import { PaymentForm } from './PaymentForm';
 import { ProductCards } from './ProductCards';
 
 type Props = {
-  productType: ThirdEarthProductType;
-  products: ThirdEarthProduct[];
-  productId: number;
-  patp: string;
+  priceOptions: ThirdEarthPriceOption[];
+  periodicity: ThirdEarthPeriodicity;
+  setPeriodicity: (periodicity: ThirdEarthPeriodicity) => void;
+  patp: string | undefined;
   email: string;
   stripe: Stripe | undefined;
   stripeOptions: StripeElementsOptions | undefined;
-  setProductId: (productId: number) => void;
   onBack: () => void;
   onNext: () => Promise<boolean>;
 };
 
 const PaymentDialogPresenter = ({
-  productType,
-  products,
-  productId,
+  priceOptions,
+  periodicity,
+  setPeriodicity,
   patp,
   email,
   stripeOptions,
-  setProductId,
   onBack,
   onNext,
 }: Props) => {
@@ -84,14 +82,11 @@ const PaymentDialogPresenter = ({
         <>
           <OnboardDialogTitle>Payment</OnboardDialogTitle>
           <ProductCards
-            products={products}
-            productId={productId}
-            setProductId={setProductId}
+            priceOptions={priceOptions}
+            periodicity={periodicity}
+            setPeriodicity={setPeriodicity}
           />
-          <AccountInformation
-            patp={productType === 'planet' ? patp : undefined}
-            email={email}
-          />
+          <AccountInformation patp={patp} email={email} />
           <PaymentForm />
         </>
       }
@@ -111,14 +106,11 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
           <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
             <ProductCards
-              products={props.products}
-              productId={props.productId}
-              setProductId={props.setProductId}
+              priceOptions={props.priceOptions}
+              periodicity={props.periodicity}
+              setPeriodicity={props.setPeriodicity}
             />
-            <AccountInformation
-              patp={props.productType === 'planet' ? props.patp : undefined}
-              email={props.email}
-            />
+            <AccountInformation patp={props.patp} email={props.email} />
             <Flex justifyContent="center" alignItems="center" my={30}>
               <Spinner size={3} />
             </Flex>

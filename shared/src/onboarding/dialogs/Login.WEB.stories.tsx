@@ -70,7 +70,7 @@ export const AccountStorageDialogStory: ComponentStory<
     <AccountStorageDialog
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
-      onClickRestartStorage={() => Promise.resolve('')}
+      onClickRestartStorage={() => Promise.resolve()}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadPier={() => {}}
@@ -82,6 +82,8 @@ export const AccountStorageDialogStory: ComponentStory<
         networkUsage: 20,
         minioUsage: 30,
       }}
+      isLoading={false}
+      error={undefined}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

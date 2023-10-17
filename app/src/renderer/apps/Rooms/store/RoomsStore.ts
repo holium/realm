@@ -525,7 +525,10 @@ export class RoomsStore extends EventsEmitter {
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
         this.rooms.set(event.room.rid, newRoom);
-        if (event.room.rtype === RoomType.media) {
+        if (
+          event.room.creator === this.ourId &&
+          event.room.rtype === RoomType.media
+        ) {
           this.currentRid = event.room.rid;
         }
         break;

@@ -1,44 +1,41 @@
-import { useEffect } from 'react';
-
 import { Flex } from '@holium/design-system/general';
 
-import { ThirdEarthProduct } from '../../types/index';
+import {
+  ThirdEarthPeriodicity,
+  ThirdEarthPriceOption,
+} from '../../types/index';
 import { ProductCard } from './ProductCard';
 
 type Props = {
-  products: ThirdEarthProduct[];
-  productId: number;
-  setProductId: (productId: number) => void;
+  priceOptions: ThirdEarthPriceOption[];
+  periodicity: ThirdEarthPeriodicity;
+  setPeriodicity: (periodicity: ThirdEarthPeriodicity) => void;
 };
 
-export const ProductCards = ({ products, productId, setProductId }: Props) => {
-  const byopProduct = products.find(
-    (product) => product.product_type === 'byop-p'
-  );
+export const ProductCards = ({
+  priceOptions,
+  periodicity,
+  setPeriodicity,
+}: Props) => (
+  <Flex gap={16}>
+    {priceOptions.sort().map((priceOption) => {
+      const isMonthly = priceOption.periodicity === ThirdEarthPeriodicity.MONTH;
+      const isSelected = priceOption.periodicity === periodicity;
 
-  useEffect(() => {
-    if (byopProduct) {
-      setProductId(byopProduct.id);
-    }
-  }, [byopProduct, setProductId]);
-
-  return (
-    <Flex gap={16}>
-      {/* Assume the cheapest is monthly and the second yearly. */}
-      {products.sort().map((product, index) => (
+      return (
         <ProductCard
-          key={product.id}
-          h2Text={`$${product.subscription_price}.00`}
-          bodyText={index === 0 ? 'Monthly' : 'Yearly'}
+          key={priceOption.stripe_price_id}
+          h2Text={`$${priceOption.recurring_price}.00`}
+          bodyText={isMonthly ? 'Monthly' : 'Yearly'}
           hintText={
-            index === 0
-              ? `$${product.subscription_price * 12} yearly`
+            isMonthly
+              ? `$${priceOption.recurring_price * 12} yearly`
               : undefined
           }
-          isSelected={productId === product.id}
-          onClick={() => setProductId(product.id)}
+          isSelected={isSelected}
+          onClick={() => setPeriodicity(priceOption.periodicity)}
         />
-      ))}
-    </Flex>
-  );
-};
+      );
+    })}
+  </Flex>
+);

@@ -8,12 +8,13 @@ import {
   DownloadDialog,
   GetOnRealmDialog,
   PaymentDialog,
+  ThirdEarthPeriodicity,
   VerifyEmailDialog,
 } from '../onboarding';
 import {
   mockPatps,
   OnboardingDialogWrapper,
-  thirdEarthMockProducts,
+  thirdEarthMockPriceOptions,
 } from './util';
 
 export default {
@@ -78,10 +79,9 @@ ChooseIdDialogStory.storyName = '3. Choose ID';
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
-      productType="planet"
-      products={thirdEarthMockProducts}
-      productId={1}
-      setProductId={() => {}}
+      priceOptions={thirdEarthMockPriceOptions}
+      periodicity={ThirdEarthPeriodicity.MONTH}
+      setPeriodicity={() => {}}
       patp="~zod"
       email="admin@admin.com"
       stripe={undefined}

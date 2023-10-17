@@ -48,7 +48,47 @@ export const ContextMenu = () => {
 
   const originatingElement = mouseRef.target as HTMLElement;
   const containerId = (mouseRef.target as HTMLElement).id;
-  const contextualOptions = getOptions(containerId);
+  // climb up the DOM tree to get all possible parent element ids
+  let allIds = [];
+  let foundLast = false;
+  let currentElement = originatingElement;
+  while (!foundLast) {
+    allIds.push(currentElement.id);
+    if (currentElement.parentElement) {
+      currentElement = currentElement.parentElement;
+    } else {
+      foundLast = true;
+    }
+  }
+  allIds = allIds.filter((i) => i !== ''); // only care about parent elements that actually have an id set
+  let allOptions: ContextMenuOption[] = [];
+  for (const id of allIds) {
+    for (const opt of getOptions(id)) {
+      allOptions.push(opt);
+    }
+  }
+  // if any option is NOT a default option, then we should remove all the defaults.
+  if (
+    allOptions.find(
+      (o) =>
+        !['copy-text', 'paste-text', 'toggle-devtools'].includes(o.id || '')
+    )
+  ) {
+    allOptions = allOptions.filter(
+      (o) =>
+        !['copy-text', 'paste-text', 'toggle-devtools'].includes(o.id || '')
+    );
+  } else {
+    // default options only
+    allOptions = getOptions('A_GARBAGE_STRING_THAT_WE_WILL_NEVER_USE_AS_AN_ID');
+  }
+  // ensure no options are duplicated
+  const contextualOptions: ContextMenuOption[] = [];
+  for (const option of allOptions) {
+    if (!contextualOptions.find((o) => o.id === option.id)) {
+      contextualOptions.push(option);
+    }
+  }
   const contextualColors = getColors(containerId);
   const anchorPoint = getAnchorPoint(mouseRef, contextualOptions);
 
