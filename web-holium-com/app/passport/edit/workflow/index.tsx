@@ -951,3 +951,100 @@ export function RenderGetStartedStep({
     </div>
   );
 }
+
+export function RenderDeviceKeyRecovery({
+  readyState,
+  words,
+  setWords,
+  onConfirm,
+}: any) {
+  return (
+    <div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          padding: '12px',
+        }}
+      >
+        <div style={{ fontWeight: 'normal' }}>
+          Your device key could not be found, but there are wallet addresses
+          associated with your passport.
+        </div>
+        <div style={{ fontWeight: 'normal' }}>
+          You can recover the device address by entering the recovery phrase
+          that was generated when you first enrolled this device.
+        </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 8,
+          }}
+        >
+          {words.map((word: string, idx: number) => (
+            <input
+              key={`txt-${idx}`}
+              maxLength={10}
+              style={{ height: '24px', width: '72px', textAlign: 'center' }}
+              onPaste={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                let data = event.clipboardData || window.clipboardData;
+                let txt: string = data.getData('Text') as string;
+                console.log('txt => %o', txt.split(' '));
+                setWords(txt.split(' '));
+              }}
+              value={word}
+              onChange={(e) => {
+                words[idx] = e.target.value;
+                setWords(words);
+              }}
+            ></input>
+          ))}
+        </div>
+        <div style={{ fontWeight: 'normal' }}>
+          Click the 'Confirm' button to accept this phrase recover your device
+          key.
+        </div>
+        <hr
+          style={{
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            width: '100%',
+            height: '1px',
+            border: 0,
+          }}
+        />
+        <button
+          style={{
+            borderRadius: '10px',
+            backgroundColor: '#FFFFFF',
+            color: '#4292F1',
+            lineHeight: '22px',
+            padding: '13px 0',
+          }}
+          onClick={() => {
+            onConfirm && onConfirm();
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            <div>Confirm New Device Key</div>
+            {readyState === 'loading' && (
+              <StyledSpinner color="#4292F1" size={12} width={1.5} />
+            )}
+            {readyState === 'error' && <ErrorIcon />}
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}

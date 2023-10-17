@@ -6,7 +6,8 @@ import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import { renderAddress } from './edit/workflow';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { shipUrl } from '../lib/shared';
+import { shipUrl, supportedWallets } from '../lib/shared';
+import { WalletIcon } from '../assets/icons';
 
 interface NFTProps {
   nft: LinkedNFT;
@@ -278,7 +279,9 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 paddingBottom: '4px',
               }}
             >
-              {passport.addresses?.length > 0 ? (
+              {passport.addresses?.filter(
+                (entry) => !(entry.wallet === 'account')
+              ).length > 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -288,7 +291,14 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 >
                   <>
                     {passport.addresses
-                      ?.filter((value, index) => index !== 1)
+                      ?.filter((entry, index) => {
+                        console.log('address => %o', entry);
+                        console.log(
+                          'wallet => %o',
+                          supportedWallets[entry.wallet]
+                        );
+                        return !(entry.wallet === 'account');
+                      })
                       .map((entry, idx) => (
                         <div
                           key={`address-${idx}`}
@@ -303,14 +313,18 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                             justifyContent: 'center',
                           }}
                         >
-                          <div
+                          <img
                             style={{
                               borderRadius: '4px',
                               width: '20px',
                               height: '20px',
-                              backgroundColor: '#5482EC',
                             }}
-                          ></div>
+                            src={
+                              supportedWallets[entry.wallet]?.image_url ||
+                              undefined
+                            }
+                            alt={entry.wallet}
+                          ></img>
                           <div style={{ flex: 1, verticalAlign: 'middle' }}>
                             {renderAddress(entry.address as `0x${string}`)}
                           </div>
@@ -377,7 +391,8 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 paddingBottom: '4px',
               }}
             >
-              {passport.addresses?.length > 0 ? (
+              {passport.addresses?.filter((entry) => entry.wallet === 'account')
+                .length > 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -387,7 +402,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 >
                   <>
                     {passport.addresses
-                      ?.filter((entry, idx) => idx === 1)
+                      ?.filter((entry, idx) => entry.wallet === 'account')
                       .map((entry, idx) => (
                         <div
                           key={`address-${idx}`}
@@ -402,14 +417,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                             justifyContent: 'center',
                           }}
                         >
-                          <div
-                            style={{
-                              borderRadius: '4px',
-                              width: '20px',
-                              height: '20px',
-                              backgroundColor: '#5482EC',
-                            }}
-                          ></div>
+                          <WalletIcon />
                           <div style={{ flex: 1, verticalAlign: 'middle' }}>
                             {renderAddress(entry.address as `0x${string}`)}
                           </div>

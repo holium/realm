@@ -11,6 +11,9 @@ import {
   w3mConnectors,
   w3mProvider,
 } from '@web3modal/ethereum';
+import { InjectedConnector } from 'wagmi/connectors/injected';
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { useWeb3Modal, Web3Modal } from '@web3modal/react';
 // import {
 //   createWeb3Modal,
@@ -25,6 +28,7 @@ import {
   OwnedNftsResponse,
 } from 'alchemy-sdk';
 import { WalletClient } from 'wagmi';
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import {
   configureChains,
   createConfig,
@@ -47,6 +51,8 @@ import {
   RenderWorkflowNoneState,
   RenderGetStartedStep,
   PageReadyState,
+  PageRenderState,
+  RenderDeviceKeyRecovery,
 } from './workflow';
 
 import {
@@ -60,7 +66,13 @@ import {
 } from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
-import { isProd, shipName, shipUrl } from '@/app/lib/shared';
+import {
+  isProd,
+  shipName,
+  shipUrl,
+  supportedWalletIds,
+  supportedWallets,
+} from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDevice,
@@ -75,56 +87,55 @@ import {
 } from '@/app/lib/wallet';
 import { saveContact } from '@/app/lib/profile';
 import { useRouter } from 'next/navigation';
+import { StyledSpinner } from '@/app/components';
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
 
+const metadata = {
+  name: 'Realm Passport',
+  description: 'Realm Passport',
+  url: 'https://holium.com',
+  icons: [
+    'https://pbs.twimg.com/profile_images/1621630320796745729/H5wKemm1_400x400.jpg',
+  ],
+};
+
 const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
+
 const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors: w3mConnectors({ projectId, chains }),
+  // connectors: w3mConnectors({ projectId, chains })
+  connectors: [
+    // new MetaMaskConnector({ chains }),
+    new WalletConnectConnector({
+      chains,
+      options: { projectId, showQrModal: false, metadata },
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: 'Injected',
+        shimDisconnect: true,
+      },
+    }),
+  ],
   publicClient,
 });
+
+// const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
+// createWeb3Modal({ wagmiConfig, projectId, chains });
+// const wagmiConfig = createConfig({
+//   autoConnect: true,
+//   connectors: w3mConnectors({ projectId, chains }),
+//   publicClient,
+// });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 // Optional Config object, but defaults to demo api-key and eth-mainnet.
 const settings = {
   apiKey: 'YVJ7LV7w8esHG18rdnKSERfN_OcyJWY_', // Replace with your Alchemy API Key.
   network: Network.ETH_MAINNET, // Replace with your network.
-};
-
-type SupportedWallets = {
-  [key: string]: {
-    explorer_id: string;
-    image_id: string;
-    image_url: string;
-  };
-};
-const supportedWallets: SupportedWallets = {
-  // metamask
-  metamask: {
-    explorer_id:
-      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-    image_id: '5195e9db-94d8-4579-6f11-ef553be95100',
-    image_url:
-      'https://explorer-api.walletconnect.com/v3/logo/lg/5195e9db-94d8-4579-6f11-ef553be95100?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
-  },
-  // rainbow
-  rainbow: {
-    explorer_id:
-      '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
-    image_id: '7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500',
-    image_url:
-      'https://explorer-api.walletconnect.com/v3/logo/md/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
-  },
-  // trust
-  trust: {
-    explorer_id:
-      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
-    image_id: '0528ee7e-16d1-4089-21e3-bbfb41933100',
-    image_url:
-      'https://explorer-api.walletconnect.com/v3/logo/md/0528ee7e-16d1-4089-21e3-bbfb41933100?projectId=f8134a8b6ecfbef24cfd151795e94b5c',
-  },
 };
 
 // createWeb3Modal({
@@ -382,6 +393,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   };
 
   const onCloseWorkflow = () => {
+    setWorkflowStep('none');
     passportWorkflow.current?.close();
   };
 
@@ -413,11 +425,20 @@ function PassportEditor({ passport }: PassportEditorProps) {
             // if signer information available, use this to get wallet name
             if (provider.isMetaMask) {
               walletProviderName = 'metamask';
+            } else if (
+              provider.signer.session.peer.metadata.name.indexOf('Rainbow') !==
+              -1
+            ) {
+              walletProviderName = 'rainbow';
             } else {
               walletProviderName = provider.signer.session.peer.metadata.name
                 .split(' ')[0]
                 .toLowerCase();
             }
+            // if (!supportedWalletIds.includes(walletProviderName)) {
+            //   console.error('%o wallet not supported', walletProviderName);
+            //   return;
+            // }
             console.log(
               'adding new address (walletClient, walletProvider) => %o...',
               [walletClient, walletProviderName]
@@ -459,25 +480,30 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
     open({
       view: 'Connect',
-      featuredWalletIds: [Object.keys(supportedWallets)],
+      // featuredWalletIds: [Object.keys(supportedWallets)],
+      // includedWalletIds: supportedWalletIds,
     });
   };
 
   useEffect(() => {
-    if (currentPassport['default-address']) {
-      console.log('loading nfts for %o...', currentPassport['default-address']);
-      alchemy.nft
-        .getNftsForOwner(currentPassport['default-address'])
-        .then((response: OwnedNftsResponse) => {
-          const nfts = [];
-          for (let i = 0; i < response.ownedNfts.length; i++) {
-            const ownedNft = response.ownedNfts[i];
-            nfts.push({ ...ownedNft });
-          }
-          setNFTs(nfts);
-        });
-    }
-  }, [currentPassport['default-address']]);
+    currentPassport.addresses
+      ?.filter((entry) => !(entry.wallet === 'account'))
+      .forEach((entry) => {
+        console.log('loading nfts for %o...', entry.address);
+        alchemy.nft
+          .getNftsForOwner(entry.address)
+          .then((response: OwnedNftsResponse) => {
+            const nfts = [];
+            console.log('loading nfts => %o', response.ownedNfts);
+            for (let i = 0; i < response.ownedNfts.length; i++) {
+              const ownedNft = response.ownedNfts[i];
+              nfts.push({ ...ownedNft });
+            }
+            console.log('setting nfts => %o', nfts);
+            setNFTs(nfts);
+          });
+      });
+  }, [currentPassport.addresses.length]);
 
   console.log('rendering workflow step: %o', workflowStep);
 
@@ -521,21 +547,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               {/* <div style={{ marginLeft: '4px' }}>
                 <ProfileViewIcon />
               </div> */}
-              <button>
-                <div
-                  style={{
-                    flex: 1,
-                    color: '#4e9efd',
-                    fontSize: '0.8em',
-                    marginLeft: '4px',
-                  }}
-                  onClick={() =>
-                    router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/`)
-                  }
-                >
-                  View Profile
-                </div>
-              </button>
             </div>
             <div
               style={{
@@ -544,24 +555,29 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 alignItems: 'center',
               }}
             >
-              <button
-                disabled={true}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                }}
-                onClick={onPhotoUpload}
-              >
+              <button>
                 <div
                   style={{
-                    color: 'rgba(51, 51, 51, 0.4)',
+                    flex: 1,
+                    color: '#4e9efd',
                     fontSize: '0.8em',
                   }}
+                  onClick={() =>
+                    router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/`)
+                  }
                 >
-                  Upload Photo
+                  View Profile
                 </div>
               </button>
-              <div style={{ fontSize: '0.7em', margin: '0px 4px' }}>|</div>
+              <div
+                style={{
+                  fontSize: '0.7em',
+                  margin: '0px 4px',
+                  color: '#ababab',
+                }}
+              >
+                |
+              </div>
               <button
                 style={{
                   display: 'flex',
@@ -579,6 +595,32 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   }}
                 >
                   Choose NFT
+                </div>
+              </button>
+              <div
+                style={{
+                  fontSize: '0.7em',
+                  margin: '0px 4px',
+                  color: '#ababab',
+                }}
+              >
+                |
+              </div>
+              <button
+                disabled={true}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+                onClick={onPhotoUpload}
+              >
+                <div
+                  style={{
+                    color: 'rgba(51, 51, 51, 0.4)',
+                    fontSize: '0.8em',
+                  }}
+                >
+                  Upload Photo
                 </div>
               </button>
             </div>
@@ -1057,7 +1099,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {currentPassport.addresses?.length > 0 ? (
+              {currentPassport.addresses?.filter(
+                (entry, idx) => entry.wallet === 'account'
+              ).length > 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -1133,129 +1177,173 @@ function PassportEditor({ passport }: PassportEditorProps) {
         ref={nftPicker}
         style={{
           minWidth: '400px',
+          maxWidth: '600px',
           borderRadius: '10px',
           padding: '24px',
         }}
       >
         {/* <form> */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection: 'row',
-            gap: '8px',
-          }}
-        >
-          {nfts.map((nft: OwnedNft, _idx: number) =>
-            nft.media.map((media: Media, idx: number) => (
-              <OwnedNFT
-                key={`owned-nft-${idx}`}
-                selectable={true}
-                isSelected={selectedMedia === media}
-                nft={nft}
-                media={media}
-                onSelectionChange={(media: Media) => {
-                  // setSelectedAvatar(thumbnail);
-                  setSelectedNft(nft);
-                  setSelectedMedia(media);
-                }}
-              />
-            ))
-          )}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '8px',
-            width: '100%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: '24px',
-          }}
-        >
-          <SocialButton
-            formMethod="dialog"
-            value="cancel"
-            onClick={(e: any) => {
-              e.preventDefault();
-              setSelectedNft(undefined);
-              setSelectedMedia(undefined);
-              nftPicker.current?.close();
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'row',
+              gap: '8px',
             }}
           >
-            Cancel
-          </SocialButton>
-          <SocialButton
-            id="confirmButton"
-            value="default"
-            onClick={(e: any) => {
-              e.preventDefault();
-              if (!(selectedNft && selectedMedia)) return;
-              console.log(editState);
-              if (editState === 'add-nft') {
-                console.log(passport);
-                const devicePrivateKey = localStorage.getItem(
-                  '/holium/realm/passport/device-signing-key'
-                );
-                if (!devicePrivateKey) {
-                  console.error('no device private key found');
-                  return;
-                }
-                addNFT(shipName, shipUrl, devicePrivateKey, [
-                  ...currentPassport.nfts,
-                  {
-                    'token-standard': selectedNft.tokenType,
-                    name:
-                      selectedNft.title ||
-                      selectedNft?.rawMetadata?.name ||
-                      'error',
-                    'contract-address': selectedNft.contract.address,
-                    'token-id': selectedNft.tokenId,
-                    'image-url':
-                      selectedMedia.gateway || selectedMedia.thumbnail || '?',
-                    'chain-id': 'eth-mainnet',
-                    'owned-by': walletFromKey(
-                      devicePrivateKey
-                    ) as `0x${string}`,
-                  },
-                ])
-                  .then((result: any) => {
-                    console.log('addNFT response => %o', result);
-                    if (result.term === 'poke-fail') {
-                      console.error('error => %o', result.tang[0]);
-                      return;
-                    }
-                    setCurrentPassport(result);
-                    nftPicker.current?.close();
-                  })
-                  .catch((e) => {
-                    console.error(e);
-                  });
-              } else if (editState === 'choose-nft') {
-                console.log(selectedMedia.thumbnail);
-                if (selectedMedia.gateway || selectedMedia.thumbnail) {
-                  saveContact({
-                    ...currentPassport.contact,
-                    avatar: {
-                      type: 'nft',
-                      img:
-                        selectedMedia.gateway || selectedMedia.thumbnail || '',
+            <span style={{ fontWeight: 450, color: '#333333' }}>
+              Select some NFTs
+            </span>
+            <hr
+              style={{
+                // color: '#333333',
+                // marginLeft: '8px',
+                backgroundColor: '#333333',
+                width: '100%',
+                height: '1px',
+                border: 0,
+                opacity: '10%',
+              }}
+            />
+          </div>
+          <span style={{ color: '#333333' }}>
+            Below is a listing of NFTs owned by one or more wallets in linked to
+            your passport. Select an NFT and click confirm to make the NFT part
+            of your public passport.
+          </span>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'row',
+              gap: '8px',
+            }}
+          >
+            {nfts.map((nft: OwnedNft, _idx: number) =>
+              nft.media.map((media: Media, idx: number) => (
+                <OwnedNFT
+                  key={`owned-nft-${idx}`}
+                  selectable={true}
+                  isSelected={selectedMedia === media}
+                  nft={nft}
+                  media={media}
+                  onSelectionChange={(media: Media) => {
+                    // setSelectedAvatar(thumbnail);
+                    setSelectedNft(nft);
+                    setSelectedMedia(media);
+                  }}
+                />
+              ))
+            )}
+          </div>
+          <hr
+            style={{
+              // color: '#333333',
+              // marginLeft: '8px',
+              backgroundColor: '#333333',
+              width: '100%',
+              height: '1px',
+              border: 0,
+              opacity: '10%',
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              // marginTop: '24px',
+            }}
+          >
+            <SocialButton
+              formMethod="dialog"
+              value="cancel"
+              onClick={(e: any) => {
+                e.preventDefault();
+                setSelectedNft(undefined);
+                setSelectedMedia(undefined);
+                nftPicker.current?.close();
+              }}
+            >
+              Cancel
+            </SocialButton>
+            <SocialButton
+              id="confirmButton"
+              value="default"
+              onClick={(e: any) => {
+                e.preventDefault();
+                if (!(selectedNft && selectedMedia)) return;
+                console.log(editState);
+                if (editState === 'add-nft') {
+                  console.log(passport);
+                  const devicePrivateKey = localStorage.getItem(
+                    '/holium/realm/passport/device-signing-key'
+                  );
+                  if (!devicePrivateKey) {
+                    console.error('no device private key found');
+                    return;
+                  }
+                  addNFT(shipName, shipUrl, devicePrivateKey, [
+                    ...currentPassport.nfts,
+                    {
+                      'token-standard': selectedNft.tokenType,
+                      name:
+                        selectedNft.title ||
+                        selectedNft?.rawMetadata?.name ||
+                        'error',
+                      'contract-address': selectedNft.contract.address,
+                      'token-id': selectedNft.tokenId,
+                      'image-url':
+                        selectedMedia.gateway || selectedMedia.thumbnail || '?',
+                      'chain-id': 'eth-mainnet',
+                      'owned-by': walletFromKey(
+                        devicePrivateKey
+                      ) as `0x${string}`,
                     },
-                  }).then((response) => {
-                    if (response.term === 'poke-fail') {
-                      console.error('error => %o', response.tang[0]);
-                      return;
-                    }
-                    setCurrentPassport(response);
-                    nftPicker.current?.close();
-                  });
+                  ])
+                    .then((result: any) => {
+                      console.log('addNFT response => %o', result);
+                      if (result.term === 'poke-fail') {
+                        console.error('error => %o', result.tang[0]);
+                        return;
+                      }
+                      setCurrentPassport(result);
+                      nftPicker.current?.close();
+                    })
+                    .catch((e) => {
+                      console.error(e);
+                    });
+                } else if (editState === 'choose-nft') {
+                  console.log(selectedMedia.thumbnail);
+                  if (selectedMedia.gateway || selectedMedia.thumbnail) {
+                    saveContact({
+                      ...currentPassport.contact,
+                      avatar: {
+                        type: 'nft',
+                        img:
+                          selectedMedia.gateway ||
+                          selectedMedia.thumbnail ||
+                          '',
+                      },
+                    }).then((response) => {
+                      if (response.term === 'poke-fail') {
+                        console.error('error => %o', response.tang[0]);
+                        return;
+                      }
+                      setCurrentPassport(response);
+                      nftPicker.current?.close();
+                    });
+                  }
                 }
-              }
-            }}
-          >
-            Confirm
-          </SocialButton>
+              }}
+            >
+              Confirm
+            </SocialButton>
+          </div>
         </div>
         {/* </form> */}
       </dialog>
@@ -1267,7 +1355,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
 export default function Home() {
   const [passport, setPassport] = useState<PassportProfile | null>(null);
   const [pageState, setPageState] = useState<
-    'none' | 'get-started' | 'edit-passport'
+    | 'none'
+    | 'get-started'
+    | 'edit-passport'
+    | 'device-inconsistent'
+    | 'passport-inconsistent'
   >('get-started');
   const [readyState, setReadyState] = useState<PageReadyState>('ready');
   const [lastError, setLastError] = useState<string>('');
@@ -1276,8 +1368,13 @@ export default function Home() {
     address: string;
     privateKey: string;
   } | null>(null);
+  const [words, setWords] = useState<string[]>([]);
 
   useEffect(() => {
+    if (words.length === 0) {
+      for (let i = 0; i < 12; i++) words.push('');
+      setWords(words);
+    }
     // get our passport from the publicly facing ship API. this is
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
@@ -1313,6 +1410,14 @@ export default function Home() {
           const { mnemonic, address, privateKey } = generateDeviceWallet();
           setDeviceWallet({ mnemonic, address, privateKey });
           setPageState('get-started');
+        } else if (passport.addresses.length === 0 && deviceKey) {
+          setPageState('device-inconsistent');
+        } else if (passport.addresses.length > 0 && !deviceKey) {
+          setPageState('passport-inconsistent');
+        } else if (
+          passport.chain.length > 0 &&
+          passport.addresses[0].address !== deviceKey
+        ) {
         } else {
           console.log('setting passport => %o', passport);
           setPageState('edit-passport');
@@ -1433,6 +1538,101 @@ export default function Home() {
           </dialog>
         </div>
       )}
+      {pageState === 'device-inconsistent' ||
+        (pageState === 'passport-inconsistent' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100vh',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '400px',
+                gap: 12,
+                borderRadius: '4px',
+                backgroundColor: 'rgba(255,110,110, 0.25)',
+                color: '#FF6E6E',
+                padding: '8px 8px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  fontWeight: 450,
+                }}
+              >
+                {readyState === 'loading' ? (
+                  <StyledSpinner color="#FF6E6E" size={12} width={1.5} />
+                ) : (
+                  <ErrorIcon />
+                )}
+                <span style={{ marginLeft: '8px' }}>
+                  Unexpected Passport State
+                </span>
+              </div>
+              {renderError(
+                pageState,
+                readyState,
+                words,
+                setWords,
+                (pageState: string) => {
+                  if (pageState === 'device-inconsistent') {
+                    setReadyState('loading');
+                    localStorage.removeItem(
+                      '/holium/realm/passport/device-signing-key'
+                    );
+                    const { mnemonic, address, privateKey } =
+                      generateDeviceWallet();
+                    setDeviceWallet({ mnemonic, address, privateKey });
+                    setPageState('get-started');
+                    setReadyState('ready');
+                  }
+                }
+              )}
+            </div>
+          </div>
+        ))}
     </>
   );
+}
+
+function renderError(
+  pageState: string,
+  readyState: PageReadyState,
+  words: string[],
+  setWords: (words: string[]) => void,
+  onAction: (pageState: string) => void
+) {
+  switch (pageState) {
+    case 'device-inconsistent':
+      return (
+        <>
+          We were able to find a device key associated with this browser;
+          however it seems your passport does not contain any addresses. This
+          inconsistent state will prevent Passport from functioning properly.
+          <p>
+            We suggest{' '}
+            <span
+              style={{ color: '#4292F1', cursor: 'pointer' }}
+              onClick={() => onAction && onAction(pageState)}
+            >
+              deleting your device key by clicking here
+            </span>{' '}
+            and restarting the passport building process.
+          </p>
+        </>
+      );
+
+    case 'passport-inconsistent':
+      return RenderDeviceKeyRecovery({ readyState, words, setWords, onAction });
+  }
 }
