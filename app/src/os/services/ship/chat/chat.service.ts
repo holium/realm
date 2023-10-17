@@ -194,6 +194,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
           peers,
           invites: 'anyone',
           'max-expires-at-duration': null,
+          'peers-get-backlog': true,
         },
       },
     };
