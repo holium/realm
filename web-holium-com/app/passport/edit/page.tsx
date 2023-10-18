@@ -83,6 +83,7 @@ import {
   createEpochPassportNode,
   generateDeviceWallet,
   generateWalletAddress,
+  recoverDeviceWallet,
   walletFromKey,
 } from '@/app/lib/wallet';
 import { saveContact } from '@/app/lib/profile';
@@ -1601,31 +1602,26 @@ export default function Home() {
                   Unexpected Passport State
                 </span>
               </div>
-              {renderError(
-                pageState,
-                readyState,
-                words,
-                setWords,
-                (pageState: string) => {
-                  if (pageState === 'device-inconsistent') {
-                    setReadyState('loading');
-                    localStorage.removeItem(
-                      '/holium/realm/passport/device-signing-key'
-                    );
-                    const { mnemonic, address, privateKey } =
-                      generateDeviceWallet();
-                    setDeviceWallet({ mnemonic, address, privateKey });
-                    setPageState('get-started');
-                    setReadyState('ready');
-                  } else if (pageState === 'passport-inconsistent') {
-                    const { mnemonic, address, privateKey } = recoverWallet(
-                      words.join(' ')
-                    );
-                    setDeviceWallet({ mnemonic, address, privateKey });
-                    setPageState('get-started');
-                  }
+              {renderError(pageState, readyState, words, setWords, () => {
+                if (pageState === 'device-inconsistent') {
+                  setReadyState('loading');
+                  localStorage.removeItem(
+                    '/holium/realm/passport/device-signing-key'
+                  );
+                  const { mnemonic, address, privateKey } =
+                    generateDeviceWallet();
+                  setDeviceWallet({ mnemonic, address, privateKey });
+                  setPageState('get-started');
+                  setReadyState('ready');
+                } else if (pageState === 'passport-inconsistent') {
+                  console.log('recovering wallet %o', words.join(' '));
+                  const { mnemonic, address, privateKey } = recoverDeviceWallet(
+                    words.join(' ')
+                  );
+                  setDeviceWallet({ mnemonic, address, privateKey });
+                  setPageState('get-started');
                 }
-              )}
+              })}
             </div>
           </div>
         ))}

@@ -956,7 +956,7 @@ export function RenderDeviceKeyRecovery({
   readyState,
   words,
   setWords,
-  onConfirm,
+  onAction,
 }: any) {
   return (
     <div>
@@ -1052,7 +1052,8 @@ export function RenderDeviceKeyRecovery({
             padding: '0px 0',
           }}
           onClick={() => {
-            onConfirm && onConfirm(readyState);
+            console.log('you are here');
+            onAction && onAction();
           }}
         >
           <div
