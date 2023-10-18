@@ -21,22 +21,17 @@ export const PassportStep = ({ setStep }: StepProps) => {
   const isHoliumHosted = serverType === 'hosted';
 
   useEffect(() => {
-    const {
-      serverId,
-      serverCode,
-      serverUrl,
-      passwordHash,
-      clientSideEncryptionKey,
-    } = OnboardingStorage.get();
+    const { serverId, serverCode, serverUrl, passwordHash } =
+      OnboardingStorage.get();
 
-    if (
-      !serverId ||
-      !serverCode ||
-      !serverUrl ||
-      !passwordHash ||
-      !clientSideEncryptionKey
-    ) {
-      console.error('in bad state');
+    if (!serverId || !serverCode || !serverUrl || !passwordHash) {
+      console.error(
+        'in bad state',
+        serverId,
+        serverCode,
+        serverUrl,
+        passwordHash
+      );
       return;
     }
 
