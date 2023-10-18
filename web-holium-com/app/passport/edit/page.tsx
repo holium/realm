@@ -88,6 +88,10 @@ import {
 import { saveContact } from '@/app/lib/profile';
 import { useRouter } from 'next/navigation';
 import { StyledSpinner } from '@/app/components';
+const {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+} = require('next/constants');
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -562,9 +566,14 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     color: '#4e9efd',
                     fontSize: '0.8em',
                   }}
-                  onClick={() =>
-                    router.push(`${process.env.NEXT_PUBLIC_LINK_ROOT}/`)
-                  }
+                  onClick={() => {
+                    console.log(process.env.NEXT_PUBLIC_BUILD);
+                    router.push(
+                      process.env.NEXT_PUBLIC_BUILD === 'development'
+                        ? '/passport'
+                        : '/'
+                    );
+                  }}
                 >
                   View Profile
                 </div>
@@ -848,39 +857,46 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 gap: '8px',
               }}
             >
-              {currentPassport.nfts.length > 0 && (
+              {currentPassport.addresses.length > 1 &&
+              currentPassport.nfts.length > 0 ? (
                 <>
-                  {currentPassport.nfts.map((nft: LinkedNFT, idx: number) => (
-                    <NFT
-                      key={`owned-nft-${idx}`}
-                      selectable={false}
-                      nft={nft}
-                    />
-                  ))}
+                  <>
+                    {currentPassport.nfts.map((nft: LinkedNFT, idx: number) => (
+                      <NFT
+                        key={`owned-nft-${idx}`}
+                        selectable={false}
+                        nft={nft}
+                      />
+                    ))}
+                  </>
+                  <button
+                    style={{
+                      width: '115px',
+                      height: '115px',
+                      borderRadius: '8px',
+                      background: 'rgba(78, 158, 253, 0.08)',
+                    }}
+                    onClick={() => {
+                      setEditState('add-nft');
+                      nftPicker.current?.showModal();
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <PlusIcon />
+                    </div>
+                  </button>
                 </>
+              ) : currentPassport.addresses.length > 1 && nfts.length === 0 ? (
+                <>There are no NFTs owned by any of your linked wallets.</>
+              ) : (
+                <>To add NFTs, please link at least one wallet.</>
               )}
-              <button
-                style={{
-                  width: '115px',
-                  height: '115px',
-                  borderRadius: '8px',
-                  background: 'rgba(78, 158, 253, 0.08)',
-                }}
-                onClick={() => {
-                  setEditState('add-nft');
-                  nftPicker.current?.showModal();
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <PlusIcon />
-                </div>
-              </button>
             </div>
           </div>
           <div style={{ width: '100%' }}>
@@ -1388,7 +1404,6 @@ export default function Home() {
     })
       .then((response) => response.json())
       .then((passport: PassportProfile) => {
-        console.log(passport);
         // parse the cookie and extract the ship name. if the ship
         //  name in the cookie matches the ship name returned by the our-passport.json
         //  call, enable edit functionality
@@ -1405,6 +1420,7 @@ export default function Home() {
         const deviceKey = localStorage.getItem(
           '/holium/realm/passport/device-signing-key'
         );
+        console.log([passport, deviceKey]);
         setPassport(passport);
         if (passport.chain.length === 0 && !deviceKey) {
           const { mnemonic, address, privateKey } = generateDeviceWallet();
@@ -1414,11 +1430,15 @@ export default function Home() {
           setPageState('device-inconsistent');
         } else if (passport.addresses.length > 0 && !deviceKey) {
           setPageState('passport-inconsistent');
-        } else if (
-          passport.chain.length > 0 &&
-          passport.addresses[0].address !== deviceKey
-        ) {
-        } else {
+        }
+        // else if (
+        //   passport.chain.length > 0 &&
+        //   passport.addresses[0].address !== deviceKey
+        // ) {
+        //   /* don't do anything here. if the user gets in this state, any
+        //      attempts to sign transactions and submit will fail server side */
+        // }
+        else {
           console.log('setting passport => %o', passport);
           setPageState('edit-passport');
         }
@@ -1428,6 +1448,8 @@ export default function Home() {
         // setPageMode('error');
       });
   }, []);
+
+  console.log('render => %o', pageState);
 
   return (
     <>

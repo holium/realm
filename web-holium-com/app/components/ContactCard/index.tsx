@@ -15,7 +15,7 @@ interface ContactCardProps {
 export default function ContactCard({ contact }: ContactCardProps) {
   return (
     <>
-      {contact.avatar && <Avatar src={contact.avatar.uri}></Avatar>}
+      {contact.avatar && <Avatar src={contact.avatar.img}></Avatar>}
       {contact['display-name'] && (
         <DisplayName>{contact['display-name']}</DisplayName>
       )}
