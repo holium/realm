@@ -857,8 +857,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 gap: '8px',
               }}
             >
-              {currentPassport.addresses.length > 1 &&
-              currentPassport.nfts.length > 0 ? (
+              {currentPassport.addresses.length > 1 && nfts.length > 0 ? (
                 <>
                   <>
                     {currentPassport.nfts.map((nft: LinkedNFT, idx: number) => (
@@ -1618,6 +1617,12 @@ export default function Home() {
                     setDeviceWallet({ mnemonic, address, privateKey });
                     setPageState('get-started');
                     setReadyState('ready');
+                  } else if (pageState === 'passport-inconsistent') {
+                    const { mnemonic, address, privateKey } = recoverWallet(
+                      words.join(' ')
+                    );
+                    setDeviceWallet({ mnemonic, address, privateKey });
+                    setPageState('get-started');
                   }
                 }
               )}

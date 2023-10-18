@@ -445,6 +445,11 @@ export function generateDeviceWallet() {
   return { mnemonic, address: wallet.address, privateKey: wallet.privateKey };
 }
 
+export function recoverDeviceWallet(mnemonic: string) {
+  const wallet = Wallet.fromMnemonic(mnemonic);
+  return { mnemonic, address: wallet.address, privateKey: wallet.privateKey };
+}
+
 /**
  * Add a new device (wallet / address) to the ship as a PASSPORT_ROOT.
  *

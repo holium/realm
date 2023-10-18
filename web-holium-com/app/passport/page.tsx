@@ -85,7 +85,13 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                   flex: 1,
                   color: '#4e9efd',
                 }}
-                onClick={() => router.push(`/passport/edit`)}
+                onClick={() =>
+                  router.push(
+                    process.env.NEXT_PUBLIC_BUILD === 'development'
+                      ? '/passport/edit'
+                      : '/edit'
+                  )
+                }
               >
                 Edit
               </div>

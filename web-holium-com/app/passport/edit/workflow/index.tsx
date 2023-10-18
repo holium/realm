@@ -985,6 +985,7 @@ export function RenderDeviceKeyRecovery({
         >
           {words.map((word: string, idx: number) => (
             <div
+              key={`txt-${idx}`}
               style={{
                 borderRadius: '4px',
                 border: 'solid 2px rgba(255,110,110, 0.25)',
@@ -992,7 +993,6 @@ export function RenderDeviceKeyRecovery({
               }}
             >
               <input
-                key={`txt-${idx}`}
                 maxLength={10}
                 style={{
                   fontSize: '0.8em',
@@ -1007,9 +1007,21 @@ export function RenderDeviceKeyRecovery({
                   event.preventDefault();
                   let data = event.clipboardData || window.clipboardData;
                   let txt: string = data.getData('Text') as string;
-                  console.log('txt => %o', txt.split(' '));
-                  setWords(txt.split(' '));
+                  if (idx === 0) {
+                    const segments = txt.split(' ');
+                    let updated = Array(12).fill('');
+                    for (let i = 0; i < 12; i++) {
+                      if (segments.length > i) {
+                        updated[i] = segments[i];
+                      }
+                    }
+                    setWords(updated);
+                  } else {
+                    words[idx] = txt;
+                    setWords(words);
+                  }
                 }}
+                defaultValue={words[idx]}
                 // value={word}
                 onChange={(e) => {
                   words[idx] = e.target.value;
@@ -1040,7 +1052,7 @@ export function RenderDeviceKeyRecovery({
             padding: '0px 0',
           }}
           onClick={() => {
-            onConfirm && onConfirm();
+            onConfirm && onConfirm(readyState);
           }}
         >
           <div
