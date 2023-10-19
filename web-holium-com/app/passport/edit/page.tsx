@@ -334,39 +334,53 @@ function PassportEditor({ passport }: PassportEditorProps) {
     ) as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const avatarImage: HTMLImageElement | null = document.getElementById(
+    const avatar: HTMLImageElement | null = document.getElementById(
       'avatar-image'
     ) as HTMLImageElement;
-    ctx.drawImage(avatarImage, 20, 20);
-    ctx.moveTo(40, 20);
-    const displayNameElem: HTMLInputElement | null = document.getElementById(
-      'display-name'
-    ) as HTMLInputElement;
-    const metrics = ctx.measureText(displayNameElem.value);
-    ctx.strokeText(displayNameElem.value, 0, 0, 300);
-    const textHeight =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-    ctx.moveTo(40, 20 + textHeight + 8);
-    const patp: HTMLDivElement | null = document.getElementById(
-      'patp'
-    ) as HTMLDivElement;
-    ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-    const dataUrl: string = canvas.toDataURL('image/png');
-    console.log('dataUrl => %o', dataUrl);
+    let avatarImage = new Image();
+    avatarImage.src = avatar.src;
+    avatarImage.crossOrigin = 'anonymous';
+    avatarImage.onload = () => {
+      canvas.width = 120;
+      canvas.height = 120;
+      var s = Math.max(
+        canvas.width / avatarImage.width,
+        canvas.height / avatarImage.height
+      );
+      ctx.scale(s, s);
+      ctx.drawImage(avatarImage, 0, 0);
+      ctx.moveTo(0, 120);
+      const displayNameElem: HTMLInputElement | null = document.getElementById(
+        'display-name'
+      ) as HTMLInputElement;
+      const metrics = ctx.measureText(displayNameElem.value);
+      ctx.strokeText(displayNameElem.value, 0, 120, 300);
+      const textHeight =
+        metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      ctx.moveTo(40, 20 + textHeight + 8);
+      // const patp: HTMLDivElement | null = document.getElementById(
+      //   'patp'
+      // ) as HTMLDivElement;
+      // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
+      const dataUrl: string = canvas.toDataURL('image/png');
+      console.log('dataUrl => %o', dataUrl);
 
-    // passport snapshot is stored in profile agent
-    uploadDataURL(`${(window as any).ship}-passport`, dataUrl)
-      .then((url) => {
-        console.log('uploaded image => %o', url);
-        try {
-          (async function (url) {
-            await savePassportOpenGraphImage(url);
-          })(url);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((e) => console.error(e));
+      // passport snapshot is stored in profile agent
+      uploadDataURL(`${(window as any).ship}-passport`, dataUrl)
+        .then((url) => {
+          console.log('uploaded image => %o', url);
+          try {
+            (async function (url) {
+              await savePassportOpenGraphImage(url);
+            })(url);
+          } catch (e) {
+            console.error(e);
+          }
+        })
+        .catch((e) => console.error(e));
+    };
+    // avatarImage.crossOrigin = 'anonymous';
+    // ctx.drawImage(avatarImage, 0, 0, 120, 120, 20, 20, 120, 120);
 
     // contact info is stored with passport agent
     const contact = {
@@ -627,6 +641,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
         />
         {currentPassport.contact.avatar ? (
           <img
+            id={'avatar-image'}
             alt={
               currentPassport.contact['display-name'] ||
               currentPassport.contact.ship
@@ -709,6 +724,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
               }}
             >
               <input
+                id={'display-name'}
                 type="text"
                 style={{
                   lineHeight: '28px',
