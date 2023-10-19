@@ -40,11 +40,12 @@ import {
 } from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
 import { shipName, shipUrl, supportedWallets } from '@/app/lib/shared';
-import { LinkedNFT, PassportProfile } from '@/app/lib/types';
+import { ContactInfo, LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDevice,
   addNFT,
   addWallet,
+  encryptWallet,
   generateDeviceWallet,
   recoverDeviceWallet,
   walletFromKey,
@@ -52,6 +53,7 @@ import {
 import { saveContact } from '@/app/lib/profile';
 import { useRouter } from 'next/navigation';
 import { StyledSpinner } from '@/app/components';
+import { savePassportOpenGraphImage, uploadDataURL } from '@/app/lib/storage';
 const {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
@@ -302,11 +304,24 @@ function PassportEditor({ passport }: PassportEditorProps) {
         console.error('image upload error');
         return;
       }
-      currentPassport.contact.avatar = {
-        type: 'image',
-        img: e.target.result as string,
-      };
-      setAvatar(currentPassport.contact.avatar.img);
+      uploadDataURL(
+        `${(window as any).ship}-profile-image`,
+        e.target.result as string
+      ).then((url) => {
+        const contact: ContactInfo = {
+          ...currentPassport.contact,
+          'display-name': displayName,
+          bio: bio,
+          avatar: {
+            type: 'image',
+            img: url,
+          },
+        };
+        saveContact(contact)
+          .then((passport: PassportProfile) => setCurrentPassport(passport))
+          .catch((e) => console.error(e));
+        setAvatar(url);
+      });
     };
     reader.readAsDataURL(e.target.files[0]);
   };
@@ -314,31 +329,46 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const onSaveClick = (e: any) => {
     e.preventDefault();
     // generate a new opengraph image using canvas
-    // const canvas: HTMLCanvasElement = document.createElement(
-    //   'canvas'
-    // ) as HTMLCanvasElement;
-    // const ctx = canvas.getContext('2d');
-    // if (!ctx) return;
-    // const avatarImage: HTMLImageElement | null = document.getElementById(
-    //   'avatar-image'
-    // ) as HTMLImageElement;
-    // ctx.drawImage(avatarImage, 20, 20);
-    // ctx.moveTo(40, 20);
-    // const displayNameElem: HTMLInputElement | null = document.getElementById(
-    //   'display-name'
-    // ) as HTMLInputElement;
-    // const metrics = ctx.measureText(displayNameElem.value);
-    // ctx.strokeText(displayNameElem.value, 0, 0, 300);
-    // const textHeight =
-    //   metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-    // ctx.moveTo(40, 20 + textHeight + 8);
-    // const patp: HTMLDivElement | null = document.getElementById(
-    //   'patp'
-    // ) as HTMLDivElement;
-    // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-    // const dataUrl: string = canvas.toDataURL('img/png');
-    // console.log('dataUrl => %o', dataUrl);
+    const canvas: HTMLCanvasElement = document.createElement(
+      'canvas'
+    ) as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const avatarImage: HTMLImageElement | null = document.getElementById(
+      'avatar-image'
+    ) as HTMLImageElement;
+    ctx.drawImage(avatarImage, 20, 20);
+    ctx.moveTo(40, 20);
+    const displayNameElem: HTMLInputElement | null = document.getElementById(
+      'display-name'
+    ) as HTMLInputElement;
+    const metrics = ctx.measureText(displayNameElem.value);
+    ctx.strokeText(displayNameElem.value, 0, 0, 300);
+    const textHeight =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    ctx.moveTo(40, 20 + textHeight + 8);
+    const patp: HTMLDivElement | null = document.getElementById(
+      'patp'
+    ) as HTMLDivElement;
+    ctx.strokeText(patp?.innerText || '', 0, 0, 300);
+    const dataUrl: string = canvas.toDataURL('image/png');
+    console.log('dataUrl => %o', dataUrl);
 
+    // passport snapshot is stored in profile agent
+    uploadDataURL(`${(window as any).ship}-passport`, dataUrl)
+      .then((url) => {
+        console.log('uploaded image => %o', url);
+        try {
+          (async function (url) {
+            await savePassportOpenGraphImage(url);
+          })(url);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((e) => console.error(e));
+
+    // contact info is stored with passport agent
     const contact = {
       ...currentPassport.contact,
       'display-name': displayName,
@@ -555,7 +585,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 |
               </div>
               <button
-                disabled={true}
+                // disabled={true}
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
@@ -564,7 +594,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
               >
                 <div
                   style={{
-                    color: 'rgba(51, 51, 51, 0.4)',
+                    color: '#4e9efd',
                     fontSize: '0.8em',
                   }}
                 >
@@ -605,7 +635,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
             style={{ width: '120px', height: '120px', borderRadius: '10px' }}
           ></img>
         ) : (
-          <button
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -615,14 +645,14 @@ function PassportEditor({ passport }: PassportEditorProps) {
               borderRadius: '10px',
               backgroundColor: '#F2F7FE',
             }}
-            onClick={() => {
-              setEditState('choose-nft');
-              nftPicker.current?.showModal();
-            }}
+            // onClick={() => {
+            // setEditState('choose-nft');
+            // nftPicker.current?.showModal();
+            // }}
             // onClick={() => editAvatarMenu.current?.show()}
           >
-            <PlusIcon />
-          </button>
+            {/* <PlusIcon /> */}
+          </div>
         )}
         {/* <SocialButton onClick={onPhotoUpload}>Upload photo</SocialButton> */}
         <input
@@ -1324,7 +1354,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`/passport/our`, {
+    fetch(`${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -1433,10 +1463,16 @@ export default function Home() {
                         .then((response: PassportProfile) => {
                           setPassport(response);
                           if (response.addresses.length > 0) {
-                            localStorage.setItem(
-                              '/holium/realm/passport/device-signing-key',
+                            encryptWallet(
+                              deviceWallet.mnemonic,
                               deviceWallet.privateKey
-                            );
+                            ).then((data: string) => {
+                              console.log('encrypted wallet: %o', data);
+                              localStorage.setItem(
+                                '/holium/realm/passport/device-signing-key',
+                                data
+                              );
+                            });
                             setReadyState('ready');
                             setPageState('edit-passport');
                           } else {
@@ -1542,10 +1578,13 @@ export default function Home() {
                   const { mnemonic, address, privateKey } = recoverDeviceWallet(
                     words.join(' ')
                   );
-                  localStorage.setItem(
-                    '/holium/realm/passport/device-signing-key',
-                    privateKey
-                  );
+                  encryptWallet(mnemonic, privateKey).then((data: string) => {
+                    console.log('encrypted wallet: %o', data);
+                    localStorage.setItem(
+                      '/holium/realm/passport/device-signing-key',
+                      data
+                    );
+                  });
                   setDeviceWallet({ mnemonic, address, privateKey });
                   setPageState('edit-passport');
                 } catch (e) {

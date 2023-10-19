@@ -1,6 +1,6 @@
 // export const shipUrl = 'http://localhost';
 export const shipUrl =
-  process.env.NEXT_PUBLIC_BUILD === 'development' ? 'http://localhost' : '';
+  process.env.NEXT_PUBLIC_BUILD === 'development' ? 'http://localhost/' : '';
 export let shipName = '~zod';
 if (typeof window !== 'undefined') {
   shipName = (window as any).ship;

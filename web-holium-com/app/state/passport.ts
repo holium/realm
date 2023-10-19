@@ -12,7 +12,7 @@ export const passportStore = {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`/~/scry/profile/our.json`, {
+    fetch(`${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/profile/our.json`, {
       method: 'GET',
       credentials: 'include',
       headers: {
