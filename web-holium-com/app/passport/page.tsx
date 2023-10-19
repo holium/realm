@@ -350,7 +350,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                  <div>No addresses found</div>
                 </div>
               )}
             </div>
@@ -443,7 +443,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                  <div>No addresses found</div>
                 </div>
               )}
             </div>
@@ -460,6 +460,7 @@ export default function Home() {
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log('cookie => %o', document.cookie);
     // get our passport from the publicly facing ship API. this is
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to

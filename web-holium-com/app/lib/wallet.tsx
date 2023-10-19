@@ -152,7 +152,6 @@ export async function createEpochPassportNode(
     }
   );
   const metadata: any = await response.json();
-  console.log('raw metadata => %o', metadata);
 
   let val = metadata['pki-state']['address-to-entity'].FILL_IN;
   metadata['pki-state']['address-to-entity'] = {
@@ -221,12 +220,6 @@ export async function loadNfts(address: `0x${string}`) {
   let response = await alchemy.nft.getNftsForOwner(address);
 
   return response;
-}
-
-export function generateWalletAddress() {
-  const privateKey = generatePrivateKey();
-  const walletAddress = new ethers.Wallet(privateKey).address;
-  return { walletAddress, privateKey };
 }
 
 export function walletFromKey(key: string) {
@@ -369,16 +362,11 @@ export async function addWalletAddress(
   return response.json();
 }
 
-export async function addNFT(
-  entity: string,
-  shipUrl: string,
-  devicePrivateKey: string,
-  nfts: LinkedNFT[]
-) {
+export async function addNFT(devicePrivateKey: string, nfts: LinkedNFT[]) {
   let wallet = new ethers.Wallet(devicePrivateKey);
   console.log(wallet.address);
 
-  console.log([entity, shipUrl, wallet.address, nfts]);
+  console.log([wallet.address, nfts]);
   let response = await fetch(
     `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
@@ -397,7 +385,6 @@ export async function addNFT(
       timestamp: Number(new Date().getTime()),
       'signing-address': wallet.address,
       'link-id': 'NAME_RECORD_SET',
-      'from-entity': entity,
     },
     'link-data': {
       name: 'nfts',
@@ -458,11 +445,7 @@ export function recoverDeviceWallet(mnemonic: string) {
  * @param mnemonic
  * @returns
  */
-export async function addDevice(
-  shipUrl: string,
-  entity: string,
-  mnemonic: string
-) {
+export async function addDevice(mnemonic: string) {
   const wallet = Wallet.fromMnemonic(mnemonic);
   let response = await fetch(
     `/~/scry/passport/template/next-block/metadata-or-root.json`,
@@ -475,7 +458,6 @@ export async function addDevice(
     }
   );
   const metadata: any = await response.json();
-  console.log('raw metadata => %o', metadata);
 
   // if the link-id returned from the API is not PASSPORT_ROOT, something
   //   is severely wrong
@@ -515,14 +497,7 @@ export async function addDevice(
     'wallet-source': 'account',
   };
 
-  console.log('entity: %o', entity);
-  console.log('wallet address: %o', wallet.address);
-  console.log(data_string);
-  console.log('calculated hash: %o', calculated_hash);
-  console.log('signed hash: %o', signed_hash);
-  console.log('root_node_link: %o', root_node_link);
   console.log(
-    'final payload: %o',
     JSON.stringify({
       'add-link': root_node_link,
     })
@@ -558,8 +533,6 @@ function getRandomInt(min: number, max: number) {
  * @returns
  */
 export async function addWallet(
-  shipUrl: string,
-  entity: string,
   deviceSigningKey: string,
   wallet: any,
   walletName: string,
@@ -581,7 +554,7 @@ export async function addWallet(
 
   const nonce = getRandomInt(1, 1000);
   const timestamp = Number(new Date().getTime());
-  const message = `${entity} owns ${walletAddress}, ${nonce}, ${timestamp}`;
+  const message = `${metadata['from-entity']} owns ${walletAddress}, ${nonce}, ${timestamp}`;
   const keysig = await wallet.signMessage({
     account: walletAddress,
     message: message,
@@ -593,12 +566,11 @@ export async function addWallet(
       // timestamp: Number(new Date().getTime()),
       'signing-address': deviceWallet.address,
       'link-id': 'SIGNED_KEY_ADD',
-      'from-entity': entity,
     },
     'link-data': {
       address: walletAddress,
       'address-type': walletName,
-      'entity-name': entity,
+      'entity-name': metadata['from-entity'],
       'key-signature': keysig,
       timestamp: timestamp,
       nonce: nonce,
@@ -618,6 +590,13 @@ export async function addWallet(
     'signature-of-hash': signed_hash,
     'link-type': 'SIGNED_KEY_ADD',
   };
+
+  console.log(
+    JSON.stringify({
+      'add-link': root_node_link,
+    })
+  );
+
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
   const url = `/spider/realm/passport-action/passport-vent/passport-vent`;

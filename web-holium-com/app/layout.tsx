@@ -1,4 +1,3 @@
-import Script from 'next/script';
 import { Rubik } from 'next/font/google';
 
 import './globals.css';
@@ -18,13 +17,6 @@ export default function RootLayout({
       <meta property="og:profile:username" content="{og-username}"></meta>
       <meta property="og:image" content="{og-image}"></meta>
       <meta property="og:url" content="{og-url}"></meta>
-      <Script id="ship-scripts">
-        {`
-        window.__INITIAL_STATE__ = "{ discoverable: {passport-discoverable} };"
-        window.ship = '{og-ship}';
-        window.shipUrl = '{og-ship-url}';
-      `}
-      </Script>
       <body className={rubik.className}>{children}</body>
     </html>
   );

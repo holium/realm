@@ -1,25 +1,9 @@
 'use client';
-import {
-  ChangeEvent,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from '@web3modal/ethereum';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { EthereumClient, w3mProvider } from '@web3modal/ethereum';
 import { InjectedConnector } from 'wagmi/connectors/injected';
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { useWeb3Modal, Web3Modal } from '@web3modal/react';
-// import {
-//   createWeb3Modal,
-//   // useWeb3Modal,
-//   // Web3Modal,
-// } from '@web3modal/wagmi/react';
 import {
   Alchemy,
   Media,
@@ -27,14 +11,10 @@ import {
   OwnedNft,
   OwnedNftsResponse,
 } from 'alchemy-sdk';
-import { WalletClient } from 'wagmi';
-import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import {
   configureChains,
   createConfig,
   useAccount,
-  useConnect,
-  useDisconnect,
   useWalletClient,
   WagmiConfig,
 } from 'wagmi';
@@ -44,45 +24,28 @@ import {
   WorkflowStep,
   PassportWorkflowState,
   renderAddress,
-  RenderWorkflowInitializeStep,
   RenderWorkflowLinkAddressStep,
-  RenderWorkflowLinkDeviceKeyStep,
-  RenderWorkflowLinkRootStep,
   RenderWorkflowNoneState,
   RenderGetStartedStep,
   PageReadyState,
-  PageRenderState,
   RenderDeviceKeyRecovery,
 } from './workflow';
 
 import {
-  CloseIcon,
   CopyIcon,
   ErrorIcon,
   PlusIcon,
-  ProfileViewIcon,
   SmallPlusIcon,
   WalletIcon,
 } from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
-// import "../styles.css";
-import {
-  isProd,
-  shipName,
-  shipUrl,
-  supportedWalletIds,
-  supportedWallets,
-} from '@/app/lib/shared';
+import { shipName, shipUrl, supportedWallets } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDevice,
-  addDeviceSigningKey,
   addNFT,
   addWallet,
-  addWalletAddress,
-  createEpochPassportNode,
   generateDeviceWallet,
-  generateWalletAddress,
   recoverDeviceWallet,
   walletFromKey,
 } from '@/app/lib/wallet';
@@ -333,7 +296,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
   if (!passport) return <></>;
 
   const filesChanged = (e: any) => {
-    console.log('files changed: %o', e.target.files);
     const reader = new FileReader();
     reader.onload = (e) => {
       if (!(e.target && e.target.result)) {
@@ -345,7 +307,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
         img: e.target.result as string,
       };
       setAvatar(currentPassport.contact.avatar.img);
-      console.log('passport => %o', passport);
     };
     reader.readAsDataURL(e.target.files[0]);
   };
@@ -383,7 +344,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
       'display-name': displayName,
       bio: bio,
     };
-    console.log('saving => %o', contact);
     saveContact(contact)
       .then((passport: PassportProfile) => setCurrentPassport(passport))
       .catch((e) => console.error(e));
@@ -403,14 +363,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
   };
 
   const onNextWorkflowStep = async (state: PassportWorkflowState) => {
-    console.log('onNextWorkflowStep => %o', state);
-    console.log(`onNextWorkflowStep (cont'd) => %o`, [
-      isLoading,
-      address,
-      connector,
-      isConnected,
-      isDisconnected,
-    ]);
     return new Promise<void>((resolve, reject) => {
       const deviceSigningKey = localStorage.getItem(
         '/holium/realm/passport/device-signing-key'
@@ -420,12 +372,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
         return;
       }
       if (walletAddress && walletClient) {
-        console.log('account => %o', walletClient.account);
-        console.log('getting provider...');
         connector
           ?.getProvider()
           .then((provider) => {
-            console.log('provider => %o', provider);
             let walletProviderName: string = '';
             // if signer information available, use this to get wallet name
             if (provider.isMetaMask) {
@@ -440,17 +389,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 .split(' ')[0]
                 .toLowerCase();
             }
-            // if (!supportedWalletIds.includes(walletProviderName)) {
-            //   console.error('%o wallet not supported', walletProviderName);
-            //   return;
-            // }
-            console.log(
-              'adding new address (walletClient, walletProvider) => %o...',
-              [walletClient, walletProviderName]
-            );
             addWallet(
-              shipUrl,
-              shipName,
               deviceSigningKey,
               walletClient,
               walletProviderName,
@@ -458,9 +397,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
             )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
-                console.log('response => %o', response);
                 if (response.term === 'poke-fail') {
-                  reject('error adding device key');
+                  reject('error adding wallet');
                   return;
                 }
                 setWorkflowStep('none');
@@ -481,8 +419,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
   };
 
   const onAddAddressClick = (_e: any) => {
-    console.log('onAddressClick => %o', currentPassport.chain);
-
     open({
       view: 'Connect',
       // featuredWalletIds: [Object.keys(supportedWallets)],
@@ -490,27 +426,30 @@ function PassportEditor({ passport }: PassportEditorProps) {
     });
   };
 
+  async function loadNFTs(passport: PassportProfile) {
+    let nfts = [];
+    for (let i = 0; i < passport.addresses.length; i++) {
+      const address = passport.addresses[i];
+      if (address.wallet !== 'account') {
+        const res: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(
+          address.address
+        );
+        for (let i = 0; i < res.ownedNfts.length; i++) {
+          const ownedNft = res.ownedNfts[i];
+          nfts.push({ ...ownedNft });
+        }
+      }
+    }
+    return nfts;
+  }
+
   useEffect(() => {
-    currentPassport.addresses
-      ?.filter((entry) => !(entry.wallet === 'account'))
-      .forEach((entry) => {
-        console.log('loading nfts for %o...', entry.address);
-        alchemy.nft
-          .getNftsForOwner(entry.address)
-          .then((response: OwnedNftsResponse) => {
-            const nfts = [];
-            console.log('loading nfts => %o', response.ownedNfts);
-            for (let i = 0; i < response.ownedNfts.length; i++) {
-              const ownedNft = response.ownedNfts[i];
-              nfts.push({ ...ownedNft });
-            }
-            console.log('setting nfts => %o', nfts);
-            setNFTs(nfts);
-          });
-      });
+    loadNFTs(currentPassport).then((nfts) => setNFTs(nfts));
   }, [currentPassport.addresses.length]);
 
-  console.log('rendering workflow step: %o', workflowStep);
+  useEffect(() => {
+    loadNFTs(passport).then((nfts) => setNFTs(nfts));
+  }, []);
 
   return (
     <div
@@ -568,7 +507,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     fontSize: '0.8em',
                   }}
                   onClick={() => {
-                    console.log(process.env.NEXT_PUBLIC_BUILD);
                     router.push(
                       process.env.NEXT_PUBLIC_BUILD === 'development'
                         ? '/passport'
@@ -959,11 +897,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   <>
                     {currentPassport.addresses
                       ?.filter((entry, index) => {
-                        console.log('address => %o', entry);
-                        console.log(
-                          'wallet => %o',
-                          supportedWallets[entry.wallet]
-                        );
                         return !(entry.wallet === 'account');
                       })
                       .map((entry, idx) => (
@@ -1293,9 +1226,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
               onClick={(e: any) => {
                 e.preventDefault();
                 if (!(selectedNft && selectedMedia)) return;
-                console.log(editState);
                 if (editState === 'add-nft') {
-                  console.log(passport);
                   const devicePrivateKey = localStorage.getItem(
                     '/holium/realm/passport/device-signing-key'
                   );
@@ -1303,7 +1234,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     console.error('no device private key found');
                     return;
                   }
-                  addNFT(shipName, shipUrl, devicePrivateKey, [
+                  addNFT(devicePrivateKey, [
                     ...currentPassport.nfts,
                     {
                       'token-standard': selectedNft.tokenType,
@@ -1322,7 +1253,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     },
                   ])
                     .then((result: any) => {
-                      console.log('addNFT response => %o', result);
                       if (result.term === 'poke-fail') {
                         console.error('error => %o', result.tang[0]);
                         return;
@@ -1334,7 +1264,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
                       console.error(e);
                     });
                 } else if (editState === 'choose-nft') {
-                  console.log(selectedMedia.thumbnail);
                   if (selectedMedia.gateway || selectedMedia.thumbnail) {
                     saveContact({
                       ...currentPassport.contact,
@@ -1420,7 +1349,6 @@ export default function Home() {
         const deviceKey = localStorage.getItem(
           '/holium/realm/passport/device-signing-key'
         );
-        console.log([passport, deviceKey]);
         setPassport(passport);
         if (passport.chain.length === 0 && !deviceKey) {
           const { mnemonic, address, privateKey } = generateDeviceWallet();
@@ -1439,7 +1367,6 @@ export default function Home() {
         //      attempts to sign transactions and submit will fail server side */
         // }
         else {
-          console.log('setting passport => %o', passport);
           setPageState('edit-passport');
         }
       })
@@ -1448,8 +1375,6 @@ export default function Home() {
         // setPageMode('error');
       });
   }, []);
-
-  console.log('render => %o', pageState);
 
   return (
     <>
@@ -1504,10 +1429,8 @@ export default function Home() {
                     readyState,
                     onConfirm: () => {
                       setReadyState('loading');
-                      console.log('onConfirm called');
-                      addDevice(shipUrl, shipName, deviceWallet.mnemonic)
+                      addDevice(deviceWallet.mnemonic)
                         .then((response: PassportProfile) => {
-                          console.log(response);
                           setPassport(response);
                           if (response.addresses.length > 0) {
                             localStorage.setItem(
@@ -1615,7 +1538,6 @@ export default function Home() {
                 setPageState('get-started');
                 setReadyState('ready');
               } else if (pageState === 'passport-inconsistent') {
-                console.log('recovering wallet %o', words.join(' '));
                 try {
                   const { mnemonic, address, privateKey } = recoverDeviceWallet(
                     words.join(' ')
@@ -1645,10 +1567,8 @@ function renderError(
   setWords: (words: string[]) => void,
   onAction: (pageState: string) => void
 ) {
-  console.log('renderError %o', pageState);
   switch (pageState) {
     case 'device-inconsistent':
-      console.log('you are here');
       return (
         <div
           style={{
