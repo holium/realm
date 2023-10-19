@@ -510,7 +510,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     router.push(
                       process.env.NEXT_PUBLIC_BUILD === 'development'
                         ? '/passport'
-                        : '/passport'
+                        : '/profile'
                     );
                   }}
                 >
