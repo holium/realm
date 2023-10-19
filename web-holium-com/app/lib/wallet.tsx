@@ -142,7 +142,7 @@ export async function createEpochPassportNode(
   }
 
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -200,7 +200,7 @@ export async function createEpochPassportNode(
   );
 
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -246,7 +246,7 @@ export async function addDeviceSigningKey(
   }
 
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -289,7 +289,7 @@ export async function addDeviceSigningKey(
   };
   console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -313,7 +313,7 @@ export async function addWalletAddress(
   const wallet = new ethers.Wallet(deviceSigningKey);
 
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -354,7 +354,7 @@ export async function addWalletAddress(
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -380,7 +380,7 @@ export async function addNFT(
 
   console.log([entity, shipUrl, wallet.address, nfts]);
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -424,7 +424,7 @@ export async function addNFT(
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -465,7 +465,7 @@ export async function addDevice(
 ) {
   const wallet = Wallet.fromMnemonic(mnemonic);
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -529,7 +529,7 @@ export async function addDevice(
   );
 
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -568,7 +568,7 @@ export async function addWallet(
   const deviceWallet = new Wallet(deviceSigningKey);
 
   let response = await fetch(
-    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -620,7 +620,7 @@ export async function addWallet(
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const url = `/spider/realm/passport-action/passport-vent/passport-vent`;
   response = await fetch(url, {
     method: 'POST',
     credentials: 'include',

@@ -464,7 +464,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${shipUrl}/passport/our`, {
+    fetch(`/passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {

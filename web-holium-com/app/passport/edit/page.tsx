@@ -279,7 +279,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const router = useRouter();
   const { open } = useWeb3Modal();
   // const { connect } = useConnect();
-  const { disconnect, disconnectAsync } = useDisconnect();
+  // const { disconnect, disconnectAsync } = useDisconnect();
   const { data: walletClient, isError, isLoading } = useWalletClient();
   const { address /*isConnected */, connector, isConnected, isDisconnected } =
     useAccount({
@@ -572,7 +572,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                     router.push(
                       process.env.NEXT_PUBLIC_BUILD === 'development'
                         ? '/passport'
-                        : '/'
+                        : '/passport'
                     );
                   }}
                 >
@@ -1395,7 +1395,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${shipUrl}/passport/our`, {
+    fetch(`/passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -1508,6 +1508,7 @@ export default function Home() {
                       addDevice(shipUrl, shipName, deviceWallet.mnemonic)
                         .then((response: PassportProfile) => {
                           console.log(response);
+                          setPassport(response);
                           if (response.addresses.length > 0) {
                             localStorage.setItem(
                               '/holium/realm/passport/device-signing-key',
@@ -1560,71 +1561,79 @@ export default function Home() {
           </dialog>
         </div>
       )}
-      {pageState === 'device-inconsistent' ||
-        (pageState === 'passport-inconsistent' && (
+      {(pageState === 'device-inconsistent' ||
+        pageState === 'passport-inconsistent') && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh',
+          }}
+        >
           <div
             style={{
               display: 'flex',
-              flexDirection: 'row',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100vh',
+              flexDirection: 'column',
+              width: '400px',
+              gap: 12,
+              borderRadius: '8px',
+              border: 'solid 2px rgba(255,110,110, 0.25)',
+              // backgroundColor: 'rgba(255,110,110, 0.25)',
+              color: '#FF6E6E',
+              padding: '16px 8px',
             }}
           >
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                width: '400px',
-                gap: 12,
-                borderRadius: '8px',
-                border: 'solid 2px rgba(255,110,110, 0.25)',
-                // backgroundColor: 'rgba(255,110,110, 0.25)',
-                color: '#FF6E6E',
-                padding: '16px 8px',
+                flexDirection: 'row',
+                alignItems: 'center',
+                fontWeight: 450,
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  fontWeight: 450,
-                }}
-              >
-                {readyState === 'loading' ? (
-                  <StyledSpinner color="#FF6E6E" size={12} width={1.5} />
-                ) : (
-                  <ErrorIcon />
-                )}
-                <span style={{ marginLeft: '8px' }}>
-                  Unexpected Passport State
-                </span>
-              </div>
-              {renderError(pageState, readyState, words, setWords, () => {
-                if (pageState === 'device-inconsistent') {
-                  setReadyState('loading');
-                  localStorage.removeItem(
-                    '/holium/realm/passport/device-signing-key'
-                  );
-                  const { mnemonic, address, privateKey } =
-                    generateDeviceWallet();
-                  setDeviceWallet({ mnemonic, address, privateKey });
-                  setPageState('get-started');
-                  setReadyState('ready');
-                } else if (pageState === 'passport-inconsistent') {
-                  console.log('recovering wallet %o', words.join(' '));
+              {readyState === 'loading' ? (
+                <StyledSpinner color="#FF6E6E" size={12} width={1.5} />
+              ) : (
+                <ErrorIcon />
+              )}
+              <span style={{ marginLeft: '8px' }}>
+                Unexpected Passport State
+              </span>
+            </div>
+            {renderError(pageState, readyState, words, setWords, () => {
+              if (pageState === 'device-inconsistent') {
+                setReadyState('loading');
+                localStorage.removeItem(
+                  '/holium/realm/passport/device-signing-key'
+                );
+                const { mnemonic, address, privateKey } =
+                  generateDeviceWallet();
+                setDeviceWallet({ mnemonic, address, privateKey });
+                setPageState('get-started');
+                setReadyState('ready');
+              } else if (pageState === 'passport-inconsistent') {
+                console.log('recovering wallet %o', words.join(' '));
+                try {
                   const { mnemonic, address, privateKey } = recoverDeviceWallet(
                     words.join(' ')
                   );
+                  localStorage.setItem(
+                    '/holium/realm/passport/device-signing-key',
+                    privateKey
+                  );
                   setDeviceWallet({ mnemonic, address, privateKey });
-                  setPageState('get-started');
+                  setPageState('edit-passport');
+                } catch (e) {
+                  console.error(e);
                 }
-              })}
-            </div>
+              }
+            })}
           </div>
-        ))}
+        </div>
+      )}
     </>
   );
 }
@@ -1636,13 +1645,25 @@ function renderError(
   setWords: (words: string[]) => void,
   onAction: (pageState: string) => void
 ) {
+  console.log('renderError %o', pageState);
   switch (pageState) {
     case 'device-inconsistent':
+      console.log('you are here');
       return (
-        <>
-          We were able to find a device key associated with this browser;
-          however it seems your passport does not contain any addresses. This
-          inconsistent state will prevent Passport from functioning properly.
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <p>
+            We were able to find a device key associated with this browser;
+            however it seems your passport does not contain any addresses. This
+            inconsistent state will prevent Passport from functioning properly.
+          </p>
           <p>
             We suggest{' '}
             <span
@@ -1653,10 +1674,13 @@ function renderError(
             </span>{' '}
             and restarting the passport building process.
           </p>
-        </>
+        </div>
       );
 
     case 'passport-inconsistent':
       return RenderDeviceKeyRecovery({ readyState, words, setWords, onAction });
+
+    default:
+      return <></>;
   }
 }

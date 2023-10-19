@@ -966,6 +966,7 @@ export function RenderDeviceKeyRecovery({
           flexDirection: 'column',
           gap: 12,
           padding: '12px',
+          color: '#333333',
         }}
       >
         <div style={{ fontWeight: 'normal' }}>
@@ -1001,6 +1002,7 @@ export function RenderDeviceKeyRecovery({
                   width: '72px',
                   textAlign: 'center',
                   border: 0,
+                  color: '#FF6E6E',
                 }}
                 onPaste={(event) => {
                   event.stopPropagation();

@@ -9,19 +9,19 @@ module.exports = (phase, { defaultConfig }) => {
     basePath: phase === PHASE_PRODUCTION_BUILD ? '/passport' : '',
     output: 'export',
 
-    async headers() {
-      return [
-        {
-          source: '/.well-known/apple-app-site-association',
-          headers: [
-            {
-              key: 'Content-Type',
-              value: 'application/json',
-            },
-          ],
-        },
-      ];
-    },
+    // async headers() {
+    //   return [
+    //     {
+    //       source: '/.well-known/apple-app-site-association',
+    //       headers: [
+    //         {
+    //           key: 'Content-Type',
+    //           value: 'application/json',
+    //         },
+    //       ],
+    //     },
+    //   ];
+    // },
 
     // async redirects() {
     //   return [
