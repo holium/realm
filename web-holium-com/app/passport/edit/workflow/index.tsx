@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { Wallet } from 'ethers';
+import { Connector } from 'wagmi/connectors';
+
 import {
   CheckIcon,
   CloseIcon,
@@ -9,6 +12,7 @@ import {
 } from '@/app/assets/icons';
 import { StyledSpinner } from '@/app/components';
 import { PassportProfile } from '@/app/lib/types';
+import { addWallet } from '@/app/lib/wallet';
 
 export const renderAddress = (address: `0x${string}` | undefined) => {
   if (!address) return 'unknown';
@@ -35,7 +39,7 @@ export interface PassportWorkflowState {
   lastError?: any;
   passport: PassportProfile;
   walletAddress?: string;
-  deviceSigningKey?: string;
+  deviceWallet?: Wallet;
 }
 
 interface PassportWorkflowProps {
@@ -74,9 +78,6 @@ export function RenderWorkflowInitializeStep({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        // color: '#FFFFFF',
-        // borderRadius: '16px',
-        // backgroundColor: '#4292F1',
         padding: '0 12px 12px',
         gap: 12,
       }}
@@ -120,7 +121,6 @@ export function RenderWorkflowInitializeStep({
           width: '100%',
           height: '1px',
           border: 0,
-          // opacity: '10%',
         }}
       />
       <div
@@ -132,13 +132,11 @@ export function RenderWorkflowInitializeStep({
           backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
-          // lineHeight: '34px',
         }}
       >
         <div
           style={{
             display: 'flex',
-            // padding: 0,
             lineHeight: '30px',
             width: '30px',
             height: '30px',
@@ -166,7 +164,6 @@ export function RenderWorkflowInitializeStep({
           backgroundColor: 'rgba(255,255,255, 0.2)',
           alignItems: 'center',
           padding: '8px 12px',
-          // lineHeight: '34px',
         }}
       >
         <div
@@ -237,7 +234,6 @@ export function RenderWorkflowInitializeStep({
               });
             });
         }}
-        // onClick={() => passportWorkflow.current?.close()}
       >
         <div
           style={{
@@ -349,7 +345,7 @@ export function RenderWorkflowLinkRootStep({
         >
           <div style={{ fontSize: '0.8em' }}>Root wallet address</div>
           <div style={{ fontSize: '1em' }}>
-            {renderAddress(state.walletAddress)}
+            {renderAddress(state.deviceWallet?.address as `0x${string}`)}
           </div>
         </div>
       </div>
@@ -513,7 +509,7 @@ export function RenderWorkflowLinkDeviceKeyStep({
         >
           <div style={{ fontSize: '0.8em' }}>Root wallet address</div>
           <div style={{ fontSize: '1em', flex: 1 }}>
-            {renderAddress(state.walletAddress)}
+            {renderAddress(state.deviceWallet?.address as `0x${string}`)}
           </div>
         </div>
         <CheckIcon />
@@ -545,7 +541,7 @@ export function RenderWorkflowLinkDeviceKeyStep({
               type="password"
               readOnly={true}
               disabled={true}
-              value={state.deviceSigningKey || 'none'}
+              value={state.deviceWallet?.privateKey || 'none'}
               style={{
                 backgroundColor: 'rgba(255,255,255, 0)',
                 color: '#ffffff',
@@ -628,182 +624,213 @@ export function RenderWorkflowLinkDeviceKeyStep({
   );
 }
 
-export function RenderWorkflowLinkAddressStep({
-  state,
-  onNextWorkflowStep,
-  onCloseWorkflow,
-}: PassportWorkflowProps) {
-  const [renderState, setRenderState] = useState<WorkflowStepRenderState>({
-    readyState: 'ready',
-  });
-  console.log(
-    'RenderWorkflowLinkAddressStep: readyState => %o',
-    renderState.readyState
+interface PassportConfirmAddWalletProps {
+  parentRef?: React.RefObject<HTMLDialogElement>;
+  connector?: Connector<any, any>;
+  walletClient?: any;
+  passport?: PassportProfile;
+  deviceWallet?: Wallet | null;
+  walletAddress?: `0x${string}`;
+  onClose: (result?: PassportProfile) => void;
+}
+
+export function PassportConfirmAddWallet({
+  parentRef,
+  connector,
+  walletClient,
+  passport,
+  deviceWallet,
+  walletAddress,
+  onClose,
+}: PassportConfirmAddWalletProps) {
+  if (
+    !(
+      parentRef &&
+      connector &&
+      walletClient &&
+      passport &&
+      deviceWallet &&
+      walletAddress
+    )
+  ) {
+    console.error('PassportConfirmAddWalletProps: unexpected state');
+    return;
+  }
+
+  const [readyState, setReadyState] = useState<'ready' | 'loading' | 'error'>(
+    'ready'
   );
+  const [lastError, setLastError] = useState<any>('');
+
+  const onCloseClick = () => onClose && onClose();
+
+  const onConfirmClick = async () => {
+    setReadyState('loading');
+    try {
+      const provider: any = await connector?.getProvider();
+
+      let walletProviderName: string = '';
+      // if signer information available, use this to get wallet name
+      if (provider.isMetaMask) {
+        walletProviderName = 'metamask';
+      } else if (
+        provider.signer.session.peer.metadata.name.indexOf('Rainbow') !== -1
+      ) {
+        walletProviderName = 'rainbow';
+      } else {
+        walletProviderName = provider.signer.session.peer.metadata.name
+          .split(' ')[0]
+          .toLowerCase();
+      }
+
+      const response: any = await addWallet(
+        deviceWallet,
+        walletClient,
+        walletProviderName,
+        walletAddress
+      );
+      if (response.term === 'poke-fail') {
+        throw new Error(response.term);
+      }
+
+      onClose && onClose(passport);
+      parentRef.current?.close();
+    } catch (e) {
+      setLastError(e);
+    }
+  };
+
   return (
-    <dialog
-      id="passportWorkflowDialog"
-      open={true}
+    <div
       style={{
-        borderRadius: '24px',
-        padding: '12px',
-        width: '400px',
-        minWidth: '400px',
-        backgroundColor: '#4292F1',
-        color: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          // gap: 8,
+          color: '#FFFFFF',
+          borderRadius: '16px',
+          backgroundColor: '#4292F1',
+          padding: '12px',
+          gap: 12,
         }}
       >
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            color: '#FFFFFF',
-            borderRadius: '16px',
-            backgroundColor: '#4292F1',
-            padding: '12px',
-            gap: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
           }}
+        >
+          <PassportIcon />
+          <div
+            style={{
+              marginLeft: '12px',
+              fontWeight: 450,
+              fontSize: '1.2em',
+              flex: 1,
+            }}
+          >
+            Add address
+          </div>
+          <button onClick={onCloseClick}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            borderRadius: '38px',
+            border: 'solid 2px rgba(255,255,255, 0.2)',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            alignItems: 'center',
+            padding: '8px 12px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '0 12px',
+              flex: 1,
+            }}
+          >
+            <div style={{ fontSize: '0.8em' }}>Wallet address</div>
+            <div style={{ fontSize: '1em', flex: 1 }}>
+              {renderAddress(walletAddress as `0x${string}`)}
+            </div>
+          </div>
+          <CheckIcon />
+        </div>
+        <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
+          You’ve connected the wallet address listed above. If this is the
+          correct address, confirm below and it will add this address to your
+          Passport.
+        </div>
+        <div style={{ fontWeight: 450, fontSize: '0.9em' }}>
+          Note: This new address will be signed using your device signing key.
+        </div>
+        <hr
+          style={{
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            width: '100%',
+            height: '1px',
+            border: 0,
+            // opacity: '10%',
+          }}
+        />
+        {lastError && (
+          <>
+            <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+              {lastError.toString()}
+            </div>
+            <hr
+              style={{
+                backgroundColor: 'rgba(255,255,255, 0.2)',
+                width: '100%',
+                height: '1px',
+                border: 0,
+                // opacity: '10%',
+              }}
+            />
+          </>
+        )}
+        <button
+          style={{
+            borderRadius: '10px',
+            backgroundColor: '#FFFFFF',
+            color: '#4292F1',
+            lineHeight: '22px',
+            padding: '13px 0',
+          }}
+          onClick={onConfirmClick}
         >
           <div
             style={{
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
             }}
           >
-            <PassportIcon />
-            <div
-              style={{
-                marginLeft: '12px',
-                fontWeight: 450,
-                fontSize: '1.2em',
-                flex: 1,
-              }}
-            >
-              Add address
-            </div>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setRenderState({ readyState: 'ready', lastError: undefined });
-                onCloseWorkflow && onCloseWorkflow();
-              }}
-            >
-              <CloseIcon />
-            </button>
+            <div>Sign and add key</div>
+            {readyState === 'loading' && (
+              <StyledSpinner color="#4292F1" size={12} width={1.5} />
+            )}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              borderRadius: '38px',
-              border: 'solid 2px rgba(255,255,255, 0.2)',
-              backgroundColor: 'rgba(255,255,255, 0.2)',
-              alignItems: 'center',
-              padding: '8px 12px',
-              // lineHeight: '34px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '0 12px',
-                flex: 1,
-              }}
-            >
-              <div style={{ fontSize: '0.8em' }}>Wallet address</div>
-              <div style={{ fontSize: '1em', flex: 1 }}>
-                {renderAddress(state.walletAddress as `0x${string}`)}
-              </div>
-            </div>
-            <CheckIcon />
-          </div>
-          <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
-            You’ve connected the wallet address listed above. If this is the
-            correct address, confirm below and it will add this address to your
-            Passport.
-          </div>
-          <div style={{ fontWeight: 450, fontSize: '0.9em' }}>
-            Note: This new address will be signed using your device signing key.
-          </div>
-          <hr
-            style={{
-              backgroundColor: 'rgba(255,255,255, 0.2)',
-              width: '100%',
-              height: '1px',
-              border: 0,
-              // opacity: '10%',
-            }}
-          />
-          {renderState.lastError && (
-            <>
-              <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
-                {renderState.lastError.toString()}
-              </div>
-              <hr
-                style={{
-                  backgroundColor: 'rgba(255,255,255, 0.2)',
-                  width: '100%',
-                  height: '1px',
-                  border: 0,
-                  // opacity: '10%',
-                }}
-              />
-            </>
-          )}
-          <button
-            style={{
-              borderRadius: '10px',
-              backgroundColor: '#FFFFFF',
-              color: '#4292F1',
-              lineHeight: '22px',
-              padding: '13px 0',
-            }}
-            onClick={() => {
-              setRenderState({ readyState: 'loading' });
-              onNextWorkflowStep(state)
-                .then(() => setRenderState({ readyState: 'ready' }))
-                .catch((e) => {
-                  console.error('error: %o', e);
-                  setRenderState({
-                    readyState: 'error',
-                    lastError: e,
-                  });
-                });
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              <div>Sign and add key</div>
-              {renderState.readyState === 'loading' && (
-                <StyledSpinner color="#4292F1" size={12} width={1.5} />
-              )}
-            </div>
-          </button>
-        </div>
+        </button>
       </div>
-    </dialog>
+    </div>
   );
 }
 
 interface PassportRenderProps {
-  signingAddress: string;
-  mnemonic: string;
+  deviceWallet: Wallet;
   readyState: PageReadyState;
   onConfirm: () => void;
 }
@@ -816,12 +843,11 @@ export interface PageRenderState {
 }
 
 export function RenderGetStartedStep({
-  signingAddress,
-  mnemonic,
+  deviceWallet,
   readyState,
   onConfirm,
 }: PassportRenderProps) {
-  const words = mnemonic.split(' ');
+  const words = deviceWallet.mnemonic.phrase.split(' ');
   console.log('RenderGetStartedStep: readyState => %o', readyState);
   return (
     <div>
@@ -888,7 +914,7 @@ export function RenderGetStartedStep({
           >
             <div style={{ fontSize: '0.8em' }}>Device signer address</div>
             <div style={{ fontSize: '1em', flex: 1 }}>
-              {renderAddress(signingAddress as `0x${string}`)}
+              {renderAddress(deviceWallet?.address as `0x${string}`)}
             </div>
             {words.length === 12 && (
               <div
@@ -1007,7 +1033,8 @@ export function RenderDeviceKeyRecovery({
                 onPaste={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  let data = event.clipboardData || window.clipboardData;
+                  let data =
+                    event.clipboardData || (window as any).clipboardData;
                   let txt: string = data.getData('Text') as string;
                   if (idx === 0) {
                     const segments = txt.split(' ');

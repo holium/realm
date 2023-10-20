@@ -4,6 +4,7 @@ import { EthereumClient, w3mProvider } from '@web3modal/ethereum';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { useWeb3Modal, Web3Modal } from '@web3modal/react';
+import { Wallet } from 'ethers';
 import {
   Alchemy,
   Media,
@@ -29,6 +30,7 @@ import {
   RenderGetStartedStep,
   PageReadyState,
   RenderDeviceKeyRecovery,
+  PassportConfirmAddWallet,
 } from './workflow';
 
 import {
@@ -43,21 +45,25 @@ import { shipName, shipUrl, supportedWallets } from '@/app/lib/shared';
 import { ContactInfo, LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDevice,
-  addNFT,
+  addNft,
   addWallet,
+  decryptWallet,
   encryptWallet,
   generateDeviceWallet,
+  loadNfts,
+  OwnerNft,
   recoverDeviceWallet,
-  walletFromKey,
 } from '@/app/lib/wallet';
 import { saveContact } from '@/app/lib/profile';
 import { useRouter } from 'next/navigation';
-import { StyledSpinner } from '@/app/components';
+import {
+  DeviceAddressList,
+  LinkedWalletList,
+  NftList,
+  StyledSpinner,
+} from '@/app/components';
 import { savePassportOpenGraphImage, uploadDataURL } from '@/app/lib/storage';
-const {
-  PHASE_DEVELOPMENT_SERVER,
-  PHASE_PRODUCTION_BUILD,
-} = require('next/constants');
+import { generateProfileSnap } from '@/app/lib/canvas';
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -93,135 +99,7 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 
-// const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
-// createWeb3Modal({ wagmiConfig, projectId, chains });
-// const wagmiConfig = createConfig({
-//   autoConnect: true,
-//   connectors: w3mConnectors({ projectId, chains }),
-//   publicClient,
-// });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
-
-// Optional Config object, but defaults to demo api-key and eth-mainnet.
-const settings = {
-  apiKey: 'YVJ7LV7w8esHG18rdnKSERfN_OcyJWY_', // Replace with your Alchemy API Key.
-  network: Network.ETH_MAINNET, // Replace with your network.
-};
-
-// createWeb3Modal({
-//   wagmiConfig,
-//   projectId,
-//   chains,
-//   includeWalletIds: Object.keys(supportedWallets),
-// });
-
-const alchemy = new Alchemy(settings);
-
-interface OwnedNFTProps {
-  nft: OwnedNft;
-  media: Media;
-  selectable: boolean;
-  isSelected: boolean;
-  onSelectionChange: (media: Media) => any;
-}
-
-const OwnedNFT = ({
-  media,
-  selectable,
-  isSelected,
-  onSelectionChange,
-}: OwnedNFTProps) => {
-  return (
-    <>
-      <button
-        style={
-          selectable && isSelected && (media.gateway || media.thumbnail)
-            ? { border: 'solid 3px #5482EC', borderRadius: '8px' }
-            : { border: 'solid 3px transparent' }
-        }
-        onClick={() => {
-          onSelectionChange && onSelectionChange(media);
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-          }}
-        >
-          {/* {selectable && media.thumbnail && (
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                onSelectionChange && onSelectionChange(e, media.thumbnail!)
-              }
-            ></input>
-          )} */}
-          {(media.gateway || media.thumbnail) && (
-            <img
-              alt={'nft'}
-              src={media.gateway || media.thumbnail}
-              style={{
-                height: '115px',
-                width: '115px',
-                borderRadius: '8px',
-              }}
-            ></img>
-          )}
-        </div>
-      </button>
-    </>
-  );
-};
-
-interface NFTProps {
-  nft: LinkedNFT;
-  selectable?: boolean;
-  isSelected?: boolean;
-  onSelectionChange?: (
-    e: ChangeEvent<HTMLInputElement>,
-    tokenId: string
-  ) => void;
-}
-
-const NFT = ({ nft, selectable, isSelected, onSelectionChange }: NFTProps) => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-      }}
-    >
-      {selectable && nft['image-url'] && (
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            onSelectionChange && onSelectionChange(e, nft['image-url'])
-          }
-        ></input>
-      )}
-      {nft['image-url'] && (
-        <img
-          alt={'nft'}
-          src={nft['image-url']}
-          style={{
-            height: '115px',
-            width: '115px',
-            borderRadius: '8px',
-          }}
-        ></img>
-      )}
-    </div>
-  );
-};
 
 type PassportState =
   | 'initial'
@@ -231,22 +109,12 @@ type PassportState =
 
 interface PassportEditorProps {
   passport: PassportProfile;
+  deviceWallet?: Wallet;
 }
 
-type OwnerNft = OwnedNft & { ownerAddress: string };
-
-// page states:
-// not public - user chose to keep passport profile hidden
-// no passport - profile is not public
-// no device key - chain array of profile/our.json call is empty.
-//    (i.e. the user has not made it thru the passport root / device key workflow)
-// all good - we have a passport, passport root, and device key
-
-function PassportEditor({ passport }: PassportEditorProps) {
+function PassportEditor({ passport, ...props }: PassportEditorProps) {
   const router = useRouter();
   const { open } = useWeb3Modal();
-  // const { connect } = useConnect();
-  // const { disconnect, disconnectAsync } = useDisconnect();
   const { data: walletClient, isError, isLoading } = useWalletClient();
   const { address /*isConnected */, connector, isConnected, isDisconnected } =
     useAccount({
@@ -255,7 +123,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
         console.log('Connected', { address, connector, isReconnected });
         if (!isReconnected) {
           setWalletAddress(address);
-          setWorkflowStep('confirm-add-address');
+          setDialogContentId('confirm-add-wallet');
+          passportDialog.current?.showModal();
         }
       },
       onDisconnect() {
@@ -264,11 +133,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
     });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nftPicker = useRef<HTMLDialogElement>(null);
-  // const editAvatarMenu = useRef<HTMLDialogElement>(null);
-  const passportWorkflow = useRef<HTMLDialogElement>(null);
-  const avatarRef = useRef<HTMLImageElement>(null);
-  const displayNameRef = useRef<HTMLInputElement>(null);
-  const [nfts, setNFTs] = useState<OwnerNft[]>([]);
+  const passportDialog = useRef<HTMLDialogElement>(null);
+  const [dialogContentId, setDialogContentId] = useState<
+    'none' | 'confirm-add-wallet' | 'wait-device-decrypt'
+  >('none');
   const [displayName, setDisplayName] = useState<string>(
     passport?.contact['display-name'] || passport?.contact?.ship || ''
   );
@@ -279,23 +147,19 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(
     undefined
   );
-  const [avatar, setAvatar] = useState<string>('');
-  const [ourNFTs, setOurNFTs] = useState<object>({});
-  const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('none');
   const [walletAddress, setWalletAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
-  const [deviceSigningKey, setDeviceSigningKey] = useState<
-    `0x${string}` | undefined
-  >(undefined);
-  const [deviceWalletAddress, setDeviceWalletAddress] = useState<
-    `0x${string}` | undefined
-  >(undefined);
-  const [currentPassport, setCurrentPassport] = useState<PassportProfile>(
-    () => passport
+  const [deviceWallet, setDeviceWallet] = useState<Wallet | null>(
+    props.deviceWallet ? props.deviceWallet! : null
   );
-  const [passportState, setPassportState] = useState<PassportState>('initial');
+  const [currentPassport, setCurrentPassport] =
+    useState<PassportProfile>(passport);
   const [editState, setEditState] = useState<string>('none');
+
+  const [readyState, setReadyState] = useState<'ready' | 'loading' | 'error'>(
+    'ready'
+  );
 
   if (!passport) return <></>;
 
@@ -322,7 +186,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
         saveContact(contact)
           .then((passport: PassportProfile) => setCurrentPassport(passport))
           .catch((e) => console.error(e));
-        setAvatar(url);
       });
     };
     reader.readAsDataURL(e.target.files[0]);
@@ -330,81 +193,25 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
   const onSaveClick = (e: any) => {
     e.preventDefault();
-    // generate a new opengraph image using canvas
-    const canvas: HTMLCanvasElement = document.createElement(
-      'canvas'
-    ) as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const avatar: HTMLImageElement | null = document.getElementById(
-      'avatar-image'
-    ) as HTMLImageElement;
-    let avatarImage = new Image();
-    avatarImage.src = avatar.src;
-    avatarImage.crossOrigin = 'anonymous';
-    avatarImage.onload = () => {
-      let rubik = new FontFace(
-        'Rubik',
-        'url(https://fonts.gstatic.com/s/rubik/v28/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4iFV0U1dYPFkZVO.woff2)'
-      );
-      rubik.load().then((font) => {
-        document.fonts.add(font);
-        canvas.width = 400;
-        canvas.height = 140;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.scale(120.0 / avatarImage.width, 120.0 / avatarImage.height);
-        ctx.drawImage(avatarImage, 10, 10);
-        const displayNameElem: HTMLInputElement | null =
-          document.getElementById('display-name') as HTMLInputElement;
-        ctx.font = "normal 32px 'Rubik'";
-        const metrics = ctx.measureText(displayNameElem.value);
-        const textHeight =
-          metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-        ctx.fillStyle = '#333333';
-        ctx.fillText(displayNameElem.value, 212, 10 + textHeight, 300);
-        ctx.font = "normal 22px 'Rubik'";
-        ctx.fillStyle = '#8e8e8e';
-        ctx.fillText(
-          'This is for testing purposes only.',
-          212,
-          10 + textHeight + 10 + textHeight,
-          300
-        );
-        // setTimeout(() => {
-        //   ctx.moveTo(0, 0);
-        //   ctx.roundRect(0, 0, canvas.width, canvas.height, 10);
-        //   ctx.clip();
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const dataUrl: string = canvas.toDataURL('image/png');
-        // console.log('dataUrl => %o', dataUrl);
-
-        // passport snapshot is stored in profile agent
-        uploadDataURL(
-          `${(window as any).ship || 'development'}-passport`,
-          dataUrl
-        )
-          .then((url) => {
-            console.log('uploaded image => %o', url);
-            try {
-              (async function (url) {
-                await savePassportOpenGraphImage(url);
-              })(url);
-            } catch (e) {
-              console.error(e);
-            }
-          })
-          .catch((e) => console.error(e));
-        // }, 0);
-        // ctx.moveTo(40, 20 + textHeight + 8);
-        // const patp: HTMLDivElement | null = document.getElementById(
-        //   'patp'
-        // ) as HTMLDivElement;
-        // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-      });
-    };
-    // avatarImage.crossOrigin = 'anonymous';
-    // ctx.drawImage(avatarImage, 0, 0, 120, 120, 20, 20, 120, 120);
+    generateProfileSnap(document).then((dataurl: string) => {
+      // console.log('dataUrl => %o', dataUrl);
+      // passport snapshot is stored in profile agent
+      uploadDataURL(
+        `${(window as any).ship || 'development'}-passport`,
+        dataurl
+      )
+        .then((url) => {
+          console.log('uploaded image => %o', url);
+          try {
+            (async function (url) {
+              await savePassportOpenGraphImage(url);
+            })(url);
+          } catch (e) {
+            console.error(e);
+          }
+        })
+        .catch((e) => console.error(e));
+    });
 
     // contact info is stored with passport agent
     const contact = {
@@ -425,68 +232,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
     }
   };
 
-  const onCloseWorkflow = () => {
-    setWorkflowStep('none');
-    passportWorkflow.current?.close();
-  };
-
-  const onNextWorkflowStep = async (state: PassportWorkflowState) => {
-    return new Promise<void>((resolve, reject) => {
-      const encryptedData = localStorage.getItem(
-        '/holium/realm/passport/device-signing-data'
-      );
-      if (!encryptedData) {
-        console.error('no device signing encrypted info found');
-        return;
-      }
-      if (walletAddress && walletClient) {
-        connector
-          ?.getProvider()
-          .then((provider) => {
-            let walletProviderName: string = '';
-            // if signer information available, use this to get wallet name
-            if (provider.isMetaMask) {
-              walletProviderName = 'metamask';
-            } else if (
-              provider.signer.session.peer.metadata.name.indexOf('Rainbow') !==
-              -1
-            ) {
-              walletProviderName = 'rainbow';
-            } else {
-              walletProviderName = provider.signer.session.peer.metadata.name
-                .split(' ')[0]
-                .toLowerCase();
-            }
-            addWallet(
-              encryptedData,
-              walletClient,
-              walletProviderName,
-              walletAddress
-            )
-              // the wallet address of secret/hidden wallet that now lives on this device
-              .then((response: any) => {
-                if (response.term === 'poke-fail') {
-                  reject('error adding wallet');
-                  return;
-                }
-                setWorkflowStep('none');
-                setCurrentPassport(response);
-                passportWorkflow.current?.close();
-                resolve();
-              })
-              .catch((e) => {
-                console.error(e);
-                reject(e);
-              });
-          })
-          .catch((e) => console.error(e));
-      } else {
-        console.error('unexpected wallet address and/or device signing key');
-      }
-    });
-  };
-
-  const onAddAddressClick = (_e: any) => {
+  const onAddAddressClick = () => {
     open({
       view: 'Connect',
       // featuredWalletIds: [Object.keys(supportedWallets)],
@@ -494,30 +240,32 @@ function PassportEditor({ passport }: PassportEditorProps) {
     });
   };
 
-  async function loadNFTs(passport: PassportProfile) {
-    let nfts: OwnerNft[] = [];
-    for (let i = 0; i < passport.addresses.length; i++) {
-      const address = passport.addresses[i];
-      if (address.wallet !== 'account') {
-        const res: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(
-          address.address
+  useEffect(() => {
+    setReadyState('loading');
+    setDialogContentId('wait-device-decrypt');
+    passportDialog.current?.showModal();
+    (async function () {
+      try {
+        const encryptedDeviceData = localStorage.getItem(
+          '/holium/realm/passport/device-signing-data'
         );
-        for (let i = 0; i < res.ownedNfts.length; i++) {
-          const ownedNft = res.ownedNfts[i];
-          nfts.push({ ...ownedNft, ownerAddress: address.address });
+        // load device wallet as early as possible. decrypting is an expensive operation
+        //  so we only one to do this once per app session.
+        if (!deviceWallet && encryptedDeviceData) {
+          const deviceWallet = await decryptWallet(encryptedDeviceData);
+          setDeviceWallet(deviceWallet);
         }
+        await loadNfts(passport);
+        passportDialog.current?.close();
+        setReadyState('ready');
+      } catch (e) {
+        console.error(e);
+        setReadyState('error');
       }
-    }
-    return nfts;
-  }
-
-  useEffect(() => {
-    loadNFTs(currentPassport).then((nfts) => setNFTs(nfts));
-  }, [currentPassport.addresses.length]);
-
-  useEffect(() => {
-    loadNFTs(passport).then((nfts) => setNFTs(nfts));
+    })();
   }, []);
+
+  console.log('render => %o', readyState);
 
   return (
     <div
@@ -556,9 +304,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               }}
             >
               <h1 style={{ fontWeight: '500' }}>Passport Editor</h1>
-              {/* <div style={{ marginLeft: '4px' }}>
-                <ProfileViewIcon />
-              </div> */}
             </div>
             <div
               style={{
@@ -641,16 +386,43 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </button>
             </div>
           </div>
-          <button onClick={onSaveClick}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'right',
+            }}
+          >
+            <div>
+              <button onClick={onSaveClick}>
+                <div
+                  style={{
+                    flex: 1,
+                    color: '#4e9efd',
+                  }}
+                >
+                  Save
+                </div>
+              </button>
+            </div>
             <div
               style={{
-                flex: 1,
-                color: '#4e9efd',
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '4px',
+                alignItems: 'center',
               }}
             >
-              Save
+              {(['saving'].includes(readyState) && (
+                <>
+                  <StyledSpinner color="#4e9efd" size={10} width={1.5} />
+                  <div style={{ color: '#4e9efd', fontSize: '0.8em' }}>
+                    saving...
+                  </div>
+                </>
+              )) || <></>}
             </div>
-          </button>
+          </div>
         </div>
         <hr
           style={{
@@ -692,24 +464,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
               borderRadius: '10px',
               backgroundColor: '#F2F7FE',
             }}
-            // onClick={() => {
-            // setEditState('choose-nft');
-            // nftPicker.current?.showModal();
-            // }}
-            // onClick={() => editAvatarMenu.current?.show()}
-          >
-            {/* <PlusIcon /> */}
-          </div>
+          ></div>
         )}
-        {/* <SocialButton onClick={onPhotoUpload}>Upload photo</SocialButton> */}
         <input
           ref={fileInputRef}
           type="file"
           style={{ display: 'none' }}
         ></input>
-        {/* <SocialButton onClick={() => nftPicker.current?.showModal()}>
-          Choose NFT
-        </SocialButton> */}
         <>
           <div style={{ width: '100%' }}>
             <div
@@ -735,7 +496,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </div>
               <hr
                 style={{
-                  // color: '#333333',
                   marginLeft: '8px',
                   backgroundColor: '#333333',
                   width: '100%',
@@ -794,7 +554,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </div>
               <hr
                 style={{
-                  // color: '#333333',
                   marginLeft: '8px',
                   backgroundColor: '#333333',
                   width: '100%',
@@ -853,7 +612,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </div>
               <hr
                 style={{
-                  // color: '#333333',
                   marginLeft: '8px',
                   backgroundColor: '#333333',
                   width: '100%',
@@ -865,54 +623,17 @@ function PassportEditor({ passport }: PassportEditorProps) {
             </div>
             <div
               style={{
-                color: '#333333',
                 paddingTop: '4px',
                 paddingBottom: '4px',
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: '8px',
               }}
             >
-              {currentPassport.addresses.length > 1 && nfts.length > 0 ? (
-                <>
-                  <>
-                    {currentPassport.nfts.map((nft: LinkedNFT, idx: number) => (
-                      <NFT
-                        key={`owned-nft-${idx}`}
-                        selectable={false}
-                        nft={nft}
-                      />
-                    ))}
-                  </>
-                  <button
-                    style={{
-                      width: '115px',
-                      height: '115px',
-                      borderRadius: '8px',
-                      background: 'rgba(78, 158, 253, 0.08)',
-                    }}
-                    onClick={() => {
-                      setEditState('add-nft');
-                      nftPicker.current?.showModal();
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <PlusIcon />
-                    </div>
-                  </button>
-                </>
-              ) : currentPassport.addresses.length > 1 && nfts.length === 0 ? (
-                <>There are no NFTs owned by any of your linked wallets.</>
-              ) : (
-                <>To add NFTs, please link at least one wallet.</>
-              )}
+              <NftList
+                passport={currentPassport}
+                onAddNftClick={() => {
+                  setEditState('add-nft');
+                  nftPicker.current?.showModal();
+                }}
+              />
             </div>
           </div>
           <div style={{ width: '100%' }}>
@@ -940,7 +661,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </div>
               <hr
                 style={{
-                  // color: '#333333',
                   marginLeft: '8px',
                   backgroundColor: '#333333',
                   width: '100%',
@@ -948,12 +668,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   border: 0,
                   opacity: '10%',
                   flex: 1,
-                  // marginRight: '8px',
                 }}
               />
-              {/* <SocialButton onClick={onAddAddressClick}>
-                Add Address
-              </SocialButton> */}
             </div>
             <div
               style={{
@@ -962,121 +678,10 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {currentPassport.addresses?.filter(
-                (entry) => !(entry.wallet === 'account')
-              ).length > 0 ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}
-                >
-                  <>
-                    {currentPassport.addresses
-                      ?.filter((entry, index) => {
-                        return !(entry.wallet === 'account');
-                      })
-                      .map((entry, idx) => (
-                        <div
-                          key={`address-${idx}`}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            backgroundColor: '#F2F4F5',
-                            borderRadius: '8px',
-                            gap: '8px',
-                            padding: '8px',
-                            alignItems: 'center',
-                          }}
-                        >
-                          {/* <div
-                            style={{
-                              borderRadius: '4px',
-                              width: '20px',
-                              height: '20px',
-                            }}
-                          > */}
-                          <img
-                            style={{
-                              borderRadius: '4px',
-                              width: '20px',
-                              height: '20px',
-                            }}
-                            src={
-                              supportedWallets[entry.wallet]?.image_url ||
-                              undefined
-                            }
-                            alt={entry.wallet}
-                          ></img>
-                          {/* </div> */}
-                          <div style={{ flex: 1 }}>
-                            {renderAddress(entry.address as `0x${string}`)}
-                          </div>
-                          {currentPassport['default-address'] ===
-                            entry.address && (
-                            <div style={{ color: '#878889' }}>Public</div>
-                          )}
-                          <button
-                            onClick={() =>
-                              navigator.clipboard.writeText(entry.address)
-                            }
-                          >
-                            <CopyIcon fill={'#9FA1A1'} />
-                          </button>
-                        </div>
-                      ))}
-                    <button
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '8px',
-                        padding: '8px',
-                        // alignItems: 'center',
-                        // just: 'flex-start',
-                      }}
-                      onClick={onAddAddressClick}
-                    >
-                      <SmallPlusIcon />
-                      <div
-                        style={{
-                          flex: 1,
-                          color: '#4e9efd',
-                          textAlign: 'left',
-                        }}
-                      >
-                        Add another address
-                      </div>
-                    </button>
-                  </>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {/* <div style={{ fontSize: '0.8em' }}>No addresses found</div> */}
-                  <button
-                    style={{
-                      borderRadius: '10px',
-                      backgroundColor: '#FFFFFF',
-                      color: '#4292F1',
-                      lineHeight: '22px',
-                      padding: '13px 0',
-                    }}
-                    onClick={onAddAddressClick}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      <div>Connect your wallet</div>
-                    </div>
-                  </button>
-                </div>
-              )}
+              <LinkedWalletList
+                passport={currentPassport}
+                onAddAddressClick={onAddAddressClick}
+              />
             </div>
           </div>
           <div style={{ width: '100%' }}>
@@ -1104,7 +709,6 @@ function PassportEditor({ passport }: PassportEditorProps) {
               </div>
               <hr
                 style={{
-                  // color: '#333333',
                   marginLeft: '8px',
                   backgroundColor: '#333333',
                   width: '100%',
@@ -1112,12 +716,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   border: 0,
                   opacity: '10%',
                   flex: 1,
-                  // marginRight: '8px',
                 }}
               />
-              {/* <SocialButton onClick={onAddAddressClick}>
-                Add Address
-              </SocialButton> */}
             </div>
             <div
               style={{
@@ -1126,76 +726,57 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {currentPassport.addresses?.filter(
-                (entry, idx) => entry.wallet === 'account'
-              ).length > 0 ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}
-                >
-                  <>
-                    {currentPassport.addresses
-                      ?.filter((entry, idx) => entry.wallet === 'account')
-                      .map((entry, idx) => (
-                        <div
-                          key={`address-${idx}`}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            backgroundColor: '#F2F4F5',
-                            borderRadius: '8px',
-                            gap: '8px',
-                            padding: '8px',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <WalletIcon />
-                          <div
-                            style={{
-                              flex: 1,
-                              alignItems: 'center',
-                              verticalAlign: 'bottom',
-                              lineHeight: '24px',
-                            }}
-                          >
-                            {renderAddress(entry.address as `0x${string}`)}
-                          </div>
-                          <button
-                            onClick={() =>
-                              navigator.clipboard.writeText(entry.address)
-                            }
-                          >
-                            <CopyIcon fill={'#9FA1A1'} />
-                          </button>
-                        </div>
-                      ))}
-                  </>
-                </div>
-              ) : (
-                <>No device address</>
-              )}
+              <DeviceAddressList passport={currentPassport} />
             </div>
           </div>
         </>
       </div>
-      {/* <dialog id="editAvatarMenu" ref={editAvatarMenu}>
-        some content
-      </dialog> */}
-      {!(workflowStep === 'confirm-add-address') && RenderWorkflowNoneState()}
-      {workflowStep === 'confirm-add-address' &&
-        RenderWorkflowLinkAddressStep({
-          state: {
-            currentStep: 'confirm-add-address',
-            walletAddress: walletAddress as `0x${string}`,
-            deviceSigningKey: deviceSigningKey || '',
-            passport: passport,
-          },
-          onNextWorkflowStep,
-          onCloseWorkflow,
-        })}
+      <dialog
+        id="passportDialog"
+        ref={passportDialog}
+        style={{
+          borderRadius: '8px',
+          padding: '12px',
+          width: '400px',
+          minWidth: '400px',
+          backgroundColor: '#4292F1',
+          color: '#ffffff',
+        }}
+      >
+        {dialogContentId === 'confirm-add-wallet' && (
+          <PassportConfirmAddWallet
+            parentRef={passportDialog}
+            connector={connector}
+            walletClient={walletClient}
+            passport={passport}
+            deviceWallet={deviceWallet}
+            walletAddress={walletAddress}
+            onClose={(passport?: PassportProfile) => {
+              // if the passport is available, it means the wallet has been added to the passport
+              //   and this new passport will reflect the addition of the new wallet
+              if (passport) {
+                setCurrentPassport(passport);
+              }
+            }}
+          />
+        )}
+        {dialogContentId === 'wait-device-decrypt' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.9em',
+              padding: '8px 12px',
+            }}
+          >
+            <StyledSpinner color="#FFFFFF" size={12} width={1.5} />
+            Please wait while we decrypt your device wallet...
+          </div>
+        )}
+        {dialogContent === 'pick-nft' && <NftPickerContent />}
+      </dialog>
       <dialog
         id="nftPicker"
         ref={nftPicker}
@@ -1205,167 +786,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
           borderRadius: '10px',
           padding: '24px',
         }}
-      >
-        {/* <form> */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              gap: '8px',
-            }}
-          >
-            <span style={{ fontWeight: 450, color: '#333333' }}>
-              Select some NFTs
-            </span>
-            <hr
-              style={{
-                // color: '#333333',
-                // marginLeft: '8px',
-                backgroundColor: '#333333',
-                width: '100%',
-                height: '1px',
-                border: 0,
-                opacity: '10%',
-              }}
-            />
-          </div>
-          <span style={{ color: '#333333' }}>
-            Below is a listing of NFTs owned by one or more wallets in linked to
-            your passport. Select an NFT and click confirm to make the NFT part
-            of your public passport.
-          </span>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              gap: '8px',
-            }}
-          >
-            {nfts.map(
-              (nft: OwnedNft & { ownerAddress: string }, _idx: number) =>
-                nft.media.map((media: Media, idx: number) => (
-                  <OwnedNFT
-                    key={`owned-nft-${idx}`}
-                    selectable={true}
-                    isSelected={selectedMedia === media}
-                    nft={nft}
-                    media={media}
-                    onSelectionChange={(media: Media) => {
-                      // setSelectedAvatar(thumbnail);
-                      setSelectedNft(nft);
-                      setSelectedMedia(media);
-                    }}
-                  />
-                ))
-            )}
-          </div>
-          <hr
-            style={{
-              // color: '#333333',
-              // marginLeft: '8px',
-              backgroundColor: '#333333',
-              width: '100%',
-              height: '1px',
-              border: 0,
-              opacity: '10%',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: '8px',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              // marginTop: '24px',
-            }}
-          >
-            <SocialButton
-              formMethod="dialog"
-              value="cancel"
-              onClick={(e: any) => {
-                e.preventDefault();
-                setSelectedNft(undefined);
-                setSelectedMedia(undefined);
-                nftPicker.current?.close();
-              }}
-            >
-              Cancel
-            </SocialButton>
-            <SocialButton
-              id="confirmButton"
-              value="default"
-              onClick={(e: any) => {
-                e.preventDefault();
-                if (!(selectedNft && selectedMedia)) return;
-                if (editState === 'add-nft') {
-                  const encryptedDeviceData = localStorage.getItem(
-                    '/holium/realm/passport/device-signing-data'
-                  );
-                  if (!encryptedDeviceData) {
-                    console.error('no encrypted device data found');
-                    return;
-                  }
-                  addNFT(encryptedDeviceData, [
-                    ...currentPassport.nfts,
-                    {
-                      'token-standard': selectedNft.tokenType,
-                      name:
-                        selectedNft.title ||
-                        selectedNft?.rawMetadata?.name ||
-                        'error',
-                      'contract-address': selectedNft.contract.address,
-                      'token-id': selectedNft.tokenId,
-                      'image-url':
-                        selectedMedia.gateway || selectedMedia.thumbnail || '?',
-                      'chain-id': 'eth-mainnet',
-                      'owned-by': selectedNft.ownerAddress,
-                    },
-                  ])
-                    .then((result: any) => {
-                      if (result.term === 'poke-fail') {
-                        console.error('error => %o', result.tang[0]);
-                        return;
-                      }
-                      setCurrentPassport(result);
-                      nftPicker.current?.close();
-                    })
-                    .catch((e) => {
-                      console.error(e);
-                    });
-                } else if (editState === 'choose-nft') {
-                  if (selectedMedia.gateway || selectedMedia.thumbnail) {
-                    saveContact({
-                      ...currentPassport.contact,
-                      avatar: {
-                        type: 'nft',
-                        img:
-                          selectedMedia.gateway ||
-                          selectedMedia.thumbnail ||
-                          '',
-                      },
-                    }).then((response) => {
-                      if (response.term === 'poke-fail') {
-                        console.error('error => %o', response.tang[0]);
-                        return;
-                      }
-                      setCurrentPassport(response);
-                      nftPicker.current?.close();
-                    });
-                  }
-                }
-              }}
-            >
-              Confirm
-            </SocialButton>
-          </div>
-        </div>
-        {/* </form> */}
-      </dialog>
+      ></dialog>
     </div>
   );
 }
@@ -1382,11 +803,7 @@ export default function Home() {
   >('get-started');
   const [readyState, setReadyState] = useState<PageReadyState>('ready');
   const [lastError, setLastError] = useState<string>('');
-  const [deviceWallet, setDeviceWallet] = useState<{
-    mnemonic: string;
-    address: string;
-    privateKey: string;
-  } | null>(null);
+  const [deviceWallet, setDeviceWallet] = useState<Wallet | null>(null);
   const [words, setWords] = useState<string[]>([]);
 
   useEffect(() => {
@@ -1420,33 +837,32 @@ export default function Home() {
             }
           }
         }
-        const deviceKey = localStorage.getItem(
+        let deviceWalletAddress = null;
+        const encryptedDeviceData = localStorage.getItem(
           '/holium/realm/passport/device-signing-data'
         );
-        setPassport(passport);
-        if (passport.chain.length === 0 && !deviceKey) {
-          const { mnemonic, address, privateKey } = generateDeviceWallet();
-          setDeviceWallet({ mnemonic, address, privateKey });
-          setPageState('get-started');
-        } else if (passport.addresses.length === 0 && deviceKey) {
-          setPageState('device-inconsistent');
-        } else if (passport.addresses.length > 0 && !deviceKey) {
-          setPageState('passport-inconsistent');
+        if (encryptedDeviceData) {
+          try {
+            deviceWalletAddress = JSON.parse(encryptedDeviceData).address;
+          } catch (e) {
+            console.error(e);
+          }
         }
-        // else if (
-        //   passport.chain.length > 0 &&
-        //   passport.addresses[0].address !== deviceKey
-        // ) {
-        //   /* don't do anything here. if the user gets in this state, any
-        //      attempts to sign transactions and submit will fail server side */
-        // }
-        else {
+        setPassport(passport);
+        if (passport.chain.length === 0 && !deviceWalletAddress) {
+          const deviceWallet = generateDeviceWallet();
+          setDeviceWallet(deviceWallet);
+          setPageState('get-started');
+        } else if (passport.addresses.length === 0 && deviceWalletAddress) {
+          setPageState('device-inconsistent');
+        } else if (passport.addresses.length > 0 && !deviceWalletAddress) {
+          setPageState('passport-inconsistent');
+        } else {
           setPageState('edit-passport');
         }
       })
       .catch((e) => {
         console.error(e);
-        // setPageMode('error');
       });
   }, []);
 
@@ -1461,7 +877,10 @@ export default function Home() {
                 paddingBottom: '48px',
               }}
             >
-              <PassportEditor passport={passport} />
+              <PassportEditor
+                passport={passport}
+                deviceWallet={deviceWallet || undefined}
+              />
             </div>
           </WagmiConfig>
           <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
@@ -1498,8 +917,7 @@ export default function Home() {
               >
                 <>
                   {RenderGetStartedStep({
-                    signingAddress: deviceWallet.address,
-                    mnemonic: deviceWallet.mnemonic,
+                    deviceWallet: deviceWallet,
                     readyState,
                     onConfirm: () => {
                       setReadyState('loading');
@@ -1605,24 +1023,23 @@ export default function Home() {
                 localStorage.removeItem(
                   '/holium/realm/passport/device-signing-key'
                 );
-                const { mnemonic, address, privateKey } =
-                  generateDeviceWallet();
-                setDeviceWallet({ mnemonic, address, privateKey });
+                const deviceWallet = generateDeviceWallet();
+                setDeviceWallet(deviceWallet);
                 setPageState('get-started');
                 setReadyState('ready');
               } else if (pageState === 'passport-inconsistent') {
                 try {
-                  const { mnemonic, address, privateKey } = recoverDeviceWallet(
-                    words.join(' ')
+                  const deviceWallet = recoverDeviceWallet(words.join(' '));
+                  encryptWallet(deviceWallet.privateKey).then(
+                    (data: string) => {
+                      console.log('encrypted wallet: %o', data);
+                      localStorage.setItem(
+                        '/holium/realm/passport/device-signing-data',
+                        data
+                      );
+                    }
                   );
-                  encryptWallet(privateKey).then((data: string) => {
-                    console.log('encrypted wallet: %o', data);
-                    localStorage.setItem(
-                      '/holium/realm/passport/device-signing-data',
-                      data
-                    );
-                  });
-                  setDeviceWallet({ mnemonic, address, privateKey });
+                  setDeviceWallet(deviceWallet);
                   setPageState('edit-passport');
                 } catch (e) {
                   console.error(e);
