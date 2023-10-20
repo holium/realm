@@ -142,7 +142,7 @@ export async function createEpochPassportNode(
   }
 
   let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -199,17 +199,19 @@ export async function createEpochPassportNode(
   );
 
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
   return response.json();
 }
 
@@ -239,7 +241,7 @@ export async function addDeviceSigningKey(
   }
 
   let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -282,17 +284,19 @@ export async function addDeviceSigningKey(
   };
   console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
   return response.json();
 }
 
@@ -306,7 +310,7 @@ export async function addWalletAddress(
   const wallet = new ethers.Wallet(deviceSigningKey);
 
   let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -347,28 +351,38 @@ export async function addWalletAddress(
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   return response.json();
 }
 
-export async function addNFT(devicePrivateKey: string, nfts: LinkedNFT[]) {
-  let wallet = new ethers.Wallet(devicePrivateKey);
-  console.log(wallet.address);
+export async function addNFT(encryptedDeviceData: string, nfts: LinkedNFT[]) {
+  let response = await fetch(`/~/scry/profile/pwd.json`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const pwd = await response.json();
+
+  const wallet = await Wallet.fromEncryptedJson(encryptedDeviceData, pwd);
 
   console.log([wallet.address, nfts]);
-  let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+  response = await fetch(
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -411,17 +425,19 @@ export async function addNFT(devicePrivateKey: string, nfts: LinkedNFT[]) {
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   return response.json();
 }
@@ -445,10 +461,10 @@ export function recoverDeviceWallet(mnemonic: string) {
  * @param mnemonic
  * @returns
  */
-export async function addDevice(mnemonic: string) {
-  const wallet = Wallet.fromMnemonic(mnemonic);
+export async function addDevice(privateKey: string) {
+  const wallet = new Wallet(privateKey);
   let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -504,17 +520,20 @@ export async function addDevice(mnemonic: string) {
   );
 
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
   return response.json();
 }
 
@@ -533,15 +552,25 @@ function getRandomInt(min: number, max: number) {
  * @returns
  */
 export async function addWallet(
-  deviceSigningKey: string,
+  encryptedWalletData: string,
   wallet: any,
   walletName: string,
   walletAddress: string
 ) {
-  const deviceWallet = new Wallet(deviceSigningKey);
+  // const deviceWallet = new Wallet(deviceSigningKey);
+  let response = await fetch(`/~/scry/profile/pwd.json`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const pwd = await response.json();
 
-  let response = await fetch(
-    `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/passport/template/next-block/metadata-or-root.json`,
+  const deviceWallet = await Wallet.fromEncryptedJson(encryptedWalletData, pwd);
+
+  response = await fetch(
+    `/~/scry/passport/template/next-block/metadata-or-root.json`,
     {
       method: 'GET',
       credentials: 'include',
@@ -599,22 +628,34 @@ export async function addWallet(
 
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/passport-action/passport-vent/passport-vent`;
-  response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'add-link': root_node_link,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  response = await fetch(
+    `/spider/realm/passport-action/passport-vent/passport-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'add-link': root_node_link,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   return response.json();
 }
 
-export function encryptWallet(mnemonic: string, privateKey: string) {
+export async function encryptWallet(privateKey: string) {
   const wallet = new Wallet(privateKey);
-  return wallet.encrypt(mnemonic);
+
+  let response = await fetch(`/~/scry/profile/pwd.json`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const pwd = await response.json();
+
+  return wallet.encrypt(pwd);
 }

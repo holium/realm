@@ -233,6 +233,8 @@ interface PassportEditorProps {
   passport: PassportProfile;
 }
 
+type OwnerNft = OwnedNft & { ownerAddress: string };
+
 // page states:
 // not public - user chose to keep passport profile hidden
 // no passport - profile is not public
@@ -266,12 +268,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const passportWorkflow = useRef<HTMLDialogElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
-  const [nfts, setNFTs] = useState<OwnedNft[]>([]);
+  const [nfts, setNFTs] = useState<OwnerNft[]>([]);
   const [displayName, setDisplayName] = useState<string>(
     passport?.contact['display-name'] || passport?.contact?.ship || ''
   );
   const [bio, setBio] = useState<string>(passport?.contact?.bio || '');
-  const [selectedNft, setSelectedNft] = useState<OwnedNft | undefined>(
+  const [selectedNft, setSelectedNft] = useState<OwnerNft | undefined>(
     undefined
   );
   const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(
@@ -341,43 +343,65 @@ function PassportEditor({ passport }: PassportEditorProps) {
     avatarImage.src = avatar.src;
     avatarImage.crossOrigin = 'anonymous';
     avatarImage.onload = () => {
-      canvas.width = 120;
-      canvas.height = 120;
-      var s = Math.max(
-        canvas.width / avatarImage.width,
-        canvas.height / avatarImage.height
+      let rubik = new FontFace(
+        'Rubik',
+        'url(https://fonts.gstatic.com/s/rubik/v28/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4iFV0U1dYPFkZVO.woff2)'
       );
-      ctx.scale(s, s);
-      ctx.drawImage(avatarImage, 0, 0);
-      ctx.moveTo(0, 120);
-      const displayNameElem: HTMLInputElement | null = document.getElementById(
-        'display-name'
-      ) as HTMLInputElement;
-      const metrics = ctx.measureText(displayNameElem.value);
-      ctx.strokeText(displayNameElem.value, 0, 120, 300);
-      const textHeight =
-        metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-      ctx.moveTo(40, 20 + textHeight + 8);
-      // const patp: HTMLDivElement | null = document.getElementById(
-      //   'patp'
-      // ) as HTMLDivElement;
-      // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-      const dataUrl: string = canvas.toDataURL('image/png');
-      console.log('dataUrl => %o', dataUrl);
+      rubik.load().then((font) => {
+        document.fonts.add(font);
+        canvas.width = 400;
+        canvas.height = 140;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(120.0 / avatarImage.width, 120.0 / avatarImage.height);
+        ctx.drawImage(avatarImage, 10, 10);
+        const displayNameElem: HTMLInputElement | null =
+          document.getElementById('display-name') as HTMLInputElement;
+        ctx.font = "normal 32px 'Rubik'";
+        const metrics = ctx.measureText(displayNameElem.value);
+        const textHeight =
+          metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        ctx.fillStyle = '#333333';
+        ctx.fillText(displayNameElem.value, 212, 10 + textHeight, 300);
+        ctx.font = "normal 22px 'Rubik'";
+        ctx.fillStyle = '#8e8e8e';
+        ctx.fillText(
+          'This is for testing purposes only.',
+          212,
+          10 + textHeight + 10 + textHeight,
+          300
+        );
+        // setTimeout(() => {
+        //   ctx.moveTo(0, 0);
+        //   ctx.roundRect(0, 0, canvas.width, canvas.height, 10);
+        //   ctx.clip();
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const dataUrl: string = canvas.toDataURL('image/png');
+        // console.log('dataUrl => %o', dataUrl);
 
-      // passport snapshot is stored in profile agent
-      uploadDataURL(`${(window as any).ship}-passport`, dataUrl)
-        .then((url) => {
-          console.log('uploaded image => %o', url);
-          try {
-            (async function (url) {
-              await savePassportOpenGraphImage(url);
-            })(url);
-          } catch (e) {
-            console.error(e);
-          }
-        })
-        .catch((e) => console.error(e));
+        // passport snapshot is stored in profile agent
+        uploadDataURL(
+          `${(window as any).ship || 'development'}-passport`,
+          dataUrl
+        )
+          .then((url) => {
+            console.log('uploaded image => %o', url);
+            try {
+              (async function (url) {
+                await savePassportOpenGraphImage(url);
+              })(url);
+            } catch (e) {
+              console.error(e);
+            }
+          })
+          .catch((e) => console.error(e));
+        // }, 0);
+        // ctx.moveTo(40, 20 + textHeight + 8);
+        // const patp: HTMLDivElement | null = document.getElementById(
+        //   'patp'
+        // ) as HTMLDivElement;
+        // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
+      });
     };
     // avatarImage.crossOrigin = 'anonymous';
     // ctx.drawImage(avatarImage, 0, 0, 120, 120, 20, 20, 120, 120);
@@ -408,11 +432,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
   const onNextWorkflowStep = async (state: PassportWorkflowState) => {
     return new Promise<void>((resolve, reject) => {
-      const deviceSigningKey = localStorage.getItem(
-        '/holium/realm/passport/device-signing-key'
+      const encryptedData = localStorage.getItem(
+        '/holium/realm/passport/device-signing-data'
       );
-      if (!deviceSigningKey) {
-        console.error('no device private key found');
+      if (!encryptedData) {
+        console.error('no device signing encrypted info found');
         return;
       }
       if (walletAddress && walletClient) {
@@ -434,7 +458,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 .toLowerCase();
             }
             addWallet(
-              deviceSigningKey,
+              encryptedData,
               walletClient,
               walletProviderName,
               walletAddress
@@ -471,7 +495,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   };
 
   async function loadNFTs(passport: PassportProfile) {
-    let nfts = [];
+    let nfts: OwnerNft[] = [];
     for (let i = 0; i < passport.addresses.length; i++) {
       const address = passport.addresses[i];
       if (address.wallet !== 'account') {
@@ -480,7 +504,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
         );
         for (let i = 0; i < res.ownedNfts.length; i++) {
           const ownedNft = res.ownedNfts[i];
-          nfts.push({ ...ownedNft });
+          nfts.push({ ...ownedNft, ownerAddress: address.address });
         }
       }
     }
@@ -647,7 +671,15 @@ function PassportEditor({ passport }: PassportEditorProps) {
               currentPassport.contact.ship
             }
             src={currentPassport.contact.avatar.img}
-            style={{ width: '120px', height: '120px', borderRadius: '10px' }}
+            style={{
+              width: '120px',
+              height: '120px',
+              borderRadius: '10px',
+              mask:
+                currentPassport.contact.avatar.type === 'nft'
+                  ? 'url(nft.svg)'
+                  : 'none',
+            }}
           ></img>
         ) : (
           <div
@@ -1158,10 +1190,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
           state: {
             currentStep: 'confirm-add-address',
             walletAddress: walletAddress as `0x${string}`,
-            deviceSigningKey:
-              localStorage.getItem(
-                '/holium/realm/passport/device-signing-key'
-              ) || '',
+            deviceSigningKey: deviceSigningKey || '',
             passport: passport,
           },
           onNextWorkflowStep,
@@ -1215,21 +1244,22 @@ function PassportEditor({ passport }: PassportEditorProps) {
               gap: '8px',
             }}
           >
-            {nfts.map((nft: OwnedNft, _idx: number) =>
-              nft.media.map((media: Media, idx: number) => (
-                <OwnedNFT
-                  key={`owned-nft-${idx}`}
-                  selectable={true}
-                  isSelected={selectedMedia === media}
-                  nft={nft}
-                  media={media}
-                  onSelectionChange={(media: Media) => {
-                    // setSelectedAvatar(thumbnail);
-                    setSelectedNft(nft);
-                    setSelectedMedia(media);
-                  }}
-                />
-              ))
+            {nfts.map(
+              (nft: OwnedNft & { ownerAddress: string }, _idx: number) =>
+                nft.media.map((media: Media, idx: number) => (
+                  <OwnedNFT
+                    key={`owned-nft-${idx}`}
+                    selectable={true}
+                    isSelected={selectedMedia === media}
+                    nft={nft}
+                    media={media}
+                    onSelectionChange={(media: Media) => {
+                      // setSelectedAvatar(thumbnail);
+                      setSelectedNft(nft);
+                      setSelectedMedia(media);
+                    }}
+                  />
+                ))
             )}
           </div>
           <hr
@@ -1273,14 +1303,14 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 e.preventDefault();
                 if (!(selectedNft && selectedMedia)) return;
                 if (editState === 'add-nft') {
-                  const devicePrivateKey = localStorage.getItem(
-                    '/holium/realm/passport/device-signing-key'
+                  const encryptedDeviceData = localStorage.getItem(
+                    '/holium/realm/passport/device-signing-data'
                   );
-                  if (!devicePrivateKey) {
-                    console.error('no device private key found');
+                  if (!encryptedDeviceData) {
+                    console.error('no encrypted device data found');
                     return;
                   }
-                  addNFT(devicePrivateKey, [
+                  addNFT(encryptedDeviceData, [
                     ...currentPassport.nfts,
                     {
                       'token-standard': selectedNft.tokenType,
@@ -1293,9 +1323,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                       'image-url':
                         selectedMedia.gateway || selectedMedia.thumbnail || '?',
                       'chain-id': 'eth-mainnet',
-                      'owned-by': walletFromKey(
-                        devicePrivateKey
-                      ) as `0x${string}`,
+                      'owned-by': selectedNft.ownerAddress,
                     },
                   ])
                     .then((result: any) => {
@@ -1370,7 +1398,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}passport/our`, {
+    fetch(`/passport/our`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -1393,7 +1421,7 @@ export default function Home() {
           }
         }
         const deviceKey = localStorage.getItem(
-          '/holium/realm/passport/device-signing-key'
+          '/holium/realm/passport/device-signing-data'
         );
         setPassport(passport);
         if (passport.chain.length === 0 && !deviceKey) {
@@ -1475,27 +1503,20 @@ export default function Home() {
                     readyState,
                     onConfirm: () => {
                       setReadyState('loading');
-                      addDevice(deviceWallet.mnemonic)
-                        .then((response: PassportProfile) => {
-                          setPassport(response);
-                          if (response.addresses.length > 0) {
-                            encryptWallet(
-                              deviceWallet.mnemonic,
-                              deviceWallet.privateKey
-                            ).then((data: string) => {
+                      addDevice(deviceWallet.privateKey)
+                        .then((passport: PassportProfile) => {
+                          setPassport(passport);
+                          encryptWallet(deviceWallet.privateKey)
+                            .then((data: string) => {
                               console.log('encrypted wallet: %o', data);
                               localStorage.setItem(
-                                '/holium/realm/passport/device-signing-key',
+                                '/holium/realm/passport/device-signing-data',
                                 data
                               );
-                            });
-                            setReadyState('ready');
-                            setPageState('edit-passport');
-                          } else {
-                            console.warn(
-                              'warning: createDevice call succeeded. but no address found in response'
-                            );
-                          }
+                            })
+                            .catch((e) => console.error(e));
+                          setReadyState('ready');
+                          setPageState('edit-passport');
                         })
                         .catch((e) => {
                           console.error(e);
@@ -1594,10 +1615,10 @@ export default function Home() {
                   const { mnemonic, address, privateKey } = recoverDeviceWallet(
                     words.join(' ')
                   );
-                  encryptWallet(mnemonic, privateKey).then((data: string) => {
+                  encryptWallet(privateKey).then((data: string) => {
                     console.log('encrypted wallet: %o', data);
                     localStorage.setItem(
-                      '/holium/realm/passport/device-signing-key',
+                      '/holium/realm/passport/device-signing-data',
                       data
                     );
                   });

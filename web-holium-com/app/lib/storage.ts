@@ -111,7 +111,7 @@ export const getStorageConfig =
     let result = null;
     try {
       const credentialsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/api-store/credentials.json`,
+        `/~/scry/api-store/credentials.json`,
         {
           method: 'GET',
           credentials: 'include',
@@ -124,7 +124,7 @@ export const getStorageConfig =
       const credentials = await credentialsResponse.json();
 
       const configurationResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_SHIP_URL_TRAIL}~/scry/api-store/configuration.json`,
+        `/~/scry/api-store/configuration.json`,
         {
           method: 'GET',
           credentials: 'include',
@@ -145,18 +145,20 @@ export const getStorageConfig =
 
 export const savePassportOpenGraphImage = async (imageUrl: string) => {
   // attempt to post payload to ship
-  const url = `${process.env.NEXT_PUBLIC_SHIP_URL}/spider/realm/profile-action/profile-vent/profile-vent`;
-  const response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      'save-opengraph-image': {
-        img: imageUrl,
+  const response = await fetch(
+    `/spider/realm/profile-action/profile-vent/profile-vent`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        'save-opengraph-image': {
+          img: imageUrl,
+        },
+      }),
+      headers: {
+        'Content-Type': 'application/json',
       },
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    }
+  );
   return response.json();
 };
