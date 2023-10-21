@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const {
-  PHASE_DEVELOPMENT_SERVER,
+  // PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
 } = require('next/constants');
 
-module.exports = (phase, { defaultConfig }) => {
+module.exports = (phase /*{ defaultConfig }*/) => {
   const nextConfig = {
     basePath: phase === PHASE_PRODUCTION_BUILD ? '/passport' : '',
     output: 'export',
@@ -43,19 +43,19 @@ module.exports = (phase, { defaultConfig }) => {
     // Optional: Change the output directory `out` -> `dist`
     // distDir: 'dist',
 
-    eslint: {
-      // Warning: This allows production builds to successfully complete even if
-      // your project has ESLint errors.
-      ignoreDuringBuilds: true,
-    },
+    // eslint: {
+    //   // Warning: This allows production builds to successfully complete even if
+    //   // your project has ESLint errors.
+    //   ignoreDuringBuilds: true,
+    // },
 
-    typescript: {
-      // !! WARN !!
-      // Dangerously allow production builds to successfully complete even if
-      // your project has type errors.
-      // !! WARN !!
-      ignoreBuildErrors: true,
-    },
+    // typescript: {
+    //   // !! WARN !!
+    //   // Dangerously allow production builds to successfully complete even if
+    //   // your project has type errors.
+    //   // !! WARN !!
+    //   ignoreBuildErrors: true,
+    // },
   };
   return nextConfig;
 };

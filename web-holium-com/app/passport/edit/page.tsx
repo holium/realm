@@ -1,17 +1,10 @@
 'use client';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { EthereumClient, w3mProvider } from '@web3modal/ethereum';
-import { InjectedConnector } from 'wagmi/connectors/injected';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { useWeb3Modal, Web3Modal } from '@web3modal/react';
+import { useEffect, useRef, useState } from 'react';
+import { w3mProvider } from '@web3modal/ethereum';
+import { useWeb3Modal } from '@web3modal/react';
 import { Wallet } from 'ethers';
-import {
-  Alchemy,
-  Media,
-  Network,
-  OwnedNft,
-  OwnedNftsResponse,
-} from 'alchemy-sdk';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   configureChains,
   createConfig,
@@ -20,33 +13,30 @@ import {
   WagmiConfig,
 } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
+import { InjectedConnector } from 'wagmi/connectors/injected';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 
 import {
-  WorkflowStep,
-  PassportWorkflowState,
-  renderAddress,
-  RenderWorkflowLinkAddressStep,
-  RenderWorkflowNoneState,
-  RenderGetStartedStep,
   PageReadyState,
-  RenderDeviceKeyRecovery,
   PassportConfirmAddWallet,
+  RenderDeviceKeyRecovery,
+  RenderGetStartedStep,
 } from './workflow';
 
+import { ErrorIcon } from '@/app/assets/icons';
 import {
-  CopyIcon,
-  ErrorIcon,
-  PlusIcon,
-  SmallPlusIcon,
-  WalletIcon,
-} from '@/app/assets/icons';
-import { SocialButton } from '@/app/assets/styled';
-import { shipName, shipUrl, supportedWallets } from '@/app/lib/shared';
-import { ContactInfo, LinkedNFT, PassportProfile } from '@/app/lib/types';
+  DeviceAddressList,
+  LinkedWalletList,
+  NftList,
+  NftPickerContent,
+  StyledSpinner,
+} from '@/app/components';
+import { generateProfileSnap } from '@/app/lib/canvas';
+import { saveContact } from '@/app/lib/profile';
+import { savePassportOpenGraphImage, uploadDataURL } from '@/app/lib/storage';
+import { ContactInfo, PassportProfile } from '@/app/lib/types';
 import {
   addDevice,
-  addNft,
-  addWallet,
   decryptWallet,
   encryptWallet,
   generateDeviceWallet,
@@ -54,16 +44,6 @@ import {
   OwnerNft,
   recoverDeviceWallet,
 } from '@/app/lib/wallet';
-import { saveContact } from '@/app/lib/profile';
-import { useRouter } from 'next/navigation';
-import {
-  DeviceAddressList,
-  LinkedWalletList,
-  NftList,
-  StyledSpinner,
-} from '@/app/components';
-import { savePassportOpenGraphImage, uploadDataURL } from '@/app/lib/storage';
-import { generateProfileSnap } from '@/app/lib/canvas';
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -99,13 +79,7 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
-
-type PassportState =
-  | 'initial'
-  | 'passport-not-found'
-  | 'device-signing-key-not-found'
-  | 'passport-ready';
+// const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 interface PassportEditorProps {
   passport: PassportProfile;
@@ -115,53 +89,48 @@ interface PassportEditorProps {
 function PassportEditor({ passport, ...props }: PassportEditorProps) {
   const router = useRouter();
   const { open } = useWeb3Modal();
-  const { data: walletClient, isError, isLoading } = useWalletClient();
-  const { address /*isConnected */, connector, isConnected, isDisconnected } =
-    useAccount({
-      // @ts-ignore
-      onConnect({ address, connector, isReconnected }) {
-        console.log('Connected', { address, connector, isReconnected });
-        if (!isReconnected) {
-          setWalletAddress(address);
-          setDialogContentId('confirm-add-wallet');
-          passportDialog.current?.showModal();
-        }
-      },
-      onDisconnect() {
-        console.log('onDisconnect called');
-      },
-    });
+  const { data: walletClient /*, isError, isLoading*/ } = useWalletClient();
+  const {
+    /*address isConnected ,*/ connector /*, isConnected, isDisconnected*/,
+  } = useAccount({
+    // @ts-ignore
+    onConnect({ address, connector, isReconnected }) {
+      console.log('Connected', { address, connector, isReconnected });
+      if (!isReconnected) {
+        setWalletAddress(address);
+        setDialogContentId('confirm-add-wallet');
+        passportDialog.current?.showModal();
+      }
+    },
+    onDisconnect() {
+      console.log('onDisconnect called');
+    },
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nftPicker = useRef<HTMLDialogElement>(null);
   const passportDialog = useRef<HTMLDialogElement>(null);
   const [dialogContentId, setDialogContentId] = useState<
-    'none' | 'confirm-add-wallet' | 'wait-device-decrypt'
+    'none' | 'confirm-add-wallet' | 'wait-device-decrypt' | 'pick-nft'
   >('none');
   const [displayName, setDisplayName] = useState<string>(
     passport?.contact['display-name'] || passport?.contact?.ship || ''
   );
   const [bio, setBio] = useState<string>(passport?.contact?.bio || '');
-  const [selectedNft, setSelectedNft] = useState<OwnerNft | undefined>(
-    undefined
-  );
-  const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(
-    undefined
-  );
+  const [nftEditMode] = useState<'add-nft' | 'choose-nft'>('choose-nft');
+  const [ownerNfts] = useState<OwnerNft[]>([]);
   const [walletAddress, setWalletAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
   const [deviceWallet, setDeviceWallet] = useState<Wallet | null>(
-    props.deviceWallet ? props.deviceWallet! : null
+    props.deviceWallet ? props.deviceWallet : null
   );
   const [currentPassport, setCurrentPassport] =
     useState<PassportProfile>(passport);
-  const [editState, setEditState] = useState<string>('none');
+  const [, setEditState] = useState<string>('none');
 
   const [readyState, setReadyState] = useState<'ready' | 'loading' | 'error'>(
     'ready'
   );
-
-  if (!passport) return <></>;
 
   const filesChanged = (e: any) => {
     const reader = new FileReader();
@@ -240,6 +209,12 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
     });
   };
 
+  const onCloseNftPickerContent = (passport?: PassportProfile) => {
+    if (passport) {
+      setCurrentPassport(passport);
+    }
+  };
+
   useEffect(() => {
     setReadyState('loading');
     setDialogContentId('wait-device-decrypt');
@@ -263,6 +238,7 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
         setReadyState('error');
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   console.log('render => %o', readyState);
@@ -436,7 +412,7 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
           }}
         />
         {currentPassport.contact.avatar ? (
-          <img
+          <Image
             id={'avatar-image'}
             alt={
               currentPassport.contact['display-name'] ||
@@ -452,7 +428,7 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
                   ? 'url(nft.svg)'
                   : 'none',
             }}
-          ></img>
+          ></Image>
         ) : (
           <div
             style={{
@@ -775,7 +751,14 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
             Please wait while we decrypt your device wallet...
           </div>
         )}
-        {dialogContent === 'pick-nft' && <NftPickerContent />}
+        {dialogContentId === 'pick-nft' && (
+          <NftPickerContent
+            editMode={nftEditMode}
+            nfts={ownerNfts}
+            passport={currentPassport}
+            onClose={onCloseNftPickerContent}
+          />
+        )}
       </dialog>
       <dialog
         id="nftPicker"
@@ -802,7 +785,7 @@ export default function Home() {
     | 'passport-inconsistent'
   >('get-started');
   const [readyState, setReadyState] = useState<PageReadyState>('ready');
-  const [lastError, setLastError] = useState<string>('');
+  const [, setLastError] = useState<string>('');
   const [deviceWallet, setDeviceWallet] = useState<Wallet | null>(null);
   const [words, setWords] = useState<string[]>([]);
 
@@ -864,7 +847,7 @@ export default function Home() {
       .catch((e) => {
         console.error(e);
       });
-  }, []);
+  }, [words]);
 
   return (
     <>
@@ -883,7 +866,7 @@ export default function Home() {
               />
             </div>
           </WagmiConfig>
-          <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+          {/* <Web3Modal projectId={projectId} ethereumClient={ethereumClient} /> */}
         </>
       ) : null}
       {deviceWallet && pageState === 'get-started' && (

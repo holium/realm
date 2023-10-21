@@ -1,29 +1,16 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { LinkedNFT, PassportProfile } from '../lib/types';
+import { Media, OwnedNft } from 'alchemy-sdk';
 import { Wallet } from 'ethers';
+import Image from 'next/image';
+import styled from 'styled-components';
 
-import {
-  Alchemy,
-  Media,
-  Network,
-  OwnedNft,
-  OwnedNftsResponse,
-} from 'alchemy-sdk';
 import { CopyIcon, PlusIcon, SmallPlusIcon, WalletIcon } from '../assets/icons';
-import { OwnerNft, addNft, loadNfts } from '../lib/wallet';
-import { renderAddress } from '../passport/edit/workflow';
-import { supportedWallets } from '../lib/shared';
 import { SocialButton } from '../assets/styled';
 import { saveContact } from '../lib/profile';
-
-// Optional Config object, but defaults to demo api-key and eth-mainnet.
-const settings = {
-  apiKey: 'YVJ7LV7w8esHG18rdnKSERfN_OcyJWY_', // Replace with your Alchemy API Key.
-  network: Network.ETH_MAINNET, // Replace with your network.
-};
-
-const alchemy = new Alchemy(settings);
+import { supportedWallets } from '../lib/shared';
+import { LinkedNFT, PassportProfile } from '../lib/types';
+import { addNft, loadNfts, OwnerNft } from '../lib/wallet';
+import { renderAddress } from '../passport/edit/workflow';
 
 type Props = {
   size: number;
@@ -89,7 +76,7 @@ const NFT = ({ nft, selectable, isSelected, onSelectionChange }: NFTProps) => {
         ></input>
       )}
       {nft['image-url'] && (
-        <img
+        <Image
           alt={'nft'}
           src={nft['image-url']}
           style={{
@@ -97,7 +84,7 @@ const NFT = ({ nft, selectable, isSelected, onSelectionChange }: NFTProps) => {
             width: '115px',
             borderRadius: '8px',
           }}
-        ></img>
+        ></Image>
       )}
     </div>
   );
@@ -120,8 +107,11 @@ export const NftList = ({ passport, onAddNftClick }: NftListProps) => {
         setNFTs(nfts);
         setReadyState('ready');
       })
-      .catch((e) => setReadyState('error'));
-  }, [passport.addresses.length]);
+      .catch((e) => {
+        console.error(e);
+        setReadyState('error');
+      });
+  }, [passport]);
 
   let content = <></>;
 
@@ -245,15 +235,15 @@ const OwnedNFT = ({
             ></input>
           )} */}
           {(media.gateway || media.thumbnail) && (
-            <img
+            <Image
               alt={'nft'}
-              src={media.gateway || media.thumbnail}
+              src={media.gateway || media.thumbnail || ''}
               style={{
                 height: '115px',
                 width: '115px',
                 borderRadius: '8px',
               }}
-            ></img>
+            ></Image>
           )}
         </div>
       </button>
@@ -281,7 +271,7 @@ export const LinkedWalletList = ({
     >
       <>
         {passport.addresses
-          ?.filter((entry, index) => {
+          ?.filter((entry) => {
             return !(entry.wallet === 'account');
           })
           .map((entry, idx) => (
@@ -297,15 +287,15 @@ export const LinkedWalletList = ({
                 alignItems: 'center',
               }}
             >
-              <img
+              <Image
                 style={{
                   borderRadius: '4px',
                   width: '20px',
                   height: '20px',
                 }}
-                src={supportedWallets[entry.wallet]?.image_url || undefined}
+                src={supportedWallets[entry.wallet]?.image_url || ''}
                 alt={entry.wallet}
-              ></img>
+              ></Image>
               <div style={{ flex: 1 }}>
                 {renderAddress(entry.address as `0x${string}`)}
               </div>
@@ -374,7 +364,7 @@ interface LinkedDeviceListProps {
 }
 
 export const DeviceAddressList = ({ passport }: LinkedDeviceListProps) => {
-  return passport.addresses?.filter((entry, idx) => entry.wallet === 'account')
+  return passport.addresses?.filter((entry) => entry.wallet === 'account')
     .length > 0 ? (
     <div
       style={{
@@ -385,7 +375,7 @@ export const DeviceAddressList = ({ passport }: LinkedDeviceListProps) => {
     >
       <>
         {passport.addresses
-          ?.filter((entry, idx) => entry.wallet === 'account')
+          ?.filter((entry) => entry.wallet === 'account')
           .map((entry, idx) => (
             <div
               key={`address-${idx}`}
@@ -426,6 +416,7 @@ export const DeviceAddressList = ({ passport }: LinkedDeviceListProps) => {
 
 interface NftPickerContentProps {
   editMode: 'add-nft' | 'choose-nft';
+  nfts: OwnerNft[];
   deviceWallet?: Wallet;
   passport: PassportProfile;
   onClose: (passport?: PassportProfile) => void;
@@ -433,6 +424,7 @@ interface NftPickerContentProps {
 
 export const NftPickerContent = ({
   editMode,
+  nfts,
   deviceWallet,
   passport,
   onClose,
@@ -536,7 +528,7 @@ export const NftPickerContent = ({
           gap: '8px',
         }}
       >
-        {nfts.map((nft: OwnedNft & { ownerAddress: string }, _idx: number) =>
+        {nfts.map((nft: OwnerNft, _idx: number) =>
           nft.media.map((media: Media, idx: number) => (
             <OwnedNFT
               key={`owned-nft-${idx}`}
