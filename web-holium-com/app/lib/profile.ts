@@ -1,5 +1,4 @@
 import { ContactInfo } from './types';
-import { shipUrl } from './shared';
 
 export async function saveContact(contact: ContactInfo) {
   const response = await fetch(

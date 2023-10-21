@@ -858,6 +858,7 @@ export default function Home() {
               style={{
                 paddingTop: '48px',
                 paddingBottom: '48px',
+                color: '#333333',
               }}
             >
               <PassportEditor

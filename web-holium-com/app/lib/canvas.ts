@@ -10,12 +10,12 @@ export const generateProfileSnap = (document: Document): Promise<string> =>
       const avatar: HTMLImageElement | null = document.getElementById(
         'avatar-image'
       ) as HTMLImageElement;
-      let avatarImage = new Image();
+      const avatarImage = new Image();
       avatarImage.src = avatar.src;
       avatarImage.crossOrigin = 'anonymous';
       avatarImage.onerror = () => reject('failed to load image');
       avatarImage.onload = () => {
-        let rubik = new FontFace(
+        const rubik = new FontFace(
           'Rubik',
           'url(https://fonts.gstatic.com/s/rubik/v28/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4iFV0U1dYPFkZVO.woff2)'
         );
