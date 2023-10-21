@@ -1,13 +1,15 @@
 'use client';
 
-import { CopyIcon } from '@/app/assets/icons';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+import { CopyIcon, WalletIcon } from '../assets/icons';
+import { supportedWallets } from '../lib/shared';
+import { renderAddress } from './edit/workflow';
+
 // import { isProd, shipUrl } from '@/app/lib/shared';
 import { LinkedNFT, PassportProfile } from '@/app/lib/types';
-import { renderAddress } from './edit/workflow';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { shipUrl, supportedWallets } from '../lib/shared';
-import { WalletIcon } from '../assets/icons';
 
 interface NFTProps {
   nft: LinkedNFT;
@@ -26,7 +28,7 @@ const NFT = ({ nft }: NFTProps) => {
       }}
     >
       {nft['image-url'] && (
-        <img
+        <Image
           alt={'nft'}
           src={nft['image-url']}
           style={{
@@ -34,7 +36,7 @@ const NFT = ({ nft }: NFTProps) => {
             width: '115px',
             borderRadius: '8px',
           }}
-        ></img>
+        ></Image>
       )}
     </div>
   );
@@ -118,11 +120,11 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
           }}
         >
           {passport.contact.avatar ? (
-            <img
+            <Image
               alt={passport.contact['display-name'] || passport.contact.ship}
               src={passport.contact.avatar.img}
               style={{ width: '120px', height: '120px', borderRadius: '10px' }}
-            ></img>
+            ></Image>
           ) : (
             <div
               style={{
@@ -297,7 +299,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 >
                   <>
                     {passport.addresses
-                      ?.filter((entry, index) => {
+                      ?.filter((entry) => {
                         console.log('address => %o', entry);
                         console.log(
                           'wallet => %o',
@@ -319,18 +321,17 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                             justifyContent: 'center',
                           }}
                         >
-                          <img
+                          <Image
                             style={{
                               borderRadius: '4px',
                               width: '20px',
                               height: '20px',
                             }}
                             src={
-                              supportedWallets[entry.wallet]?.image_url ||
-                              undefined
+                              supportedWallets[entry.wallet]?.image_url || ''
                             }
                             alt={entry.wallet}
-                          ></img>
+                          ></Image>
                           <div style={{ flex: 1, verticalAlign: 'middle' }}>
                             {renderAddress(entry.address as `0x${string}`)}
                           </div>
@@ -408,7 +409,7 @@ function PassportView({ canEdit, passport }: PassportViewProps) {
                 >
                   <>
                     {passport.addresses
-                      ?.filter((entry, idx) => entry.wallet === 'account')
+                      ?.filter((entry) => entry.wallet === 'account')
                       .map((entry, idx) => (
                         <div
                           key={`address-${idx}`}

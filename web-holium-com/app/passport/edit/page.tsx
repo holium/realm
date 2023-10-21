@@ -719,23 +719,26 @@ function PassportEditor({ passport, ...props }: PassportEditorProps) {
           color: '#ffffff',
         }}
       >
-        {dialogContentId === 'confirm-add-wallet' && (
-          <PassportConfirmAddWallet
-            parentRef={passportDialog}
-            connector={connector}
-            walletClient={walletClient}
-            passport={passport}
-            deviceWallet={deviceWallet}
-            walletAddress={walletAddress}
-            onClose={(passport?: PassportProfile) => {
-              // if the passport is available, it means the wallet has been added to the passport
-              //   and this new passport will reflect the addition of the new wallet
-              if (passport) {
-                setCurrentPassport(passport);
-              }
-            }}
-          />
-        )}
+        {dialogContentId === 'confirm-add-wallet' &&
+          connector &&
+          deviceWallet &&
+          walletAddress && (
+            <PassportConfirmAddWallet
+              parentRef={passportDialog}
+              connector={connector}
+              walletClient={walletClient}
+              passport={passport}
+              deviceWallet={deviceWallet}
+              walletAddress={walletAddress}
+              onClose={(passport?: PassportProfile) => {
+                // if the passport is available, it means the wallet has been added to the passport
+                //   and this new passport will reflect the addition of the new wallet
+                if (passport) {
+                  setCurrentPassport(passport);
+                }
+              }}
+            />
+          )}
         {dialogContentId === 'wait-device-decrypt' && (
           <div
             style={{

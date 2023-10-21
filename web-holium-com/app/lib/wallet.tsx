@@ -1,12 +1,8 @@
+import { Alchemy, Network, OwnedNft, OwnedNftsResponse } from 'alchemy-sdk';
 import { ethers, Wallet } from 'ethers';
-import { createWalletClient, custom, recoverPublicKey } from 'viem';
-import { generateMnemonic, english } from 'viem/accounts';
-import { mainnet } from 'viem/chains';
-import { Network, Alchemy, OwnedNft, OwnedNftsResponse } from 'alchemy-sdk';
+import { english, generateMnemonic } from 'viem/accounts';
 
-import { EPOCH_NODE_POC, LinkedNFT, PassportProfile } from './types';
-import { WalletClient } from 'wagmi';
-import { StringDecoder } from 'string_decoder';
+import { LinkedNFT, PassportProfile } from './types';
 
 declare global {
   interface Window {
@@ -26,7 +22,7 @@ const alchemy = new Alchemy(settings);
 export type OwnerNft = OwnedNft & { ownerAddress: string };
 
 export async function loadNfts(passport: PassportProfile) {
-  let nfts: OwnerNft[] = [];
+  const nfts: OwnerNft[] = [];
   for (let i = 0; i < passport.addresses.length; i++) {
     const address = passport.addresses[i];
     if (address.wallet !== 'account') {
@@ -147,12 +143,12 @@ export async function addDevice(privateKey: string) {
     return;
   }
 
-  let val = metadata['pki-state']['address-to-entity'].FILL_IN;
+  const val = metadata['pki-state']['address-to-entity'].FILL_IN;
   metadata['pki-state']['address-to-entity'] = {
     [wallet.address]: val,
   };
 
-  let nonce = metadata['pki-state']['address-to-nonce'].FILL_IN;
+  const nonce = metadata['pki-state']['address-to-nonce'].FILL_IN;
   metadata['pki-state']['address-to-nonce'] = {
     [wallet.address]: nonce,
   };
@@ -218,7 +214,7 @@ export async function addWallet(
   deviceWallet: Wallet,
   wallet: any,
   walletName: string,
-  walletAddress: string
+  walletAddress: `0x${string}`
 ) {
   let response = await fetch(
     `/~/scry/passport/template/next-block/metadata-or-root.json`,
@@ -299,7 +295,7 @@ export async function addWallet(
 export async function encryptWallet(privateKey: string) {
   const wallet = new Wallet(privateKey);
 
-  let response = await fetch(`/~/scry/profile/pwd.json`, {
+  const response = await fetch(`/~/scry/profile/pwd.json`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -312,7 +308,7 @@ export async function encryptWallet(privateKey: string) {
 }
 
 export async function decryptWallet(encryptedDeviceData: string) {
-  let response = await fetch(`/~/scry/profile/pwd.json`, {
+  const response = await fetch(`/~/scry/profile/pwd.json`, {
     method: 'GET',
     credentials: 'include',
     headers: {

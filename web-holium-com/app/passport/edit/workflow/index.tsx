@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import { Wallet } from 'ethers';
 import { Connector } from 'wagmi/connectors';
 
@@ -625,12 +624,12 @@ export function RenderWorkflowLinkDeviceKeyStep({
 }
 
 interface PassportConfirmAddWalletProps {
-  parentRef?: React.RefObject<HTMLDialogElement>;
-  connector?: Connector<any, any>;
-  walletClient?: any;
-  passport?: PassportProfile;
-  deviceWallet?: Wallet | null;
-  walletAddress?: `0x${string}`;
+  parentRef: React.RefObject<HTMLDialogElement>;
+  connector: Connector<any, any>;
+  walletClient: any;
+  passport: PassportProfile;
+  deviceWallet: Wallet;
+  walletAddress: `0x${string}`;
   onClose: (result?: PassportProfile) => void;
 }
 
@@ -643,20 +642,6 @@ export function PassportConfirmAddWallet({
   walletAddress,
   onClose,
 }: PassportConfirmAddWalletProps) {
-  if (
-    !(
-      parentRef &&
-      connector &&
-      walletClient &&
-      passport &&
-      deviceWallet &&
-      walletAddress
-    )
-  ) {
-    console.error('PassportConfirmAddWalletProps: unexpected state');
-    return;
-  }
-
   const [readyState, setReadyState] = useState<'ready' | 'loading' | 'error'>(
     'ready'
   );
@@ -669,7 +654,7 @@ export function PassportConfirmAddWallet({
     try {
       const provider: any = await connector?.getProvider();
 
-      let walletProviderName: string = '';
+      let walletProviderName = '';
       // if signer information available, use this to get wallet name
       if (provider.isMetaMask) {
         walletProviderName = 'metamask';
@@ -1033,12 +1018,12 @@ export function RenderDeviceKeyRecovery({
                 onPaste={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  let data =
+                  const data =
                     event.clipboardData || (window as any).clipboardData;
-                  let txt: string = data.getData('Text') as string;
+                  const txt: string = data.getData('Text') as string;
                   if (idx === 0) {
                     const segments = txt.split(' ');
-                    let updated = Array(12).fill('');
+                    const updated = Array(12).fill('');
                     for (let i = 0; i < 12; i++) {
                       if (segments.length > i) {
                         updated[i] = segments[i];
