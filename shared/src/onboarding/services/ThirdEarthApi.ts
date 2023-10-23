@@ -43,7 +43,6 @@ type GetPlanetsResponse = {
     [key: number]: {
       id: number;
       patp: string;
-      planet_status: 'available' | 'sold';
       sigil: string;
     };
   };

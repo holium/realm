@@ -22,9 +22,9 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const productId = products[0].id;
 
   const planets = await thirdEarthApi.getPlanets(productId);
-  const identities = Object.values(planets.planets)
-    .filter((planet) => planet.planet_status === 'available')
-    .map((planet) => planet.patp);
+  const identities = Object.values(planets.planets).map(
+    (planet) => planet.patp
+  );
 
   return {
     props: {
