@@ -124,12 +124,33 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
   }
 
   private async _fetchFriends() {
-    // Get last timestamp
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'friends',
-      path: '/all',
+    const contacts = await APIConnection.getInstance().conduit.scry({
+      app: 'passport',
+      path: '/contacts',
     });
-    return response?.friends;
+    const friends = await APIConnection.getInstance().conduit.scry({
+      app: 'passport',
+      path: '/friends',
+    });
+    const result: any = {};
+    for (const c of contacts) {
+      const isfriend = !!friends.find(
+        (f: any) => f.status === 'friend' && f.ship === c.ship
+      );
+      result[c.ship] = {
+        status: isfriend ? 'fren' : 'contact',
+        tags: [],
+        pinned: false,
+        contactInfo: {
+          avatar: c.avatar,
+          cover: null,
+          bio: c.bio,
+          nickname: c['display-name'],
+          color: c.color || '#000000',
+        },
+      };
+    }
+    return result;
   }
 
   public async getFriends() {
