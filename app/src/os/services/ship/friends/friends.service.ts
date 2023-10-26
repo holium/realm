@@ -111,15 +111,18 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
     insertMany(friends);
   }
 
-  async fetchOne(patp: string) {
+  async fetchOur() {
     const response = await APIConnection.getInstance().conduit.scry({
-      app: 'friends',
-      path: `/contact/${patp}`,
+      app: 'passport',
+      path: '/our-passport',
     });
 
     return {
-      ...response,
-      color: response.color ? cleanNounColor(response.color) : '#000',
+      avatar: response.contact.avatar ? response.contact.avatar.img : null,
+      cover: response.cover,
+      bio: response.contact.bio,
+      nickname: response.contact['display-name'],
+      color: response.contact.color || '#000000',
     };
   }
 
@@ -142,7 +145,7 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
         tags: [],
         pinned: false,
         contactInfo: {
-          avatar: c.avatar,
+          avatar: c.avatar ? c.avatar.img : null,
           cover: null,
           bio: c.bio,
           nickname: c['display-name'],
