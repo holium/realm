@@ -324,12 +324,10 @@ export class ShipService extends AbstractService<any> {
 
       // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
       let endp = response.credentials.endpoint;
+      endp = endp.replace('https://', '');
       if (endp.split('.')[0] === response.configuration.currentBucket) {
         endp = endp.split('.').slice(1).join('.');
       }
-
-      endp = endp.replace('https://', '');
-
       const client = new S3Client({
         endpoint: response.credentials.endpoint.includes('https://')
           ? response.credentials.endpoint
