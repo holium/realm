@@ -114,7 +114,7 @@ const configuration: webpack.Configuration = {
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
-      API_URL: 'https://backend-server.third.earth',
+      API_URL: 'https://backend-server.holium.network',
       JOIN_API_URL: 'https://join.holium.com',
       API_HEADERS_CLIENT_ID: '5',
       API_HEADERS_VERSION: '2',

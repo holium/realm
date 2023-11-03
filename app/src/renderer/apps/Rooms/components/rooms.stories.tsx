@@ -35,12 +35,6 @@ const contacts: any = {
     avatar:
       'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/~fasnut-famden/1683832836-fasnut-famden%20light%20blue%20green.jpg',
   },
-  '~lopsyp-doztun': {
-    color: '#129131',
-    nickname: 'Gus',
-    avatar:
-      'https://rindux-mocrux.s31.third.earth/~lopsyp-doztun/1683061010-boom.jpeg',
-  },
   '~hostyv': {
     color: '#785218',
     nickname: 'hostyv',
