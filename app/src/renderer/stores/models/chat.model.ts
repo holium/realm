@@ -102,7 +102,7 @@ const InvitePermission = types.enumeration(['host', 'anyone', 'open']);
 export type InvitePermissionType = Instance<typeof InvitePermission>;
 
 const PeerModel = types.model('PeerModel', {
-  role: types.enumeration(['host', 'member']),
+  role: types.enumeration(['host', 'member', 'admin']),
   ship: types.string,
 });
 export type PeerModelType = Instance<typeof PeerModel>;
