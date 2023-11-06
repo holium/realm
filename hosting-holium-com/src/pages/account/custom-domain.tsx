@@ -35,25 +35,23 @@ const CustomDomainPresenter = () => {
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
 
-    const result = await thirdEarthApi.setCustomDomain(
-      token,
-      domain,
-      ship.droplet_id.toString(),
-      ship.droplet_ip,
-      ship.id.toString(),
-      ship.user_id.toString()
-    );
-
-    if (result) {
-      if (result.checkIp !== ship.droplet_id.toString()) {
-        setErrorMessage(
-          `The domain you entered does not point to the correct IP address (${ship.droplet_ip}).`
-        );
-      } else {
-        setSuccessMessage(
-          `Your domain has been set to ${domain}. It may take a few minutes to propagate.`
-        );
-      }
+    try {
+      await thirdEarthApi.setCustomDomain(
+        token,
+        domain,
+        ship.droplet_id.toString(),
+        ship.droplet_ip,
+        ship.id.toString(),
+        ship.user_id.toString()
+      );
+      setSuccessMessage(
+        `Your domain has been set to ${domain}. It may take a few minutes to propagate.`
+      );
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(
+        `The domain you entered does not point to the correct IP address (${ship.droplet_ip}).`
+      );
     }
 
     submitting.toggleOff();
