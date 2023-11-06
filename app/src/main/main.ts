@@ -96,7 +96,7 @@ export const bootRealm = () => {
     }
   });
 
-  mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
+  mouseOverlayWindow = createMouseOverlayWindow(realmWindow, realmService);
 
   menuBuilder = null;
 
@@ -136,7 +136,7 @@ export const bootStandaloneChat = () => {
   if (realmWindow && !realmWindow.isDestroyed()) {
     // We need to window the window before closing it, otherwise
     // the Mac menubar isn't reliably restored from simple fullscreen.
-    windowWindow(realmWindow);
+    windowWindow(realmWindow, undefined);
     realmWindow.destroy();
   }
 
@@ -144,7 +144,10 @@ export const bootStandaloneChat = () => {
 
   setRealmCursor(false);
   standaloneChatWindow = createStandaloneChatWindow();
-  mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
+  mouseOverlayWindow = createMouseOverlayWindow(
+    standaloneChatWindow,
+    realmService
+  );
 
   menuBuilder = null;
 
