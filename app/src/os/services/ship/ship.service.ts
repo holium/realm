@@ -186,7 +186,7 @@ export class ShipService extends AbstractService<any> {
   }
 
   public async getOurPassport() {
-    return await this.services?.friends.fetchOne(this.patp);
+    return await this.services?.friends.fetchOur();
   }
 
   public updateCookie(cookie: string) {
@@ -410,7 +410,7 @@ export class ShipService extends AbstractService<any> {
 
   getPassport() {
     if (!this.services) return;
-    return this.services.friends.fetchOne(this.patp);
+    return this.services.friends.fetchOur();
   }
 
   updatePassport(
