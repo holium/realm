@@ -136,7 +136,7 @@ export const bootStandaloneChat = () => {
   if (realmWindow && !realmWindow.isDestroyed()) {
     // We need to window the window before closing it, otherwise
     // the Mac menubar isn't reliably restored from simple fullscreen.
-    windowWindow(realmWindow, undefined);
+    windowWindow(realmWindow, null);
     realmWindow.destroy();
   }
 

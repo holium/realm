@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
+import { RealmService } from '../../os/realm.service';
 import { isMacWithCameraNotch } from './env';
 
 // Get the menu bar of new macs with notch.
@@ -50,7 +51,10 @@ const getFullScreenBounds = () => {
   return fullScreenBounds;
 };
 
-export const fullScreenWindow = (window: BrowserWindow, realmService: any) => {
+export const fullScreenWindow = (
+  window: BrowserWindow,
+  realmService: RealmService | null
+) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
 
@@ -62,7 +66,10 @@ export const fullScreenWindow = (window: BrowserWindow, realmService: any) => {
   realmService?.setLastWindowBounds(fullScreenBounds);
 };
 
-export const windowWindow = (window: BrowserWindow, realmService: any) => {
+export const windowWindow = (
+  window: BrowserWindow,
+  realmService: RealmService | null
+) => {
   const windowedBounds = getWindowedBounds();
 
   window.setFullScreen(false);
@@ -92,7 +99,7 @@ export const toggleFullScreen = (window: BrowserWindow) => {
 const registerListeners = (
   mainWindow: BrowserWindow,
   mouseWindow: BrowserWindow,
-  realmService: any
+  realmService: RealmService | null
 ) => {
   rs = realmService;
   mainWindow.on('enter-full-screen', () => {
