@@ -43,7 +43,7 @@
     "better-sqlite3-multiple-ciphers": "^8.2.0",
     "big-integer": "^1.6.51",
     "coingecko-api": "^1.0.10",
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "disable-scroll": "^0.6.0",
     "electron-debug": "^3.2.0",
     "electron-dl": "^3.5.0",
