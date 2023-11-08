@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_ENV: development
-  API_URL: 'https://backend-server-test.thirdearth.com'
+  API_URL: 'https://backend-server-test.plymouth.network'
   API_HEADERS_VERSION: '2'
   API_HEADERS_CLIENT_ID: '5'
   STRIPE_KEY: 'pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM'
