@@ -38,7 +38,7 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     // Preserve fullscreen state.
     const isFullScreen = mainWindow.isFullScreen();
     if (isFullScreen) {
-      fullScreenWindow(mainWindow);
+      fullScreenWindow(mainWindow, null);
     }
   });
 };

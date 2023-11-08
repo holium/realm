@@ -1,5 +1,6 @@
 import { BrowserWindow, shell } from 'electron';
 
+import { RealmService } from '../os/realm.service';
 import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
@@ -81,7 +82,7 @@ export const createRealmWindow = (
         initialBounds === undefined) &&
       !hasBeenExpanded(newRealmWindow)
     ) {
-      fullScreenWindow(newRealmWindow, undefined);
+      fullScreenWindow(newRealmWindow, null);
     } else {
       if (initialBounds !== undefined) {
         newRealmWindow.setBounds(initialBounds);
@@ -100,7 +101,7 @@ export const createRealmWindow = (
 
 export const createMouseOverlayWindow = (
   parentWindow: BrowserWindow,
-  realmService: any
+  realmService: RealmService | null
 ) => {
   // Create a window covering the whole main window.
   const defaultMouseWindowOptions: Electron.BrowserWindowConstructorOptions = {
@@ -207,7 +208,7 @@ export const createStandaloneChatWindow = () => {
 
   newStandaloneChatWindow.on('ready-to-show', () => {
     if (!hasBeenExpanded(newStandaloneChatWindow)) {
-      windowWindow(newStandaloneChatWindow, undefined);
+      windowWindow(newStandaloneChatWindow, null);
     }
 
     newStandaloneChatWindow.show();
