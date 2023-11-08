@@ -178,7 +178,9 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
       this._sendAuthenticated(patp, credentials.url, credentials.cookie ?? '');
       const updatedPassport = await this.services.ship?.getOurPassport();
-      this.services.auth.setPassport(patp, updatedPassport);
+      if (updatedPassport) {
+        this.services.auth.setPassport(patp, updatedPassport);
+      }
     }
     return isAuthenticated;
   }
