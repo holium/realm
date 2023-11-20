@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
+import { RealmService } from '../../os/realm.service';
 import { isMacWithCameraNotch } from './env';
 
 // Get the menu bar of new macs with notch.
@@ -50,19 +51,25 @@ const getFullScreenBounds = () => {
   return fullScreenBounds;
 };
 
-export const fullScreenWindow = (window: BrowserWindow) => {
+export const fullScreenWindow = (
+  window: BrowserWindow,
+  realmService: RealmService | null
+) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
-  window.setFullScreen(true);
 
   const hasCameraNotch = isMacWithCameraNotch();
   if (hasCameraNotch) window.setSimpleFullScreen(true);
   else window.setFullScreen(true);
   window.webContents.send('set-fullscreen', true);
   window.webContents.send('use-custom-titlebar', hasCameraNotch);
+  realmService?.setLastWindowBounds(fullScreenBounds);
 };
 
-export const windowWindow = (window: BrowserWindow) => {
+export const windowWindow = (
+  window: BrowserWindow,
+  realmService: RealmService | null
+) => {
   const windowedBounds = getWindowedBounds();
 
   window.setFullScreen(false);
@@ -72,8 +79,10 @@ export const windowWindow = (window: BrowserWindow) => {
   window.setBounds(windowedBounds);
   window.webContents.send('set-fullscreen', false);
   window.webContents.send('use-custom-titlebar', hasCameraNotch);
+  realmService?.setLastWindowBounds(windowedBounds);
 };
 
+let rs: any;
 export const toggleFullScreen = (window: BrowserWindow) => {
   const hasCameraNotch = isMacWithCameraNotch();
 
@@ -81,16 +90,18 @@ export const toggleFullScreen = (window: BrowserWindow) => {
     window.isFullScreen() ||
     (hasCameraNotch && window.isSimpleFullScreen())
   ) {
-    windowWindow(window);
+    windowWindow(window, rs);
   } else {
-    fullScreenWindow(window);
+    fullScreenWindow(window, rs);
   }
 };
 
 const registerListeners = (
   mainWindow: BrowserWindow,
-  mouseWindow: BrowserWindow
+  mouseWindow: BrowserWindow,
+  realmService: RealmService | null
 ) => {
+  rs = realmService;
   mainWindow.on('enter-full-screen', () => {
     if (!mainWindow) return;
     if (mainWindow.isDestroyed()) return;
@@ -123,9 +134,9 @@ const registerListeners = (
 
   ipcMain.handle('set-fullscreen', (_, shouldFullScreen) => {
     if (shouldFullScreen) {
-      fullScreenWindow(mainWindow);
+      fullScreenWindow(mainWindow, realmService);
     } else {
-      windowWindow(mainWindow);
+      windowWindow(mainWindow, realmService);
     }
   });
 

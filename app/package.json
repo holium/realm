@@ -126,7 +126,7 @@
     "detect-port": "^1.3.0",
     "dotenv": "^16.0.3",
     "dotenv-webpack": "^8.0.1",
-    "electron": "^23.0.0",
+    "electron": "^23.3.13",
     "electron-builder": "^23.3.3",
     "electron-notarize": "^1.2.1",
     "electronmon": "^2.0.2",

@@ -1,5 +1,6 @@
 import { BrowserWindow, shell } from 'electron';
 
+import { RealmService } from '../os/realm.service';
 import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
@@ -81,7 +82,7 @@ export const createRealmWindow = (
         initialBounds === undefined) &&
       !hasBeenExpanded(newRealmWindow)
     ) {
-      fullScreenWindow(newRealmWindow);
+      fullScreenWindow(newRealmWindow, null);
     } else {
       if (initialBounds !== undefined) {
         newRealmWindow.setBounds(initialBounds);
@@ -98,7 +99,10 @@ export const createRealmWindow = (
   return newRealmWindow;
 };
 
-export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
+export const createMouseOverlayWindow = (
+  parentWindow: BrowserWindow,
+  realmService: RealmService | null
+) => {
   // Create a window covering the whole main window.
   const defaultMouseWindowOptions: Electron.BrowserWindowConstructorOptions = {
     show: false,
@@ -131,7 +135,11 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
-  FullScreenHelper.registerListeners(parentWindow, newMouseWindow);
+  FullScreenHelper.registerListeners(
+    parentWindow,
+    newMouseWindow,
+    realmService
+  );
   CursorSettingsHelper.registerListeners(parentWindow, newMouseWindow);
   MouseEventsHelper.registerListeners(parentWindow, newMouseWindow);
 
@@ -200,7 +208,7 @@ export const createStandaloneChatWindow = () => {
 
   newStandaloneChatWindow.on('ready-to-show', () => {
     if (!hasBeenExpanded(newStandaloneChatWindow)) {
-      windowWindow(newStandaloneChatWindow);
+      windowWindow(newStandaloneChatWindow, null);
     }
 
     newStandaloneChatWindow.show();

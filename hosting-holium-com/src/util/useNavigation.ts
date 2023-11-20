@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { capitalizeFirstLetter } from '@holium/design-system/util';
 import {
@@ -21,18 +21,19 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
 
 export const useNavigation = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const currentAccountSection = useMemo(() => {
-    const isAccountSection = router.pathname.split('/')[1] === 'account';
+    const isAccountSection = pathname.split('/')[1] === 'account';
     if (!isAccountSection) return null;
 
-    const path = router.pathname.split('/')[2] ?? SidebarSection.Hosting;
+    const path = pathname.split('/')[2] ?? SidebarSection.Hosting;
     const eachWordCapitalized = path
       .split('-')
       .map((word) => capitalizeFirstLetter(word))
       .join(' ');
     return eachWordCapitalized as SidebarSection;
-  }, [router.pathname]);
+  }, [pathname]);
 
   const goToPage = useCallback(
     (
@@ -45,9 +46,15 @@ export const useNavigation = () => {
         product_type?: ThirdEarthProductType;
       }
     ) => {
-      const path =
-        page + (params ? `?${new URLSearchParams(params).toString()}` : '');
-      return router.push(path);
+      try {
+        const path =
+          page + (params ? `?${new URLSearchParams(params).toString()}` : '');
+        router.push(path);
+        return Promise.resolve(true);
+      } catch (e) {
+        console.error(e);
+        return Promise.resolve(false);
+      }
     },
     [router]
   );
@@ -55,7 +62,7 @@ export const useNavigation = () => {
   const logout = useCallback(() => {
     goToPage('/login');
     OnboardingStorage.reset();
-  }, [router]);
+  }, [goToPage]);
 
   return { currentAccountSection, goToPage, logout };
 };

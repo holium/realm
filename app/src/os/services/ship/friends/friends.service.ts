@@ -111,25 +111,49 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
     insertMany(friends);
   }
 
-  async fetchOne(patp: string) {
+  async fetchOur() {
     const response = await APIConnection.getInstance().conduit.scry({
-      app: 'friends',
-      path: `/contact/${patp}`,
+      app: 'passport',
+      path: '/our-passport',
     });
 
     return {
-      ...response,
-      color: response.color ? cleanNounColor(response.color) : '#000',
+      avatar: response.contact.avatar ? response.contact.avatar.img : null,
+      cover: response.cover,
+      bio: response.contact.bio,
+      nickname: response.contact['display-name'],
+      color: response.contact.color || '#000000',
     };
   }
 
   private async _fetchFriends() {
-    // Get last timestamp
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'friends',
-      path: '/all',
+    const contacts = await APIConnection.getInstance().conduit.scry({
+      app: 'passport',
+      path: '/contacts',
     });
-    return response?.friends;
+    const friends = await APIConnection.getInstance().conduit.scry({
+      app: 'passport',
+      path: '/friends',
+    });
+    const result: any = {};
+    for (const c of contacts) {
+      const isfriend = !!friends.find(
+        (f: any) => f.status === 'friend' && f.ship === c.ship
+      );
+      result[c.ship] = {
+        status: isfriend ? 'fren' : 'contact',
+        tags: [],
+        pinned: false,
+        contactInfo: {
+          avatar: c.avatar ? c.avatar.img : null,
+          cover: null,
+          bio: c.bio,
+          nickname: c['display-name'],
+          color: c.color || '#000000',
+        },
+      };
+    }
+    return result;
   }
 
   public async getFriends() {

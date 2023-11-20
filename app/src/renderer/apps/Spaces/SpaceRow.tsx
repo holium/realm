@@ -39,7 +39,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   const contextMenuOptions = useMemo(() => {
     const menu = [];
     menu.push({
-      id: `space-row-${space.path}-btn-leave`,
+      id: `space-row-${space.path}-btn-copy`,
       label: 'Copy link',
       onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
