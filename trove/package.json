@@ -53,7 +53,7 @@
     "postcss": "^8.3.9",
     "react-icons": "^4.6.0",
     "tailwindcss": "^2.2.16",
-    "vite": "^4.3.9",
+    "vite": "^4.5.2",
     "urbit-ob": "^5.0.1"
   }
 }
