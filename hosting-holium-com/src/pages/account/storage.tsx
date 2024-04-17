@@ -30,28 +30,6 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickUploadPier = () => {
-    const byopInProgress = ships.find(
-      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
-    );
-
-    if (byopInProgress) {
-      goToPage('/upload-pier', {
-        back_url: '/account/storage',
-      });
-    } else {
-      goToPage('/upload-pier-disclaimer', {
-        back_url: '/account/storage',
-      });
-    }
-  };
-
-  const onClickPurchaseId = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: '/account/storage',
-    });
-  };
-
   const getAndSetS3Info = async (token: string, shipId: string) => {
     try {
       loading.toggleOn();
@@ -115,8 +93,6 @@ const S3StoragePresenter = () => {
       isLoading={loading.isOn}
       error={error}
       onClickRestartStorage={onClickRestartStorage}
-      onClickPurchaseId={onClickPurchaseId}
-      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

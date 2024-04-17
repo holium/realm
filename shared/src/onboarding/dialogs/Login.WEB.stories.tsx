@@ -4,7 +4,6 @@ import { Anchor } from '@holium/design-system/general';
 
 import {
   AccountCustomDomainDialog,
-  AccountDownloadRealmDialog,
   AccountHostingDialog,
   AccountStorageDialog,
   AccountUnfinishedUploadDialog,
@@ -43,8 +42,6 @@ export const AccountHostingDialogStory: ComponentStory<
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -72,8 +69,6 @@ export const AccountStorageDialogStory: ComponentStory<
       selectedShipId={0}
       onClickRestartStorage={() => Promise.resolve()}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       storageUrl="https://console.s31.holium.network"
       storageBucket="pasren-satmex"
       storagePassword="1234567890"
@@ -105,8 +100,6 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       submitting={false}
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -114,28 +107,6 @@ export const AccountCustomDomainDialogStory: ComponentStory<
 );
 
 AccountCustomDomainDialogStory.storyName = '4. Custom Domain';
-
-export const AccountDownloadRealmDialogStory: ComponentStory<
-  typeof AccountDownloadRealmDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <AccountDownloadRealmDialog
-      ships={[thirdEarthMockShip]}
-      selectedShipId={0}
-      setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
-      onClickSidebarSection={() => {}}
-      onDownloadMacM1={() => {}}
-      onDownloadMacIntel={() => {}}
-      onDownloadWindows={() => {}}
-      onDownloadLinux={() => {}}
-      onExit={() => {}}
-    />
-  </OnboardingDialogWrapper>
-);
-
-AccountDownloadRealmDialogStory.storyName = '5. Download Realm';
 
 export const AccountContinueWorkflowDialogStory: ComponentStory<
   typeof AccountStorageDialog
@@ -150,8 +121,6 @@ export const AccountContinueWorkflowDialogStory: ComponentStory<
       ]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
@@ -159,7 +128,7 @@ export const AccountContinueWorkflowDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountContinueWorkflowDialogStory.storyName = '6.1. Continue Workflow';
+AccountContinueWorkflowDialogStory.storyName = '5.1. Continue Workflow';
 
 export const AccountUnfinishedUploadDialogStory: ComponentStory<
   typeof AccountStorageDialog
@@ -169,8 +138,6 @@ export const AccountUnfinishedUploadDialogStory: ComponentStory<
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
@@ -178,7 +145,7 @@ export const AccountUnfinishedUploadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountUnfinishedUploadDialogStory.storyName = '6.2. Identity Being Created';
+AccountUnfinishedUploadDialogStory.storyName = '5.2. Identity Being Created';
 
 export const AccountErroredUploadDialogStory: ComponentStory<
   typeof AccountStorageDialog
@@ -193,8 +160,6 @@ export const AccountErroredUploadDialogStory: ComponentStory<
       ]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
@@ -202,4 +167,4 @@ export const AccountErroredUploadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountErroredUploadDialogStory.storyName = '6.3. Identity Upload Error';
+AccountErroredUploadDialogStory.storyName = '5.3. Identity Upload Error';

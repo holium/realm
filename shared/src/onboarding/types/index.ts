@@ -109,15 +109,12 @@ type OnboardingAccountPage =
   | '/account'
   | '/account/support'
   | '/account/custom-domain'
-  | '/account/download-realm'
-  | '/account/get-realm'
   | '/account/storage'
   | '/account/statistics';
 
 type OnboardingSignupPage =
   | '/'
   | '/create-account'
-  | '/login'
   | '/verify-email'
   | '/choose-id'
   | '/upload-pier'
@@ -130,7 +127,6 @@ type OnboardingSignupPage =
 export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
 
 export type RealmOnboardingStep =
-  | '/login'
   | '/add-identity'
   | '/passport'
   | '/hosting'

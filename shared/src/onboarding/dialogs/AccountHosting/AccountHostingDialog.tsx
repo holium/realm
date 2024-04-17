@@ -17,8 +17,6 @@ type Props = {
   onClickGetNewAccessCode: () => void;
   onClickChangeMaintenanceWindow: () => void;
   onClickEjectId: () => void;
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -37,8 +35,6 @@ export const AccountHostingDialog = ({
   onClickGetNewAccessCode,
   onClickChangeMaintenanceWindow,
   onClickEjectId,
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -53,8 +49,6 @@ export const AccountHostingDialog = ({
       !serverCode ||
       (!serverMaintenanceWindow && serverMaintenanceWindow !== 0)
     }
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

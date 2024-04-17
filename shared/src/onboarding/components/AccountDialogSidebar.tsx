@@ -1,12 +1,6 @@
 import { useEffect } from 'react';
 
-import {
-  Button,
-  Flex,
-  Icon,
-  Skeleton,
-  Text,
-} from '@holium/design-system/general';
+import { Button, Flex, Icon, Skeleton } from '@holium/design-system/general';
 import { Select } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
@@ -22,9 +16,7 @@ export enum SidebarSection {
   Hosting = 'Hosting',
   Storage = 'Storage',
   CustomDomain = 'Custom Domain',
-  DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
-  GetRealm = 'Get Realm',
   Support = 'Support',
 }
 
@@ -33,8 +25,6 @@ type Props = {
   selectedShipId?: number;
   currentSection?: SidebarSection;
   isLoading?: boolean;
-  onClickUploadPier: () => void;
-  onClickPurchaseId: () => void;
   setSelectedShipId: (shipId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
@@ -45,8 +35,6 @@ export const AccountDialogSidebar = ({
   selectedShipId,
   currentSection,
   isLoading,
-  onClickUploadPier,
-  onClickPurchaseId,
   setSelectedShipId,
   onClickSidebarSection,
   onExit,
@@ -67,7 +55,6 @@ export const AccountDialogSidebar = ({
           SidebarSection.Hosting,
           SidebarSection.Storage,
           SidebarSection.CustomDomain,
-          SidebarSection.DownloadRealm,
           SidebarSection.Support,
         ];
       } else {
@@ -78,22 +65,13 @@ export const AccountDialogSidebar = ({
         SidebarSection.Hosting,
         SidebarSection.Storage,
         SidebarSection.CustomDomain,
-        SidebarSection.DownloadRealm,
         SidebarSection.Support,
       ];
     }
   } else if (hasCSEK.isOn) {
-    sidebarItems = [
-      SidebarSection.DownloadRealm,
-      SidebarSection.GetHosting,
-      SidebarSection.Support,
-    ];
+    sidebarItems = [SidebarSection.GetHosting, SidebarSection.Support];
   } else {
-    sidebarItems = [
-      SidebarSection.GetRealm,
-      SidebarSection.GetHosting,
-      SidebarSection.Support,
-    ];
+    sidebarItems = [SidebarSection.GetHosting, SidebarSection.Support];
   }
 
   useEffect(() => {
@@ -134,28 +112,6 @@ export const AccountDialogSidebar = ({
                   };
                 }
               )}
-              extraSection={
-                <Flex
-                  flexDirection="column"
-                  mt="8px"
-                  pt="8px"
-                  gap="8px"
-                  borderTop="1px solid rgba(var(--rlm-border-rgba))"
-                >
-                  <Button.Transparent width="100%" onClick={onClickUploadPier}>
-                    <Flex alignItems="center" gap="8px">
-                      <Icon name="ArrowRightLine" size={16} />
-                      <Text.Body>Upload Pier</Text.Body>
-                    </Flex>
-                  </Button.Transparent>
-                  <Button.Transparent width="100%" onClick={onClickPurchaseId}>
-                    <Flex alignItems="center" gap="8px">
-                      <Icon name="AddCircleLine" size={16} />
-                      <Text.Body>Purchase ID</Text.Body>
-                    </Flex>
-                  </Button.Transparent>
-                </Flex>
-              }
               selected={selectedShipId}
               onClick={(newId) => setSelectedShipId(newId as number)}
             />

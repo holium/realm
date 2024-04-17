@@ -21,8 +21,7 @@ type Props = {
   error: string | undefined;
   onClickRestartStorage: () => Promise<void>;
   setSelectedShipId: (newId: number) => void;
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
+
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -39,8 +38,6 @@ export const AccountStorageDialog = ({
   error,
   onClickRestartStorage,
   setSelectedShipId,
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -50,8 +47,6 @@ export const AccountStorageDialog = ({
     currentSection={SidebarSection.Storage}
     isLoading={isLoading}
     setSelectedShipId={setSelectedShipId}
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

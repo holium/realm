@@ -11,8 +11,6 @@ import {
 
 export const accountPageUrl: Record<string, OnboardingPage> = {
   Support: '/account/support',
-  'Get Realm': '/account/get-realm',
-  'Download Realm': '/account/download-realm',
   'Custom Domain': '/account/custom-domain',
   Storage: '/account/storage',
   Hosting: '/account',
@@ -60,7 +58,7 @@ export const useNavigation = () => {
   );
 
   const logout = useCallback(() => {
-    goToPage('/login');
+    goToPage('/');
     OnboardingStorage.reset();
   }, [goToPage]);
 

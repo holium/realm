@@ -5,7 +5,6 @@ import {
   ChooseIdentityDialog,
   CreateAccountDialog,
   CredentialsDialog,
-  DownloadDialog,
   GetOnRealmDialog,
   PaymentDialog,
   ThirdEarthPeriodicity,
@@ -136,20 +135,3 @@ export const CredentialsDialogStory: ComponentStory<
 );
 
 CredentialsDialogStory.storyName = '6. Credentials';
-
-export const DownloadDialogStory: ComponentStory<
-  typeof DownloadDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <DownloadDialog
-      onDownloadMacM1={() => {}}
-      onDownloadMacIntel={() => {}}
-      onDownloadWindows={() => {}}
-      onDownloadLinux={() => {}}
-      onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-DownloadDialogStory.storyName = '7. Download Realm for desktop';

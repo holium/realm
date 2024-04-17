@@ -39,7 +39,7 @@ export default function CreateAccount({
 
   const [prefilledEmail, setPrefilledEmail] = useState<string>();
 
-  const onAlreadyHaveAccount = () => goToPage('/login');
+  const onAlreadyHaveAccount = () => goToPage('/');
 
   const onBack = () => goToPage('/');
 

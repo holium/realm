@@ -7,7 +7,7 @@ export default function UploadPierDisclaimer() {
   const { goToPage } = useNavigation();
 
   const onBack = () => {
-    goToPage('/login');
+    goToPage('/');
   };
 
   const onNext = () => {

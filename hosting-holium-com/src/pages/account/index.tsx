@@ -179,31 +179,9 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickUploadPier = () => {
-    const byopInProgress = ships.find(
-      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
-    );
-
-    if (byopInProgress) {
-      goToPage('/upload-pier', {
-        back_url: '/account',
-      });
-    } else {
-      goToPage('/upload-pier-disclaimer', {
-        back_url: '/account',
-      });
-    }
-  };
-
   const onClickReuploadPier = () => {
     goToPage('/upload-pier', {
       product_type: 'byop-p',
-      back_url: '/account',
-    });
-  };
-
-  const onClickPurchaseId = () => {
-    goToPage('/choose-id', {
       back_url: '/account',
     });
   };
@@ -214,8 +192,6 @@ const HostingPresenter = () => {
         ships={ships}
         selectedShipId={selectedShipId}
         onClickReuploadPier={onClickReuploadPier}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickSidebarSection={onClickSidebarSection}
         onClickExit={logout}
@@ -264,8 +240,6 @@ const HostingPresenter = () => {
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

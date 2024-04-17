@@ -8,8 +8,6 @@ type Props = {
   selectedShipId: number | undefined;
   setSelectedShipId: (newId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
   onClickReuploadPier: () => void;
   onClickExit: () => void;
 };
@@ -19,8 +17,6 @@ export const AccountUnfinishedUploadDialog = ({
   selectedShipId,
   setSelectedShipId,
   onClickSidebarSection,
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickReuploadPier,
   onClickExit,
 }: Props) => (
@@ -29,8 +25,6 @@ export const AccountUnfinishedUploadDialog = ({
     selectedShipId={selectedShipId}
     setSelectedShipId={setSelectedShipId}
     currentSection={SidebarSection.Hosting}
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onClickExit}
   >

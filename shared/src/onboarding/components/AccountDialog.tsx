@@ -18,8 +18,6 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickUploadPier: () => void;
-  onClickPurchaseId: () => void;
   setSelectedShipId: (shipId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -33,8 +31,6 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickUploadPier,
-  onClickPurchaseId,
   setSelectedShipId,
   onClickSidebarSection,
   onSubmit,
@@ -52,8 +48,6 @@ export const AccountDialog = ({
         selectedShipId={selectedShipId}
         currentSection={currentSection}
         isLoading={isLoading}
-        onClickUploadPier={onClickUploadPier}
-        onClickPurchaseId={onClickPurchaseId}
         setSelectedShipId={setSelectedShipId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={onExit}
@@ -87,22 +81,14 @@ type AccountDialogSkeletonProps = {
 export const AccountDialogSkeleton = ({
   currentSection,
 }: AccountDialogSkeletonProps) => {
-  const isBlankBody =
-    currentSection &&
-    [SidebarSection.GetRealm, SidebarSection.DownloadRealm].includes(
-      currentSection
-    );
-
   return (
     <AccountDialog
       ships={[]}
       selectedShipId={0}
       currentSection={currentSection}
       isLoading
-      customBody={isBlankBody ? <Flex flex={5} /> : undefined}
+      customBody={undefined}
       setSelectedShipId={() => {}}
-      onClickPurchaseId={() => {}}
-      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
