@@ -81,19 +81,13 @@ type AccountDialogSkeletonProps = {
 export const AccountDialogSkeleton = ({
   currentSection,
 }: AccountDialogSkeletonProps) => {
-  const isBlankBody =
-    currentSection &&
-    [SidebarSection.GetRealm, SidebarSection.DownloadRealm].includes(
-      currentSection
-    );
-
   return (
     <AccountDialog
       ships={[]}
       selectedShipId={0}
       currentSection={currentSection}
       isLoading
-      customBody={isBlankBody ? <Flex flex={5} /> : undefined}
+      customBody={undefined}
       setSelectedShipId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}

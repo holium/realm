@@ -16,9 +16,7 @@ export enum SidebarSection {
   Hosting = 'Hosting',
   Storage = 'Storage',
   CustomDomain = 'Custom Domain',
-  DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
-  GetRealm = 'Get Realm',
   Support = 'Support',
 }
 
@@ -57,7 +55,6 @@ export const AccountDialogSidebar = ({
           SidebarSection.Hosting,
           SidebarSection.Storage,
           SidebarSection.CustomDomain,
-          SidebarSection.DownloadRealm,
           SidebarSection.Support,
         ];
       } else {
@@ -68,22 +65,13 @@ export const AccountDialogSidebar = ({
         SidebarSection.Hosting,
         SidebarSection.Storage,
         SidebarSection.CustomDomain,
-        SidebarSection.DownloadRealm,
         SidebarSection.Support,
       ];
     }
   } else if (hasCSEK.isOn) {
-    sidebarItems = [
-      SidebarSection.DownloadRealm,
-      SidebarSection.GetHosting,
-      SidebarSection.Support,
-    ];
+    sidebarItems = [SidebarSection.GetHosting, SidebarSection.Support];
   } else {
-    sidebarItems = [
-      SidebarSection.GetRealm,
-      SidebarSection.GetHosting,
-      SidebarSection.Support,
-    ];
+    sidebarItems = [SidebarSection.GetHosting, SidebarSection.Support];
   }
 
   useEffect(() => {

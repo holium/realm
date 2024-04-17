@@ -35,7 +35,6 @@ export { ChooseIdentityDialog } from './dialogs/ChooseIdentity/ChooseIdentityDia
 export { ClaimTokenDialog } from './dialogs/ClaimToken/ClaimTokenDialog';
 export { CreateAccountDialog } from './dialogs/CreateAccount/CreateAccountDialog';
 export { CredentialsDialog } from './dialogs/Credentials/CredentialsDialog';
-export { DownloadDialog } from './dialogs/Download/DownloadDialog';
 export { GetOnRealmDialog } from './dialogs/GetOnRealm/GetOnRealmDialog';
 export { GetRealmDialog } from './dialogs/GetRealm/GetRealmDialog';
 export { HostingDialog } from './dialogs/Hosting/HostingDialog';
