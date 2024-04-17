@@ -78,7 +78,7 @@ export default function ClaimInvite({
 
   useEffect(() => {
     if (full_account) {
-      goToPage('/login', {
+      goToPage('/', {
         email,
         redirect_url: '/account',
       });

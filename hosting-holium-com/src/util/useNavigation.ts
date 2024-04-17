@@ -58,7 +58,7 @@ export const useNavigation = () => {
   );
 
   const logout = useCallback(() => {
-    goToPage('/login');
+    goToPage('/');
     OnboardingStorage.reset();
   }, [goToPage]);
 

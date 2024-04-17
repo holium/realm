@@ -115,7 +115,6 @@ type OnboardingAccountPage =
 type OnboardingSignupPage =
   | '/'
   | '/create-account'
-  | '/login'
   | '/verify-email'
   | '/choose-id'
   | '/upload-pier'
@@ -128,7 +127,6 @@ type OnboardingSignupPage =
 export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
 
 export type RealmOnboardingStep =
-  | '/login'
   | '/add-identity'
   | '/passport'
   | '/hosting'
