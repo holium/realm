@@ -68,7 +68,7 @@ export default function ClaimInvite({
 
       OnboardingStorage.set({ token });
 
-      return goToPage('/account/download-realm');
+      return goToPage('/account');
     } catch (error) {
       console.error(error);
 
@@ -80,7 +80,7 @@ export default function ClaimInvite({
     if (full_account) {
       goToPage('/login', {
         email,
-        redirect_url: '/account/download-realm',
+        redirect_url: '/account',
       });
     }
   }, []);

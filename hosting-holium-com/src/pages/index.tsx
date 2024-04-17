@@ -83,18 +83,7 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
 
     if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
     else {
-      const ships = await thirdEarthApi.getUserShips(response.token);
-
-      if (ships.length) {
-        // Ships imply Realm access.
-        goToPage('/account');
-      } else if (response.client_side_encryption_key) {
-        // CSEK without ships still implies Realm access.
-        goToPage('/account/download-realm');
-      } else {
-        // No ships or CSEK implies no Realm access.
-        goToPage('/account/get-realm');
-      }
+      goToPage('/account');
     }
 
     return true;

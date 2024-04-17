@@ -109,8 +109,6 @@ type OnboardingAccountPage =
   | '/account'
   | '/account/support'
   | '/account/custom-domain'
-  | '/account/download-realm'
-  | '/account/get-realm'
   | '/account/storage'
   | '/account/statistics';
 
