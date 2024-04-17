@@ -9,16 +9,12 @@ import { OrDivider } from '../../components/OrDivider';
 import { GetIdIcon } from '../../icons/GetIdIcon';
 
 type Props = {
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
   onClickJoinWaitlist: (email: string) => Promise<boolean>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountGetRealmDialog = ({
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickJoinWaitlist,
   onClickSidebarSection,
   onExit,
@@ -54,8 +50,6 @@ export const AccountGetRealmDialog = ({
         </Flex>
       </Flex>
     }
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

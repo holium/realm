@@ -61,28 +61,6 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickUploadPier = () => {
-    const byopInProgress = ships.find(
-      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
-    );
-
-    if (byopInProgress) {
-      goToPage('/upload-pier', {
-        back_url: '/account/custom-domain',
-      });
-    } else {
-      goToPage('/upload-pier-disclaimer', {
-        back_url: '/account/custom-domain',
-      });
-    }
-  };
-
-  const onClickPurchaseId = () => {
-    goToPage('/choose-id', {
-      back_url: '/account/custom-domain',
-    });
-  };
-
   return (
     <AccountCustomDomainDialog
       ships={ships}
@@ -95,8 +73,6 @@ const CustomDomainPresenter = () => {
       setSelectedShipId={setSelectedShipId}
       onChangeDomain={setDomain}
       onSubmit={onSubmit}
-      onClickPurchaseId={onClickPurchaseId}
-      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

@@ -8,8 +8,6 @@ type Props = {
   ships: ThirdEarthShip[];
   selectedShipId: number | undefined;
   setSelectedShipId: (newId: number) => void;
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -19,8 +17,6 @@ export const AccountSupportDialog = ({
   ships,
   selectedShipId,
   setSelectedShipId,
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -29,8 +25,6 @@ export const AccountSupportDialog = ({
     selectedShipId={selectedShipId}
     setSelectedShipId={setSelectedShipId}
     currentSection={SidebarSection.Support}
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

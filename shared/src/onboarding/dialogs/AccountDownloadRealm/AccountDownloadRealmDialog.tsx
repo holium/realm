@@ -16,8 +16,6 @@ type Props = DownloadRealmButtonsProps & {
   ships: ThirdEarthShip[];
   selectedShipId: number | undefined;
   setSelectedShipId: (newId: number) => void;
-  onClickPurchaseId: () => void;
-  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -30,8 +28,6 @@ export const AccountDownloadRealmDialog = ({
   onDownloadMacIntel,
   onDownloadWindows,
   onDownloadLinux,
-  onClickPurchaseId,
-  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -64,8 +60,6 @@ export const AccountDownloadRealmDialog = ({
         />
       </Flex>
     }
-    onClickPurchaseId={onClickPurchaseId}
-    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />
