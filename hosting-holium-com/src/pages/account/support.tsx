@@ -36,36 +36,12 @@ const SupportPresenter = ({ alerts }: Props) => {
     }
   };
 
-  const onClickUploadPier = () => {
-    const byopInProgress = ships.find(
-      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
-    );
-
-    if (byopInProgress) {
-      goToPage('/upload-pier', {
-        back_url: '/account/support',
-      });
-    } else {
-      goToPage('/upload-pier-disclaimer', {
-        back_url: '/account/support',
-      });
-    }
-  };
-
-  const onClickPurchaseId = () => {
-    goToPage('/choose-id', {
-      back_url: '/account/support',
-    });
-  };
-
   return (
     <AccountSupportDialog
       alerts={alerts}
       ships={ships}
       selectedShipId={selectedShipId}
       setSelectedShipId={setSelectedShipId}
-      onClickPurchaseId={onClickPurchaseId}
-      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />
