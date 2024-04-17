@@ -37,8 +37,6 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const forgotPassword = useToggle(false);
   const resetPassword = useToggle(false);
 
-  const onBack = () => goToPage('/');
-
   const onForgotPassword = async (email: string) => {
     const response = await thirdEarthApi.forgotPassword(email);
 
@@ -104,7 +102,6 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
       <LoginDialog
         prefilledEmail={prefilledEmail}
         footer={<ForgotPassword onClick={() => forgotPassword.toggleOn()} />}
-        onBack={onBack}
         onLogin={onLogin}
       />
     </Page>
